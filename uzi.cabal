@@ -70,6 +70,7 @@ test-suite uzi-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      OpcodeSpec
       Paths_uzi
   autogen-modules:
       Paths_uzi
