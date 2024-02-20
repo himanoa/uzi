@@ -3,28 +3,25 @@
 
 module Lib
   ( runUzi,
-    UziError(CrashError),
+    UziError (CrashError),
     module Opcode,
   )
 where
 
+import Control.Exception.Safe
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, MonadUnliftIO (withRunInIO), liftIO, runEff, (:>))
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
+import Effectful.Log
+import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Opcode
-import Log.Backend.StandardOutput
-import Effectful.Log
-import Control.Exception.Safe
-
-
 
 data EnvConfig = EnvConfig
-  { discordApiToken :: Text
-  }
+  {discordApiToken :: Text}
   deriving (Show)
 
 makeEnvConfig :: Text -> EnvConfig
@@ -53,7 +50,8 @@ runClient host port path opt headers inner =
 runUzi :: IO ()
 
 data UziError = CrashError
-  deriving Show
+  deriving (Show)
+
 instance Exception UziError
 
 runUzi = runEff $ do
@@ -66,11 +64,19 @@ runUzi = runEff $ do
         config <- fromEnvironment
         _ <- logInfo_ . pack . show $ config
 
-        _ <- runClient "gateway.discord.gg" 443 "" WS.defaultConnectionOptions [("xxx", "yyy")] (\c -> do
-          _ <- liftIO (WS.sendTextData c (ByteString.pack "xxxx"))
-          logInfo_ "Connected websocket") `catch` ( \(e :: WS.HandshakeException) -> do
-            _ <- logAttention_ $ pack ("handshale failed " <> displayException e)
-            throw CrashError
-          )
+        _ <-
+          runClient
+            "gateway.discord.gg"
+            443
+            ""
+            WS.defaultConnectionOptions
+            [("xxx", "yyy")]
+            ( \c -> do
+                _ <- liftIO (WS.sendTextData c (ByteString.pack "xxxx"))
+                logInfo_ "Connected websocket"
+            )
+            `catch` ( \(e :: WS.HandshakeException) -> do
+                        _ <- logAttention_ $ pack ("handshale failed " <> displayException e)
+                        throw CrashError
+                    )
         pure ()
-
