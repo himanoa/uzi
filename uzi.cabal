@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Opcode
   other-modules:
       Paths_uzi
   autogen-modules:
@@ -39,8 +40,9 @@ library
     , bytestring
     , effectful
     , log-base
-    , log-effectful
     , text
+    , unliftio
+    , websockets
   default-language: GHC2021
 
 executable uzi-exe
@@ -58,9 +60,10 @@ executable uzi-exe
     , bytestring
     , effectful
     , log-base
-    , log-effectful
     , text
+    , unliftio
     , uzi
+    , websockets
   default-language: GHC2021
 
 test-suite uzi-test
@@ -78,8 +81,10 @@ test-suite uzi-test
     , base >=4.7 && <5
     , bytestring
     , effectful
+    , hspec
     , log-base
-    , log-effectful
     , text
+    , unliftio
     , uzi
+    , websockets
   default-language: GHC2021

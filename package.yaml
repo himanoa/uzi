@@ -26,8 +26,9 @@ dependencies:
 - bytestring
 - aeson
 - effectful
-- log-effectful
 - log-base
+- websockets
+- unliftio
 
 ghc-options:
 - -Wall
@@ -64,3 +65,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - uzi
+    - hspec
