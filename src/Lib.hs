@@ -1,12 +1,16 @@
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Lib
     ( runUzi
     ) where
 import Effectful (runEff)
-import qualified Control.Applicative as Eff
-import qualified Control.Monad.IO.Class as Eff
+import Effectful.Log
+import Log.Backend.StandardOutput
 
 runUzi :: IO ()
 
 runUzi = runEff $ do
-  _ <- Eff.liftIO $ putStrLn "someFunc"
-  Eff.pure()
+  withStdOutLogger $ \stdoutLogger -> do
+    runLog "Uzi" stdoutLogger defaultLogLevel $ do 
+      logInfo_ "Hello uzi"

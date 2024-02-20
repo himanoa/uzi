@@ -41,7 +41,7 @@ library
     , log-base
     , log-effectful
     , text
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable uzi-exe
   main-is: Main.hs
@@ -61,7 +61,7 @@ executable uzi-exe
     , log-effectful
     , text
     , uzi
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite uzi-test
   type: exitcode-stdio-1.0
@@ -82,4 +82,4 @@ test-suite uzi-test
     , log-effectful
     , text
     , uzi
-  default-language: Haskell2010
+  default-language: GHC2021
