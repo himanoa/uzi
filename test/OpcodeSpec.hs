@@ -1,9 +1,10 @@
-module OpcodeSpec (
-  spec
-) where
+module OpcodeSpec
+  ( spec,
+  )
+where
 
-import Test.Hspec 
-import Lib (OperationCode(Identify, SelectProtocol, Ready, Heartbeat, SessionDescription, Speaking, HeartbeatAck, Resume, Hello, Resumed, ClientConnect, ClientDisconnect))
+import Lib (OperationCode (ClientConnect, ClientDisconnect, Heartbeat, HeartbeatAck, Hello, Identify, Ready, Resume, Resumed, SelectProtocol, SessionDescription, Speaking))
+import Test.Hspec
 
 spec :: Spec
 spec = describe "Opcode" $ do
@@ -11,7 +12,7 @@ spec = describe "Opcode" $ do
     describe "input is Identify" $ do
       it "is return to 0" $ do
         fromEnum Identify `shouldBe` 0
-    
+
     describe "input is SelectProtocol" $ do
       it "is return to 1" $ do
         fromEnum SelectProtocol `shouldBe` 1
