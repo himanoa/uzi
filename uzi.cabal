@@ -6,12 +6,12 @@ cabal-version: 2.2
 
 name:           uzi
 version:        0.1.0.0
-description:    Discord bot application for uzi republic discord server.
-homepage:       https://github.com/himanoa/uzi#readme
-bug-reports:    https://github.com/himanoa/uzi/issues
-author:         himanoa
-maintainer:     matsunoappy@gmail.com
-copyright:      2024 himanoa
+description:    Please see the README on GitHub at <https://github.com/githubuser/uzi#readme>
+homepage:       https://github.com/githubuser/uzi#readme
+bug-reports:    https://github.com/githubuser/uzi/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2024 Author name here
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
@@ -34,7 +34,13 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , effectful
+    , log-base
+    , log-effectful
+    , text
   default-language: Haskell2010
 
 executable uzi-exe
@@ -47,7 +53,13 @@ executable uzi-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , effectful
+    , log-base
+    , log-effectful
+    , text
     , uzi
   default-language: Haskell2010
 
@@ -62,6 +74,12 @@ test-suite uzi-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , effectful
+    , log-base
+    , log-effectful
+    , text
     , uzi
   default-language: Haskell2010
