@@ -40,6 +40,8 @@ library
     , bytestring
     , effectful
     , log-base
+    , log-effectful
+    , safe-exceptions
     , text
     , unliftio
     , websockets
@@ -60,6 +62,8 @@ executable uzi-exe
     , bytestring
     , effectful
     , log-base
+    , log-effectful
+    , safe-exceptions
     , text
     , unliftio
     , uzi
@@ -84,6 +88,8 @@ test-suite uzi-test
     , effectful
     , hspec
     , log-base
+    , log-effectful
+    , safe-exceptions
     , text
     , unliftio
     , uzi

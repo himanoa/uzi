@@ -3,11 +3,11 @@
 
 module Lib
   ( runUzi,
+    UziError(CrashError),
     module Opcode,
   )
 where
 
-import Control.Exception (Exception, throw)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
@@ -16,6 +16,11 @@ import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Opcode
+import Log.Backend.StandardOutput
+import Effectful.Log
+import Control.Exception.Safe
+
+
 
 data EnvConfig = EnvConfig
   { discordApiToken :: Text
@@ -46,16 +51,26 @@ runClient host port path opt headers inner =
     WS.runClientWith host port path opt headers (runInIO . inner)
 
 runUzi :: IO ()
-runUzi = runEff $ do
-  -- withStdOutLogger $ \stdoutLogger -> do
-  runEnvironment $ do
-    -- runLog "Uzi" stdoutLogger defaultLogLevel $ do
-    --        logInfo_ "Hello uzi"
-    --        logInfo_ "Load enviroments"
-    config <- fromEnvironment
-    --       _ <- logInfo_ . pack . show $ config
-    runClient "localhost" 1337 "" WS.defaultConnectionOptions [("xxx", "yyy")] $ \c -> do
-      _ <- liftIO (WS.sendTextData c (ByteString.pack "xxxx"))
-      pure ()
 
---          logInfo_ "Connected websocket"
+data UziError = CrashError
+  deriving Show
+instance Exception UziError
+
+runUzi = runEff $ do
+  withStdOutLogger $ \stdoutLogger -> do
+    runEnvironment $ do
+      runLog "Uzi" stdoutLogger defaultLogLevel $ do
+        _ <- logInfo_ "Hello uzi"
+
+        _ <- logInfo_ "Load enviroments"
+        config <- fromEnvironment
+        _ <- logInfo_ . pack . show $ config
+
+        _ <- runClient "gateway.discord.gg" 443 "" WS.defaultConnectionOptions [("xxx", "yyy")] (\c -> do
+          _ <- liftIO (WS.sendTextData c (ByteString.pack "xxxx"))
+          logInfo_ "Connected websocket") `catch` ( \(e :: WS.HandshakeException) -> do
+            _ <- logAttention_ $ pack ("handshale failed " <> displayException e)
+            throw CrashError
+          )
+        pure ()
+

@@ -26,9 +26,12 @@ dependencies:
 - bytestring
 - aeson
 - effectful
+- log-effectful
 - log-base
 - websockets
 - unliftio
+- safe-exceptions
+
 
 ghc-options:
 - -Wall
