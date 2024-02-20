@@ -6,12 +6,12 @@ cabal-version: 2.2
 
 name:           uzi
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/uzi#readme>
-homepage:       https://github.com/githubuser/uzi#readme
-bug-reports:    https://github.com/githubuser/uzi/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2024 Author name here
+description:    Discord bot application for uzi republic discord server.
+homepage:       https://github.com/himanoa/uzi#readme
+bug-reports:    https://github.com/himanoa/uzi/issues
+author:         himanoa
+maintainer:     matsunoappy@gmail.com
+copyright:      2024 himanoa
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
