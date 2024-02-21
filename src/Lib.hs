@@ -17,8 +17,10 @@ import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import Network.WebSockets qualified as WS
 import Opcode
+import Network.Socket (PortNumber)
+import qualified Network.WebSockets as WS
+import qualified Wuss as WS
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -42,10 +44,10 @@ fromEnvironment = do
   discordApiToken <- maybe (throw DiscordApiTokenIsUndefined) pure discordApiTokenMaybe
   pure $ makeEnvConfig . convertToText $ discordApiToken
 
-runClient :: (MonadUnliftIO m) => String -> Int -> String -> WS.ConnectionOptions -> WS.Headers -> (Connection -> m a) -> m a
+runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (Connection -> m a) -> m a
 runClient host port path opt headers inner =
   withRunInIO $ \runInIO ->
-    WS.runClientWith host port path opt headers (runInIO . inner)
+    WS.runSecureClientWith host port path opt headers (runInIO . inner)
 
 runUzi :: IO ()
 

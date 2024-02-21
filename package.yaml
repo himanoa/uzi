@@ -24,11 +24,13 @@ dependencies:
 - base >= 4.7 && < 5
 - text
 - bytestring
+- network
 - aeson
 - effectful
 - log-effectful
 - log-base
 - websockets
+- wuss
 - unliftio
 - safe-exceptions
 
