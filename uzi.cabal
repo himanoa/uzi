@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib
       Opcode
+      UnliftWuss
   other-modules:
       Paths_uzi
   autogen-modules:

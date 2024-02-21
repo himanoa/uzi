@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -9,18 +10,18 @@ module Lib
 where
 
 import Control.Exception.Safe
+import Control.Monad (forever)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
-import Effectful (Eff, MonadUnliftIO (withRunInIO), liftIO, runEff, (:>))
+import Effectful (Eff, IOE, MonadUnliftIO (withRunInIO), liftIO, runEff, (:>))
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
+import Network.WebSockets qualified as WS
 import Opcode
-import Network.Socket (PortNumber)
-import qualified Network.WebSockets as WS
-import qualified Wuss as WS
+import UnliftWuss qualified
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -44,11 +45,6 @@ fromEnvironment = do
   discordApiToken <- maybe (throw DiscordApiTokenIsUndefined) pure discordApiTokenMaybe
   pure $ makeEnvConfig . convertToText $ discordApiToken
 
-runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (Connection -> m a) -> m a
-runClient host port path opt headers inner =
-  withRunInIO $ \runInIO ->
-    WS.runSecureClientWith host port path opt headers (runInIO . inner)
-
 runUzi :: IO ()
 
 data UziError = CrashError
@@ -59,26 +55,38 @@ instance Exception UziError
 runUzi = runEff $ do
   withStdOutLogger $ \stdoutLogger -> do
     runEnvironment $ do
-      runLog "Uzi" stdoutLogger defaultLogLevel $ do
-        _ <- logInfo_ "Hello uzi"
+      runLog "Uzi" stdoutLogger defaultLogLevel startUp
 
-        _ <- logInfo_ "Load enviroments"
-        config <- fromEnvironment
-        _ <- logInfo_ . pack . show $ config
+startUp :: (Log :> es, Environment :> es, IOE :> es) => Eff es ()
+startUp = do
+  _ <- logInfo_ "Hello uzi"
+  _ <- logInfo_ "Load enviroments"
+  config <- fromEnvironment
+  _ <- logInfo_ . pack . show $ config
 
-        _ <-
-          runClient
-            "gateway.discord.gg"
-            443
-            ""
-            WS.defaultConnectionOptions
-            [("xxx", "yyy")]
-            ( \c -> do
-                _ <- liftIO (WS.sendTextData c (ByteString.pack "xxxx"))
-                logInfo_ "Connected websocket"
-            )
-            `catch` ( \(e :: WS.HandshakeException) -> do
-                        _ <- logAttention_ $ pack ("handshale failed " <> displayException e)
-                        throw CrashError
-                    )
-        pure ()
+  _ <-
+    UnliftWuss.runClient
+      "gateway.discord.gg"
+      443
+      "/?v=10&encoding-json"
+      WS.defaultConnectionOptions
+      []
+      onConnect
+      `catch` ( \(e :: WS.HandshakeException) -> do
+                  _ <- logAttention_ $ pack ("handshake failed " <> displayException e)
+                  throw CrashError
+              )
+  pure ()
+
+onConnect :: (Log :> es, IOE :> es) => Connection -> Eff es ()
+onConnect c = do
+  _ <- logInfo_ "Connected websocket"
+  _ <- UnliftWuss.withPingThread c 15 (pure ()) $ do
+    forever (receive c)
+  pure ()
+
+receive :: (Log :> es, IOE :> es) => Connection -> Eff es ()
+receive conn = do
+  d <- liftIO (WS.receiveData conn)
+  _ <- logInfo_ d
+  pure ()
