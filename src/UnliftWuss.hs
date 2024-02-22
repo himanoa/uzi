@@ -1,13 +1,14 @@
-module UnliftWuss (
-  runClient,
-  withPingThread
-) where
+module UnliftWuss
+  ( runClient,
+    withPingThread,
+  )
+where
 
-import UnliftIO
 import Network.Socket
-import qualified Network.WebSockets as WS
-import qualified Wuss as WS
 import Network.WebSockets (Connection)
+import Network.WebSockets qualified as WS
+import UnliftIO
+import Wuss qualified as WS
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
 runClient host port path opt headers inner =
@@ -16,5 +17,5 @@ runClient host port path opt headers inner =
 
 withPingThread :: (MonadUnliftIO m) => Connection -> Int -> IO () -> m a -> m a
 withPingThread conn interval after_sending inner =
-  withRunInIO $ \runInIO -> 
-    WS.withPingThread conn interval after_sending (runInIO  inner)
+  withRunInIO $ \runInIO ->
+    WS.withPingThread conn interval after_sending (runInIO inner)

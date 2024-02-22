@@ -1,10 +1,10 @@
-module Protocol (
-  Protocol(..) 
-) where
+module Protocol
+  ( Protocol (..),
+  )
+where
 
 data Protocol
-  = ReceiveHelloEvent 
+  = ReceiveHelloEvent
   | ReadyEvent
   | GatewayDisconnectedOccurus
   deriving (Show, Eq)
-

@@ -15,6 +15,9 @@ import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, liftIO, runEff, (:>))
+import Effectful.Concurrent (Concurrent, forkIO, runConcurrent, threadDelay)
+import Effectful.Concurrent.Async (concurrently_)
+import Effectful.Concurrent.STM qualified as STM
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
@@ -22,9 +25,6 @@ import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Opcode
 import UnliftWuss qualified
-import Effectful.Concurrent (forkIO, Concurrent, runConcurrent, threadDelay)
-import Effectful.Concurrent.Async (concurrently_)
-import qualified Effectful.Concurrent.STM as STM
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -85,9 +85,9 @@ startUp = do
 onConnect :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- logInfo_ "Connected websocket"
-  _ <-  UnliftWuss.withPingThread c 15 (pure ()) $ do
-    concurrently_ (forever $ receive c)  (forever $ sender c)
-    -- TODO: Handle Ctrl + C and kill signal
+  _ <- UnliftWuss.withPingThread c 15 (pure ()) $ do
+    concurrently_ (forever $ receive c) (forever $ sender c)
+  -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
 receive :: (Log :> es, IOE :> es) => Connection -> Eff es ()
@@ -95,7 +95,6 @@ receive conn = do
   d <- liftIO (WS.receiveData conn)
   _ <- logInfo_ d
   pure ()
-
 
 sender :: (Log :> es, IOE :> es) => Connection -> Eff es ()
 sender conn = do

@@ -1,20 +1,21 @@
-{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE TemplateHaskell #-}
 
-module Data.Discord.SendOperation (
-SendOperation(..),
-operationCode
-)where
+module Data.Discord.SendOperation
+  ( SendOperation (..),
+    operationCode,
+  )
+where
 
-import GHC.Generics
-import Data.Aeson (ToJSON, FromJSON)
 import Control.Lens.TH
+import Data.Aeson (FromJSON, ToJSON)
+import GHC.Generics
 
 data SendOperation
-  = Identify 
+  = Identify
   | Resume
   | Heartbeat
   | RequestGuildMembers
@@ -23,7 +24,7 @@ data SendOperation
   deriving (Show, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
--- | get operationCode 
+-- | get operationCode
 -- >>> operationCode Identify
 -- 2
 -- >>> operationCode Resume
@@ -36,9 +37,8 @@ data SendOperation
 -- 4
 -- >>> operationCode UpdatePresence
 -- 3
---
-operationCode :: SendOperation-> Int
-operationCode code = case code of 
+operationCode :: SendOperation -> Int
+operationCode code = case code of
   Identify -> 2
   Resume -> 6
   Heartbeat -> 1
