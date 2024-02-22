@@ -1,5 +1,6 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 module Data.Discord.Response.HelloEventResponse (
   HelloEventResponse(..)
 ) where
