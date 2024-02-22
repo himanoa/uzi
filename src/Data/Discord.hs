@@ -1,6 +1,7 @@
 module Data.Discord
-  ( module Data.Discord.Internal,
+  ( module Data.Discord.Response,
   )
 where
 
-import Data.Discord.Internal
+import Data.Discord.Response
+

@@ -30,7 +30,6 @@ library
       Data.Discord.ReceiveEvent
       Data.Discord.ReceiveEventOperationCode
       Data.Discord.Response
-      Data.Discord.Response.Converter
       Data.Discord.Response.HelloEventResponse
       Data.Discord.SendOperation
       Lib

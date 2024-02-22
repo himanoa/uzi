@@ -10,13 +10,12 @@ module Lib
 where
 
 import Control.Exception.Safe
-import Control.Monad (forever)
+import Control.Monad (forever, liftM)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, liftIO, runEff, (:>))
-import Effectful.Concurrent (Concurrent, forkIO, runConcurrent, threadDelay)
-import Effectful.Concurrent.Async (concurrently_)
+import Effectful.Concurrent.Async ( concurrently_, runConcurrent )
 import Effectful.Concurrent.STM qualified as STM
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
@@ -25,6 +24,11 @@ import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Opcode
 import UnliftWuss qualified
+import Data.Discord.Response.HelloEventResponse
+import Data.Aeson (eitherDecode)
+import qualified Data.Text.Encoding as LT
+import Data.ByteString.Lazy qualified as BL
+import Effectful.Concurrent (Concurrent)
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -93,6 +97,9 @@ onConnect c = do
 receive :: (Log :> es, IOE :> es) => Connection -> Eff es ()
 receive conn = do
   d <- liftIO (WS.receiveData conn)
+  _ <- case eitherDecode @HelloEventResponse (BL.fromStrict . LT.encodeUtf8 $ d) of
+    Right x -> logInfo_ . convertToText . show $ x
+    Left _-> pure ()
   _ <- logInfo_ d
   pure ()
 
