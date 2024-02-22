@@ -3,12 +3,9 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module Data.Discord.SendOperation
-  ( SendOperation (..),
-    operationCode,
-  )
-where
+module Data.Discord.SendOperation where
 
 import Control.Lens.TH
 import Data.Aeson (FromJSON, ToJSON)

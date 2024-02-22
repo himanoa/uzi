@@ -27,6 +27,7 @@ library
   exposed-modules:
       Data.Discord
       Data.Discord.Internal
+      Data.Discord.ReceiveOperation
       Data.Discord.SendOperation
       Lib
       Opcode
