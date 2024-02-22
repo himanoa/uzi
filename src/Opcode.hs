@@ -3,6 +3,7 @@ module Opcode
   )
 where
 
+-- Deprecated
 data OperationCode
   = Identify
   | SelectProtocol

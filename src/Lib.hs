@@ -14,7 +14,7 @@ import Control.Monad (forever)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
-import Effectful (Eff, IOE, MonadUnliftIO (withRunInIO), liftIO, runEff, (:>))
+import Effectful (Eff, IOE, liftIO, runEff, (:>))
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
@@ -22,6 +22,9 @@ import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Opcode
 import UnliftWuss qualified
+import Effectful.Concurrent (forkIO, Concurrent, runConcurrent, threadDelay)
+import Effectful.Concurrent.Async (concurrently_)
+import qualified Effectful.Concurrent.STM as STM
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -54,10 +57,11 @@ instance Exception UziError
 
 runUzi = runEff $ do
   withStdOutLogger $ \stdoutLogger -> do
-    runEnvironment $ do
-      runLog "Uzi" stdoutLogger defaultLogLevel startUp
+    runConcurrent $ do
+      runEnvironment $ do
+        runLog "Uzi" stdoutLogger defaultLogLevel startUp
 
-startUp :: (Log :> es, Environment :> es, IOE :> es) => Eff es ()
+startUp :: (Log :> es, Environment :> es, IOE :> es, Concurrent :> es) => Eff es ()
 startUp = do
   _ <- logInfo_ "Hello uzi"
   _ <- logInfo_ "Load enviroments"
@@ -78,15 +82,21 @@ startUp = do
               )
   pure ()
 
-onConnect :: (Log :> es, IOE :> es) => Connection -> Eff es ()
+onConnect :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- logInfo_ "Connected websocket"
-  _ <- UnliftWuss.withPingThread c 15 (pure ()) $ do
-    forever (receive c)
+  _ <-  UnliftWuss.withPingThread c 15 (pure ()) $ do
+    concurrently_ (forever $ receive c)  (forever $ sender c)
+    -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
 receive :: (Log :> es, IOE :> es) => Connection -> Eff es ()
 receive conn = do
   d <- liftIO (WS.receiveData conn)
   _ <- logInfo_ d
+  pure ()
+
+
+sender :: (Log :> es, IOE :> es) => Connection -> Eff es ()
+sender conn = do
   pure ()
