@@ -10,13 +10,12 @@ module Lib
 where
 
 import Control.Exception.Safe
-import Control.Monad (forever, liftM)
+import Control.Monad (forever)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, liftIO, runEff, (:>))
 import Effectful.Concurrent.Async ( concurrently_, runConcurrent )
-import Effectful.Concurrent.STM qualified as STM
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
@@ -29,6 +28,7 @@ import Data.Aeson (eitherDecode)
 import qualified Data.Text.Encoding as LT
 import Data.ByteString.Lazy qualified as BL
 import Effectful.Concurrent (Concurrent)
+import Effectful.Concurrent.STM (TQueue, atomically, writeTQueue, newTQueue, readTQueue)
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -37,7 +37,6 @@ data EnvConfig = EnvConfig
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
 
-fromEnvironment :: (Environment :> es) => Eff es EnvConfig
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -47,6 +46,7 @@ instance Exception FromEnvironmentError
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
 
+fromEnvironment :: (Environment :> es) => Eff es EnvConfig
 fromEnvironment = do
   discordApiTokenMaybe <- lookupEnv "UZI_DISCORD_API_TOKEN"
   discordApiToken <- maybe (throw DiscordApiTokenIsUndefined) pure discordApiTokenMaybe
@@ -90,19 +90,28 @@ onConnect :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- logInfo_ "Connected websocket"
   _ <- UnliftWuss.withPingThread c 15 (pure ()) $ do
-    concurrently_ (forever $ receive c) (forever $ sender c)
+    queue <- atomically newTQueue
+    concurrently_ (forever $ receive c queue) (forever $ sender c queue)
   -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
-receive :: (Log :> es, IOE :> es) => Connection -> Eff es ()
-receive conn = do
+receive :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> TQueue HelloEventResponse -> Eff es ()
+receive conn queue = do
   d <- liftIO (WS.receiveData conn)
   _ <- case eitherDecode @HelloEventResponse (BL.fromStrict . LT.encodeUtf8 $ d) of
-    Right x -> logInfo_ . convertToText . show $ x
+    Right x ->  atomically $ writeTQueue queue x
     Left _-> pure ()
   _ <- logInfo_ d
   pure ()
 
-sender :: (Log :> es, IOE :> es) => Connection -> Eff es ()
-sender conn = do
-  pure ()
+
+data SenderError = EventQueueIsEmpty
+  deriving (Show)
+
+sender :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> TQueue HelloEventResponse ->  Eff es ()
+sender conn queue = do
+  event <- atomically $ readTQueue queue
+  logInfo_ . convertToText $ ("Received Log" <> show event)
+  -- case eventMaybe of
+  --   Just event ->  logInfo_ . convertToText $ ("Received Log" <> show event)
+  --   Nothing -> pure ()
