@@ -27,7 +27,11 @@ library
   exposed-modules:
       Data.Discord
       Data.Discord.Internal
-      Data.Discord.ReceiveOperation
+      Data.Discord.ReceiveEvent
+      Data.Discord.ReceiveEventOperationCode
+      Data.Discord.Response
+      Data.Discord.Response.Converter
+      Data.Discord.Response.HelloEventResponse
       Data.Discord.SendOperation
       Lib
       Opcode
@@ -50,6 +54,7 @@ library
     , log-effectful
     , network
     , safe-exceptions
+    , scientific
     , text
     , unliftio
     , websockets
@@ -75,6 +80,7 @@ executable uzi-exe
     , log-effectful
     , network
     , safe-exceptions
+    , scientific
     , text
     , unliftio
     , uzi
@@ -104,6 +110,7 @@ test-suite uzi-test
     , log-effectful
     , network
     , safe-exceptions
+    , scientific
     , text
     , unliftio
     , uzi

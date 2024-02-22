@@ -5,13 +5,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module Data.Discord.ReceiveOperation where
+module Data.Discord.ReceiveEvent where
 
 import GHC.Generics
 import Data.Aeson
 import Control.Lens (makeLenses)
 
-data ReceiveOperation
+data ReceiveEvent
   = Hello
   | Ready
   | Resumed
@@ -81,4 +81,4 @@ data ReceiveOperation
   deriving (Show, Enum, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
-makeLenses ''ReceiveOperation
+makeLenses ''ReceiveEvent
