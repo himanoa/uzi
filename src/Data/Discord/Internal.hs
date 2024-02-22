@@ -10,26 +10,6 @@ import Data.Aeson (ToJSON, FromJSON)
 import GHC.Generics
 import Control.Lens.TH
 
-data SendOperation
-  = Identify 
-  | Resume
-  | Heartbeat
-  | RequestGuildMembers
-  | UpdateVoiceState
-  | UpdatePresence
-  deriving (Show, Generic)
-  deriving anyclass (ToJSON, FromJSON)
-
-operationCode :: SendOperation-> Int
-operationCode code = case code of 
-  Identify -> 2
-  Resume -> 6
-  Heartbeat -> 1
-  RequestGuildMembers -> 8
-  UpdateVoiceState -> 4
-  UpdatePresence -> 3
-
-
 data ReceiveOperation
   = Hello
   | Ready
