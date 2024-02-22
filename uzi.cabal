@@ -92,6 +92,7 @@ test-suite uzi-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Data.Discord.Response.HelloEventResponseSpec
       OpcodeSpec
       Paths_uzi
   autogen-modules:

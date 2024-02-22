@@ -1,28 +1,24 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Data.Discord.Response.HelloEventResponse (
-
+  HelloEventResponse(..)
 ) where
 
 import GHC.Generics
+import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode (Hello))
+import Data.Aeson (FromJSON (parseJSON), withObject, (.:))
+import Data.Aeson.Types (prependFailure, typeMismatch)
+
+data HelloEventResponse = HelloEventResponse 
+  deriving (Show, Generic, Eq) 
 
 --
--- ## やりたいこと
+-- | FromJson implementation
 --
--- Decodeに成功したらJust 失敗したら Nothingを返す
---
--- ObjectはData.Aeson.Object
---
--- XXXResponseDecoder :: Object -> Maybe XXX
---
--- decoders = [
---   helloEventResponseDecoder,
---   XXXEventResponseDecoder,
---   ...
--- ]
---
--- data EventResponse = HelloEventResponse | XXXEventResponse deriving Show
---
--- decodeEventResponse :: List[Decoder] -> Maybe EventResponse
---
-data HelloEventResponse = HelloEventResponse 
-  deriving (Show, Generic) 
+instance FromJSON HelloEventResponse where
+  parseJSON = withObject "HelloEventResponse" $ \v -> do
+    operationCode <- parseJSON @ReceiveEventOperationCode =<< v .: "op"
+    case operationCode of
+      Hello -> pure HelloEventResponse
+      _ -> prependFailure "Not supported op code" ( typeMismatch "op" "" )
+    
