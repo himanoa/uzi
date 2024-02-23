@@ -91,12 +91,12 @@ onConnect c = do
   _ <- logInfo_ "Connected websocket"
   _ <- UnliftWuss.withPingThread c 15 (pure ()) $ do
     queue <- atomically newTQueue
-    concurrently_ (forever $ receive c queue) (forever $ sender c queue)
+    concurrently_ (forever $ receiver c queue) (forever $ sender c queue)
   -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
-receive :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> TQueue HelloEventResponse -> Eff es ()
-receive conn queue = do
+receiver :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> TQueue HelloEventResponse -> Eff es ()
+receiver conn queue = do
   d <- liftIO (WS.receiveData conn)
   _ <- case eitherDecode @HelloEventResponse (BL.fromStrict . LT.encodeUtf8 $ d) of
     Right x ->  atomically $ writeTQueue queue x

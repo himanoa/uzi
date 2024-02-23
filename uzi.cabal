@@ -29,6 +29,7 @@ library
       Data.Discord.Internal
       Data.Discord.ReceiveEvent
       Data.Discord.ReceiveEventOperationCode
+      Data.Discord.Request.IdentifyRequest
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
       Data.Discord.SendOperation
