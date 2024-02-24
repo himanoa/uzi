@@ -7,9 +7,9 @@
 
 module Effectful.DynamicLogger.Interpreter where
 
+import Effectful
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.DynamicLogger.Effect
-import Effectful
 import Effectful.Log
 
 runDynamicLogger :: (Log :> es) => Eff (DynamicLogger : es) a -> Eff es a

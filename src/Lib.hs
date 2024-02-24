@@ -20,13 +20,13 @@ import Effectful.Concurrent (Concurrent)
 import Effectful.Concurrent.Async (concurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
 import Effectful.DiscordGateway
+import Effectful.DynamicLogger
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import EnvConfig
+import EventHandler.HelloEventHandler (helloEventHandler)
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import EventHandler.HelloEventHandler (helloEventHandler)
-import Effectful.DynamicLogger
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
@@ -75,7 +75,7 @@ onConnect c = do
   -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
-receiver :: ( Concurrent :> es, DiscordGateway :> es) =>TQueue Response -> Eff es ()
+receiver :: (Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
 receiver queue = do
   _ <-
     receiveEvent >>= \case

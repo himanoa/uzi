@@ -1,6 +1,6 @@
-module Data.Discord.Request (
-  Request(..)
-) where
+module Data.Discord.Request
+  ( Request (..),
+  )
+where
 
 import Data.Discord.Request.Internal
-

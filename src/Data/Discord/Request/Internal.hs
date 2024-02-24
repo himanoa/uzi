@@ -1,12 +1,14 @@
-{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Discord.Request.Internal (
-  Request(..)
-) where
 
-import Data.Discord.Request.IdentifyRequest (IdentifyRequest)
+module Data.Discord.Request.Internal
+  ( Request (..),
+  )
+where
+
 import Data.Aeson
+import Data.Discord.Request.IdentifyRequest (IdentifyRequest)
 import GHC.Generics (Generic)
 
 data Request = Identify IdentifyRequest
@@ -19,6 +21,3 @@ instance ToJSON Request where
 operationCode :: Request -> Int
 operationCode r = case r of
   Identify _ -> 2
-
-
-
