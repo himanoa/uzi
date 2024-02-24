@@ -38,7 +38,6 @@ library
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
       Lib
-      Opcode
       Protocol
   other-modules:
       Paths_uzi

@@ -1,11 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Lib
   ( runUzi,
     UziError (CrashError),
-    module Opcode,
   )
 where
 
@@ -20,7 +20,6 @@ import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import Opcode
 import Effectful.Concurrent (Concurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, writeTQueue, newTQueue, readTQueue)
 import Effectful.DiscordGateway
@@ -81,8 +80,7 @@ onConnect c = do
 
 receiver :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
 receiver queue = do
-  event <- receiveEvent
-  _ <- case event of
+  _ <- receiveEvent >>= \case 
     Just x ->  atomically $ writeTQueue queue x
     Nothing -> pure ()
   pure ()
