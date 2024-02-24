@@ -40,7 +40,6 @@ library
       Lib
       Opcode
       Protocol
-      UnliftWuss
   other-modules:
       Paths_uzi
   autogen-modules:
