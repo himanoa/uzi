@@ -19,7 +19,6 @@ import Network.Socket
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Network.WebSockets qualified as Wuss
-import UnliftIO
 import Wuss qualified as WS
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
