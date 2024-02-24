@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module EventHandler.HelloEventHandler where
 
@@ -16,7 +17,6 @@ convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
 
 helloEventHandler :: (DiscordGateway :> es) => EnvConfig -> Response -> Eff es ()
-helloEventHandler config res = do
-  case res of
-    Hello _ -> do
-      sendEvent . Identify . defaultIdentifyRequest $ config.discordApiToken 
+helloEventHandler config = \case
+  Hello _ -> do
+    sendEvent . Identify . defaultIdentifyRequest $ config.discordApiToken 
