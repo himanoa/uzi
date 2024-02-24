@@ -1,18 +1,26 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.Discord.Response.Internal
   ( Response (..),
   )
 where
 
 import Data.Aeson
-import Data.Discord.Response.HelloEventResponse (HelloEventResponse (HelloEventResponse))
+import Data.Discord.Response.ReadyEventResponse
+import Data.Discord.Response.HelloEventResponse 
+import Data.Discord.ReceiveEventOperationCode qualified as OC
+import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode)
 
-data Response = Hello HelloEventResponse
+data Response = Hello HelloEventResponse | Ready ReadyEventResponse
   deriving (Show, Eq)
 
 instance FromJSON Response where
-  parseJSON v = do
-    payload <- parseJSON @HelloEventResponse v
-    case payload of
-      HelloEventResponse -> pure . Hello $ HelloEventResponse
+  parseJSON = withObject "Response" $ \v -> do
+    code <- parseJSON @ReceiveEventOperationCode =<< v .: "op"
+    case code of
+      OC.Hello -> pure . Hello $ HelloEventResponse
+      OC.Ready -> pure . Ready $ ReadyEventResponse
+      -- TODO: Implemented better event handler
+      -- _ -> prependFailure "Not supported event" ( typeMismatch "code: " (Number 999))
 
 -- _ -> prependFailure "Not supported event" ( typeMismatch "Response" v )

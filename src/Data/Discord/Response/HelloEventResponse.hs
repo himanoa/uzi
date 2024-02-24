@@ -15,8 +15,6 @@ import GHC.Generics
 data HelloEventResponse = HelloEventResponse
   deriving (Show, Generic, Eq)
 
---
-
 -- | FromJson implementation
 instance FromJSON HelloEventResponse where
   parseJSON = withObject "HelloEventResponse" $ \v -> do

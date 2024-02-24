@@ -35,6 +35,7 @@ library
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
       Data.Discord.Response.Internal
+      Data.Discord.Response.ReadyEventResponse
       Data.Discord.SendOperation
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
