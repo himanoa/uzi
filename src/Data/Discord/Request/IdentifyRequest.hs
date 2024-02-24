@@ -4,6 +4,7 @@
 module Data.Discord.Request.IdentifyRequest where
 
 import Data.Aeson (ToJSON)
+import Data.Text
 import GHC.Generics (Generic)
 
 data IdentifyRequestProperties = IdentifyRequestProperties
@@ -11,15 +12,15 @@ data IdentifyRequestProperties = IdentifyRequestProperties
     browser :: String,
     device :: String
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
   deriving anyclass (ToJSON)
 
 data IdentifyRequest = IdentifyRequest
-  { token :: String,
+  { token :: Text,
     intents :: Integer,
     properties :: IdentifyRequestProperties
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
   deriving anyclass (ToJSON)
 
 defaultIdentifyRequestProperties :: IdentifyRequestProperties
@@ -33,7 +34,7 @@ defaultIdentifyRequestProperties =
 defaultIntents :: Integer
 defaultIntents = 3243773
 
-defaultIdentifyRequest :: String -> IdentifyRequest
+defaultIdentifyRequest :: Text -> IdentifyRequest
 defaultIdentifyRequest token =
   IdentifyRequest
     { token = token,

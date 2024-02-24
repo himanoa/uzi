@@ -7,7 +7,7 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
-import Data.Aeson (decode)
+import Data.Aeson (decode, encode)
 import Data.ByteString.Lazy (LazyByteString)
 import Data.ByteString.Lazy qualified as BL
 import Data.Discord
@@ -43,4 +43,5 @@ runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
     d <- liftIO (Wuss.receiveData conn)
     pure . handleEvent $ (BL.fromStrict . LT.encodeUtf8 $ d)
-  SendEvent t -> liftIO (Wuss.sendTextData conn t)
+  SendEvent request -> do
+    liftIO . Wuss.sendTextData conn . encode $ request

@@ -29,7 +29,9 @@ library
       Data.Discord.Internal
       Data.Discord.ReceiveEvent
       Data.Discord.ReceiveEventOperationCode
+      Data.Discord.Request
       Data.Discord.Request.IdentifyRequest
+      Data.Discord.Request.Internal
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
       Data.Discord.Response.Internal
@@ -37,6 +39,9 @@ library
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
+      EnvConfig
+      EventHandler
+      EventHandler.HelloEventHandler
       Lib
       Protocol
   other-modules:
@@ -96,7 +101,8 @@ test-suite uzi-test
   other-modules:
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
-      OpcodeSpec
+      EventHandler.HelloEventHandlerSpec
+      Helper.DummyDiscordGatewayInterpreter
       Paths_uzi
   autogen-modules:
       Paths_uzi

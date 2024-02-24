@@ -22,12 +22,9 @@ import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writ
 import Effectful.DiscordGateway
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
+import EnvConfig
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-
-data EnvConfig = EnvConfig
-  {discordApiToken :: Text}
-  deriving (Show)
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
