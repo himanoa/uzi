@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
-module Data.Discord.Request.Identify where
+module Data.Discord.Request.IdentifyRequest where
 import GHC.Generics (Generic)
 import Data.Aeson (ToJSON)
 

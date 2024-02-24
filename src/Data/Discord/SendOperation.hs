@@ -21,7 +21,7 @@ data SendOperation
   deriving (Show, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
--- | get operationCode
+-- | Get operationCode
 -- >>> operationCode Identify
 -- 2
 -- >>> operationCode Resume

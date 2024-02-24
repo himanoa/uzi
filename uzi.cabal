@@ -33,6 +33,8 @@ library
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
       Data.Discord.SendOperation
+      Effectful.DiscordGateway
+      Effectful.DiscordGateway.Effect
       Lib
       Opcode
       Protocol
@@ -93,6 +95,7 @@ test-suite uzi-test
   main-is: Spec.hs
   other-modules:
       Data.Discord.Response.HelloEventResponseSpec
+      Data.Discord.Response.Internal
       OpcodeSpec
       Paths_uzi
   autogen-modules:

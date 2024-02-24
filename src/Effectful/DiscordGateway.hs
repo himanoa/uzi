@@ -1,0 +1,3 @@
+module Effectful.DiscordGateway (
+
+) where
