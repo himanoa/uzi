@@ -27,6 +27,7 @@ import EnvConfig
 import EventHandler.HelloEventHandler (helloEventHandler)
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
+import EventHandler
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
@@ -91,4 +92,4 @@ sender queue = do
   event <- atomically $ readTQueue queue
   config <- fromEnvironment
   info . convertToText $ ("Received Log " <> show event)
-  helloEventHandler config event
+  handlers config event
