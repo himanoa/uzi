@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Lib
   ( runUzi,
@@ -12,18 +12,18 @@ where
 import Control.Exception.Safe
 import Control.Monad (forever)
 import Data.ByteString.Char8 qualified as ByteString
+import Data.Discord
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, runEff, (:>))
-import Effectful.Concurrent.Async ( concurrently_, runConcurrent )
+import Effectful.Concurrent (Concurrent)
+import Effectful.Concurrent.Async (concurrently_, runConcurrent)
+import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
+import Effectful.DiscordGateway
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import Effectful.Concurrent (Concurrent)
-import Effectful.Concurrent.STM (TQueue, atomically, writeTQueue, newTQueue, readTQueue)
-import Effectful.DiscordGateway
-import Data.Discord
 
 data EnvConfig = EnvConfig
   {discordApiToken :: Text}
@@ -31,7 +31,6 @@ data EnvConfig = EnvConfig
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
-
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -80,19 +79,20 @@ onConnect c = do
 
 receiver :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
 receiver queue = do
-  _ <- receiveEvent >>= \case 
-    Just x ->  atomically $ writeTQueue queue x
-    Nothing -> pure ()
+  _ <-
+    receiveEvent >>= \case
+      Just x -> atomically $ writeTQueue queue x
+      Nothing -> pure ()
   pure ()
-
 
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response ->  Eff es ()
+sender :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
   logInfo_ . convertToText $ ("Received Log " <> show event)
-  -- case eventMaybe of
-  --   Just event ->  logInfo_ . convertToText $ ("Received Log" <> show event)
-  --   Nothing -> pure ()
+
+-- case eventMaybe of
+--   Just event ->  logInfo_ . convertToText $ ("Received Log" <> show event)
+--   Nothing -> pure ()

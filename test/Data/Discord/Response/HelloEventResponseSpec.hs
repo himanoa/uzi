@@ -1,13 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Discord.Response.HelloEventResponseSpec (
-  spec
-) where
-import Test.Hspec
+
+module Data.Discord.Response.HelloEventResponseSpec
+  ( spec,
+  )
+where
+
 import Data.Aeson (decode)
 import Data.Discord.Response.HelloEventResponse
+import Test.Hspec
 
-spec::Spec
-spec = describe "HelloEventResponse" $ do 
+spec :: Spec
+spec = describe "HelloEventResponse" $ do
   describe "FromJson" $ do
     describe "parseJSON" $ do
       describe "if op equal 10" $ do
@@ -18,4 +21,3 @@ spec = describe "HelloEventResponse" $ do
         it "is return to Just HelloEventResponse" $ do
           let json = "{\"op\": 11}"
           Data.Aeson.decode @HelloEventResponse json `shouldBe` Nothing
-

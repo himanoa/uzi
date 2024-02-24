@@ -4,4 +4,3 @@ module Data.Discord
 where
 
 import Data.Discord.Response
-

@@ -1,12 +1,12 @@
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Effectful.DiscordGateway.Effect where
 
-import Effectful
-import Data.Text
-import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import Data.Discord.Response (Response)
+import Data.Text
+import Effectful
+import Effectful.Dispatch.Dynamic (HasCallStack, send)
 
 data DiscordGateway :: Effect where
   ReceiveEvent :: DiscordGateway m (Maybe Response)
