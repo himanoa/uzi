@@ -35,6 +35,7 @@ dependencies:
 - safe-exceptions
 - lens 
 - scientific
+- string-conversions
 
 
 ghc-options:

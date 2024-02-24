@@ -25,6 +25,7 @@ import Effectful.Log
 import EnvConfig
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
+import EventHandler.HelloEventHandler (helloEventHandler)
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
@@ -56,16 +57,14 @@ runUzi = runEff $ do
       runEnvironment $ do
         runLog "Uzi" stdoutLogger defaultLogLevel startUp
 
-startUp :: (Log :> es, Environment :> es, IOE :> es, Concurrent :> es) => Eff es ()
+startUp :: (Log :> es, IOE :> es, Concurrent :> es, Environment :> es) => Eff es ()
 startUp = do
   _ <- logInfo_ "Hello uzi"
   _ <- logInfo_ "Load enviroments"
-  config <- fromEnvironment
-  _ <- logInfo_ . pack . show $ config
   withDiscordGatewayConnection onConnect
   pure ()
 
-onConnect :: (Log :> es, IOE :> es, Concurrent :> es) => Connection -> Eff es ()
+onConnect :: (Log :> es, IOE :> es, Concurrent :> es, Environment :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- logInfo_ "Connected websocket"
   _ <- withPingThread c 15 (pure ()) $ do
@@ -74,7 +73,7 @@ onConnect c = do
   -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
-receiver :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
+receiver :: ( Concurrent :> es, DiscordGateway :> es) =>TQueue Response -> Eff es ()
 receiver queue = do
   _ <-
     receiveEvent >>= \case
@@ -85,10 +84,12 @@ receiver queue = do
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (Log :> es, IOE :> es, Concurrent :> es, DiscordGateway :> es) => TQueue Response -> Eff es ()
+sender :: (Log :> es, Concurrent :> es, DiscordGateway :> es, Environment :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
+  config <- fromEnvironment
   logInfo_ . convertToText $ ("Received Log " <> show event)
+  helloEventHandler config event
 
 -- case eventMaybe of
 --   Just event ->  logInfo_ . convertToText $ ("Received Log" <> show event)
