@@ -36,6 +36,7 @@ library
       Data.Discord.SendOperation
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
+      Effectful.DiscordGateway.Interpreter
       Lib
       Opcode
       Protocol
