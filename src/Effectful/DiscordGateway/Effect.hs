@@ -17,5 +17,5 @@ type instance DispatchOf DiscordGateway = Dynamic
 receiveEvent :: (HasCallStack, DiscordGateway :> es) => Eff es (Maybe Response)
 receiveEvent = send ReceiveEvent
 
--- sendEvent :: (HasCallStack, DiscordGateway :> es) => Text -> Eff es ()
--- sendEvent payload = send (SendEvent payload)
+sendEvent :: (HasCallStack, DiscordGateway :> es) => Text -> Eff es ()
+sendEvent payload = send (SendEvent payload)
