@@ -20,7 +20,3 @@ instance FromJSON Response where
     case code of
       OC.Hello -> pure . Hello $ HelloEventResponse
       OC.Ready -> pure . Ready $ ReadyEventResponse
-      -- TODO: Implemented better event handler
-      -- _ -> prependFailure "Not supported event" ( typeMismatch "code: " (Number 999))
-
--- _ -> prependFailure "Not supported event" ( typeMismatch "Response" v )
