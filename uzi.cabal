@@ -32,6 +32,7 @@ library
       Data.Discord.Request.IdentifyRequest
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
+      Data.Discord.Response.Internal
       Data.Discord.SendOperation
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
@@ -95,7 +96,7 @@ test-suite uzi-test
   main-is: Spec.hs
   other-modules:
       Data.Discord.Response.HelloEventResponseSpec
-      Data.Discord.Response.Internal
+      Data.Discord.Response.InternalSpec
       OpcodeSpec
       Paths_uzi
   autogen-modules:
