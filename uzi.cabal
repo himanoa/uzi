@@ -39,6 +39,9 @@ library
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
+      Effectful.DynamicLogger
+      Effectful.DynamicLogger.Effect
+      Effectful.DynamicLogger.Interpreter
       EnvConfig
       EventHandler
       EventHandler.HelloEventHandler

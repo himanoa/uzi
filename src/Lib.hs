@@ -26,6 +26,7 @@ import EnvConfig
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
 import EventHandler.HelloEventHandler (helloEventHandler)
+import Effectful.DynamicLogger
 
 makeEnvConfig :: Text -> EnvConfig
 makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
@@ -55,18 +56,19 @@ runUzi = runEff $ do
   withStdOutLogger $ \stdoutLogger -> do
     runConcurrent $ do
       runEnvironment $ do
-        runLog "Uzi" stdoutLogger defaultLogLevel startUp
+        runLog "Uzi" stdoutLogger defaultLogLevel $ do
+          runDynamicLogger startUp
 
-startUp :: (Log :> es, IOE :> es, Concurrent :> es, Environment :> es) => Eff es ()
+startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es) => Eff es ()
 startUp = do
-  _ <- logInfo_ "Hello uzi"
-  _ <- logInfo_ "Load enviroments"
+  _ <- info "Hello uzi"
+  _ <- info "Load enviroments"
   withDiscordGatewayConnection onConnect
   pure ()
 
-onConnect :: (Log :> es, IOE :> es, Concurrent :> es, Environment :> es) => Connection -> Eff es ()
+onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es) => Connection -> Eff es ()
 onConnect c = do
-  _ <- logInfo_ "Connected websocket"
+  _ <- info "Connected websocket"
   _ <- withPingThread c 15 (pure ()) $ do
     queue <- atomically newTQueue
     concurrently_ (forever (runDiscordGateway c (receiver queue))) (forever $ runDiscordGateway c (sender queue))
@@ -84,13 +86,9 @@ receiver queue = do
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (Log :> es, Concurrent :> es, DiscordGateway :> es, Environment :> es) => TQueue Response -> Eff es ()
+sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, Environment :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
   config <- fromEnvironment
-  logInfo_ . convertToText $ ("Received Log " <> show event)
+  info . convertToText $ ("Received Log " <> show event)
   helloEventHandler config event
-
--- case eventMaybe of
---   Just event ->  logInfo_ . convertToText $ ("Received Log" <> show event)
---   Nothing -> pure ()
