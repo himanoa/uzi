@@ -22,3 +22,4 @@ helloEventHandler config = \case
   Hello _ -> do
     sendEvent . Identify . defaultIdentifyRequest $ config.discordApiToken
     info "Sent HelloEvetnt"
+  _ -> pure()

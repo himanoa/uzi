@@ -46,6 +46,7 @@ library
       EnvConfig
       EventHandler
       EventHandler.HelloEventHandler
+      EventHandler.ReadyEventHandler
       Lib
       Protocol
   other-modules:
