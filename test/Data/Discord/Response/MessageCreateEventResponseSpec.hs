@@ -34,7 +34,7 @@ spec = describe "MessageCreateEventResponse" $ do
                 "872812820100694077",
                 "872811935832346654"
               ],
-              nick = Nickname "himanoa"
+              nick = Just . Nickname $ "himanoa"
             },
             isBot = False
           }

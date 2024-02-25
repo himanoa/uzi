@@ -113,6 +113,7 @@ test-suite uzi-test
   main-is: Spec.hs
   other-modules:
       Data.Discord.EventNameSpec
+      Data.Discord.MemberSpec
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
       Data.Discord.Response.MessageCreateEventResponseSpec
