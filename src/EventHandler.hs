@@ -1,6 +1,6 @@
 module EventHandler
   (
-    handlers
+    dispatchEventHandlers
   )
 where
 
@@ -11,10 +11,11 @@ import Effectful.DiscordGateway
 import Effectful
 import EnvConfig
 import Data.Discord.Response
+import EventHandler.MessageCreateEventHandler (dispatchMessageEventHandlers)
 
-handlers :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
-handlers = mconcat [
-  readyEventHandler,
-  helloEventHandler
-  ]
+dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
+dispatchEventHandlers c r = do
+  readyEventHandler c r
+  helloEventHandler c r
+  dispatchMessageEventHandlers c r
 

@@ -24,7 +24,6 @@ import Effectful.DynamicLogger
 import Effectful.Environment (Environment, lookupEnv, runEnvironment)
 import Effectful.Log
 import EnvConfig
-import EventHandler.HelloEventHandler (helloEventHandler)
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
 import EventHandler
@@ -92,4 +91,4 @@ sender queue = do
   event <- atomically $ readTQueue queue
   config <- fromEnvironment
   info . convertToText $ ("Received Log " <> show event)
-  handlers config event
+  dispatchEventHandlers config event

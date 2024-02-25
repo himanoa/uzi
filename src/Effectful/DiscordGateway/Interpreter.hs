@@ -7,7 +7,7 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
-import Data.Aeson (decode, encode)
+import Data.Aeson (decode, encode, eitherDecode)
 import Data.ByteString.Lazy (LazyByteString)
 import Data.ByteString.Lazy qualified as BL
 import Data.Discord
@@ -34,8 +34,8 @@ withPingThread conn interval after_sending inner =
   withRunInIO $ \runInIO ->
     WS.withPingThread conn interval after_sending (runInIO inner)
 
-handleEvent :: LazyByteString -> Maybe Response
-handleEvent = decode @Response
+handleEvent :: LazyByteString -> Either String Response
+handleEvent = eitherDecode @Response
 
 withDiscordGatewayConnection :: (MonadUnliftIO m) => (WS.Connection -> m a) -> m a
 withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=14&encoding-json" WS.defaultConnectionOptions []
@@ -44,13 +44,18 @@ runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.C
 runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
     d <- liftIO (Wuss.receiveData conn)
-    lookupEnv "UZI_IS_DEBUG"  >>= \case 
+    lookupEnv "UZI_IS_DEBUG"  >>= \case
       Just _ -> info d
       Nothing -> pure ()
-    pure . handleEvent $ (BL.fromStrict . LT.encodeUtf8 $ d)
+    case handleEvent (BL.fromStrict . LT.encodeUtf8 $ d) of
+      Left s -> do
+        attention . convertString $ s
+        pure Nothing
+      Right p -> do
+        pure . Just $ p
   SendEvent request -> do
     let text = encode request
-    lookupEnv "UZI_IS_DEBUG"  >>= \case 
+    lookupEnv "UZI_IS_DEBUG"  >>= \case
       Just _ -> info . convertString $ text
       Nothing -> pure ()
     liftIO . Wuss.sendTextData conn $ text

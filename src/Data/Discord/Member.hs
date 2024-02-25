@@ -18,7 +18,7 @@ newtype Role = Role Text
 
 data Member = Member {
   roles :: [Role],
-  nick :: Nickname
+  nick :: Maybe Nickname
 }
   deriving (Show, Eq, Generic)
   deriving anyclass FromJSON

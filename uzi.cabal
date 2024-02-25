@@ -50,6 +50,8 @@ library
       EnvConfig
       EventHandler
       EventHandler.HelloEventHandler
+      EventHandler.MessageCreateEventHandler
+      EventHandler.MessageCreateEventHandler.Ping
       EventHandler.ReadyEventHandler
       Lib
       Protocol
