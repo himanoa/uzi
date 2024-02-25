@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Data.Discord.Response.Internal
   ( Response (..),
@@ -13,21 +14,17 @@ import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode)
 import Data.Discord.EventName
 import Data.Aeson.Types
 import Data.Discord.Response.MessageCreateEventResponse
+import Data.Functor
 
 data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse
   deriving (Show, Eq)
 
 instance FromJSON Response where
-  parseJSON = withObject "Response" $ \v -> do
-    code <- parseJSON @ReceiveEventOperationCode =<< v .: "op"
-    case code of
+  parseJSON = withObject "Response" $ \v ->
+    v .: "op" >>= parseJSON @ReceiveEventOperationCode  >>= \case
       OC.Hello -> pure . Hello $ HelloEventResponse
-      OC.Ready -> do
-        t <- parseJSON @EventName =<< v .: "t"
-        case t of
+      OC.Ready -> v .: "t" >>=  parseJSON @EventName >>= \case
           ReadyEventName -> pure . Ready $ ReadyEventResponse
-          MessageCreateEventName -> do
-            res <- parseJSON @MessageCreateEventResponse (Object v)
-            pure . MessageCreate $ res
+          MessageCreateEventName -> parseJSON @MessageCreateEventResponse (Object v) <&> MessageCreate
           _ -> prependFailure "Not Supported" (typeMismatch "t" "xxx" )
 
