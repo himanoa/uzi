@@ -28,6 +28,8 @@ library
       Data.Discord
       Data.Discord.EventName
       Data.Discord.Internal
+      Data.Discord.Member
+      Data.Discord.Nickname
       Data.Discord.ReceiveEvent
       Data.Discord.ReceiveEventOperationCode
       Data.Discord.Request
@@ -111,6 +113,7 @@ test-suite uzi-test
       Data.Discord.EventNameSpec
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
+      Data.Discord.Response.MessageCreateEventResponseSpec
       EventHandler.HelloEventHandlerSpec
       Helper.DummyDiscordGatewayInterpreter
       Paths_uzi

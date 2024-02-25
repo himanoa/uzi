@@ -4,6 +4,7 @@
 
 module Data.Discord.Response.HelloEventResponse
   ( HelloEventResponse (..),
+    HelloEventResponse
   )
 where
 

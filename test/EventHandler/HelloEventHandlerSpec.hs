@@ -8,7 +8,7 @@ where
 
 import Data.Discord
 import Data.Discord.Request.IdentifyRequest
-import Data.Discord.Response
+import Data.Discord.Response.HelloEventResponse
 import Effectful
 import Effectful.DynamicLogger
 import Effectful.State.Static.Local (runState)
