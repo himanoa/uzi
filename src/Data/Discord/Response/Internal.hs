@@ -10,6 +10,8 @@ import Data.Discord.Response.ReadyEventResponse
 import Data.Discord.Response.HelloEventResponse 
 import Data.Discord.ReceiveEventOperationCode qualified as OC
 import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode)
+import Data.Discord.EventName
+import Data.Aeson.Types
 
 data Response = Hello HelloEventResponse | Ready ReadyEventResponse
   deriving (Show, Eq)
@@ -19,4 +21,9 @@ instance FromJSON Response where
     code <- parseJSON @ReceiveEventOperationCode =<< v .: "op"
     case code of
       OC.Hello -> pure . Hello $ HelloEventResponse
-      OC.Ready -> pure . Ready $ ReadyEventResponse
+      OC.Ready -> do
+        t <- parseJSON @EventName =<< v .: "t"
+        case t of 
+          ReadyEventName -> pure . Ready $ ReadyEventResponse
+          _ -> prependFailure "Not Supported" (typeMismatch "t" "xxx" )
+

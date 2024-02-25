@@ -8,6 +8,7 @@ where
 import Data.Aeson (decode)
 import Data.Discord.Response
 import Test.Hspec
+import Data.Discord.Response.ReadyEventResponse
 
 spec :: Spec
 spec = describe "Response" $ do
@@ -17,3 +18,7 @@ spec = describe "Response" $ do
         it "is return to Hello" $ do
           let json = "{\"op\": 10}"
           decode @Response json `shouldBe` (Just . Hello $ HelloEventResponse)
+      describe "if receive HelloEventResponse" $ do
+        it "is return to Ready" $ do
+          let json = "{\"op\": 0, \"t\": \"READY\"}"
+          decode @Response json `shouldBe` (Just . Ready $ ReadyEventResponse)
