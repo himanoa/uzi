@@ -27,6 +27,7 @@ dependencies:
 - network
 - aeson
 - effectful
+- effectful-core
 - log-effectful
 - log-base
 - websockets
@@ -36,6 +37,7 @@ dependencies:
 - lens 
 - scientific
 - string-conversions
+- req
 
 
 ghc-options:

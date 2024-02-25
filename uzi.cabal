@@ -47,6 +47,7 @@ library
       Effectful.DynamicLogger
       Effectful.DynamicLogger.Effect
       Effectful.DynamicLogger.Interpreter
+      Effectful.Req.Effect
       EnvConfig
       EventHandler
       EventHandler.HelloEventHandler
@@ -67,10 +68,12 @@ library
     , base >=4.7 && <5
     , bytestring
     , effectful
+    , effectful-core
     , lens
     , log-base
     , log-effectful
     , network
+    , req
     , safe-exceptions
     , scientific
     , string-conversions
@@ -94,10 +97,12 @@ executable uzi-exe
     , base >=4.7 && <5
     , bytestring
     , effectful
+    , effectful-core
     , lens
     , log-base
     , log-effectful
     , network
+    , req
     , safe-exceptions
     , scientific
     , string-conversions
@@ -130,11 +135,13 @@ test-suite uzi-test
     , base >=4.7 && <5
     , bytestring
     , effectful
+    , effectful-core
     , hspec
     , lens
     , log-base
     , log-effectful
     , network
+    , req
     , safe-exceptions
     , scientific
     , string-conversions
