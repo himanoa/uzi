@@ -22,6 +22,7 @@ import Network.WebSockets qualified as Wuss
 import Wuss qualified as WS
 import Effectful.Environment
 import Effectful.DynamicLogger
+import Data.String.Conversions (ConvertibleStrings(convertString))
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
 runClient host port path opt headers inner =
@@ -37,7 +38,7 @@ handleEvent :: LazyByteString -> Maybe Response
 handleEvent = decode @Response
 
 withDiscordGatewayConnection :: (MonadUnliftIO m) => (WS.Connection -> m a) -> m a
-withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=10&encoding-json" WS.defaultConnectionOptions []
+withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=14&encoding-json" WS.defaultConnectionOptions []
 
 runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.Connection -> Eff (DiscordGateway : es) a -> Eff es a
 runDiscordGateway conn = interpret $ \_ -> \case
@@ -48,4 +49,8 @@ runDiscordGateway conn = interpret $ \_ -> \case
       Nothing -> pure ()
     pure . handleEvent $ (BL.fromStrict . LT.encodeUtf8 $ d)
   SendEvent request -> do
-    liftIO . Wuss.sendTextData conn . encode $ request
+    let text = encode request
+    lookupEnv "UZI_IS_DEBUG"  >>= \case 
+      Just _ -> info . convertString $ text
+      Nothing -> pure ()
+    liftIO . Wuss.sendTextData conn $ text

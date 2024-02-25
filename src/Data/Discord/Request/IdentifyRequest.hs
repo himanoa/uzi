@@ -6,6 +6,12 @@ module Data.Discord.Request.IdentifyRequest where
 import Data.Aeson (ToJSON)
 import Data.Text
 import GHC.Generics (Generic)
+import Data.Bits
+
+messageContentIntent :: Integer
+messageContentIntent = shift 1 15
+guildMessageContentIntent:: Integer
+guildMessageContentIntent = shift 1 9
 
 data IdentifyRequestProperties = IdentifyRequestProperties
   { os :: String,
@@ -32,7 +38,7 @@ defaultIdentifyRequestProperties =
     }
 
 defaultIntents :: Integer
-defaultIntents = 3243773
+defaultIntents = messageContentIntent .|. guildMessageContentIntent
 
 defaultIdentifyRequest :: Text -> IdentifyRequest
 defaultIdentifyRequest token =
