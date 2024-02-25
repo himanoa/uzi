@@ -12,10 +12,11 @@ import Effectful
 import EnvConfig
 import Data.Discord.Response
 import EventHandler.MessageCreateEventHandler (dispatchMessageEventHandlers)
+import Effectful.NonDet 
 
 dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
 dispatchEventHandlers c r = do
-  readyEventHandler c r
-  helloEventHandler c r
-  dispatchMessageEventHandlers c r
+  runNonDet OnEmptyKeep (readyEventHandler c r <|> helloEventHandler c r)
+  pure ()
+--  dispatchMessageEventHandlers c r
 

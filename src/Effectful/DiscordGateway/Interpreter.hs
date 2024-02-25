@@ -43,7 +43,7 @@ withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=14&encodi
 runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.Connection -> Eff (DiscordGateway : es) a -> Eff es a
 runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
-    d <- liftIO (Wuss.receiveData conn)
+    d <- liftIO . Wuss.receiveData $ conn
     lookupEnv "UZI_IS_DEBUG"  >>= \case
       Just _ -> info d
       Nothing -> pure ()

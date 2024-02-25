@@ -1,5 +1,6 @@
 {-# LANGUAGE IncoherentInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module EventHandler.HelloEventHandlerSpec
   ( spec,
@@ -16,6 +17,7 @@ import EnvConfig
 import EventHandler.HelloEventHandler (helloEventHandler)
 import Helper.DummyDiscordGatewayInterpreter (runDummyDiscordGateway)
 import Test.Hspec
+import Effectful.NonDet
 
 spec :: Spec
 spec = describe "HelloEventHandler" $ do
@@ -24,6 +26,6 @@ spec = describe "HelloEventHandler" $ do
       let config = (EnvConfig {discordApiToken = "xxx"})
       let helloEventResponse = Hello HelloEventResponse
       (_, request) <- pure . runPureEff $ do
-        runState @(Maybe Request) Nothing . runSilentDynamicLogger $ runDummyDiscordGateway (helloEventHandler config helloEventResponse)
+         runState @(Maybe Request) Nothing . runNonDet OnEmptyKeep . runSilentDynamicLogger $ runDummyDiscordGateway (helloEventHandler config helloEventResponse)
 
       request `shouldBe` (Just . Identify . defaultIdentifyRequest $ "xxx")

@@ -9,12 +9,13 @@ import EnvConfig
 import Data.Discord.Response
 import Effectful
 import Data.String.Conversions (ConvertibleStrings(convertString))
+import Effectful.NonDet
 
 
-readyEventHandler :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
+readyEventHandler :: (DiscordGateway :> es, DynamicLogger :> es, NonDet :> es) => EnvConfig -> Response -> Eff es ()
 readyEventHandler _ = \case
   Ready r -> do
     info "Dispatch ReadyEventHandler"
     info . convertString . show $ r
-  _ -> pure ()
+  _ -> emptyEff
 

@@ -47,7 +47,7 @@ library
       Effectful.DynamicLogger
       Effectful.DynamicLogger.Effect
       Effectful.DynamicLogger.Interpreter
-      Effectful.Req.Effect
+      Effectful.Req
       EnvConfig
       EventHandler
       EventHandler.HelloEventHandler
