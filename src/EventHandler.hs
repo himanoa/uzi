@@ -9,13 +9,13 @@ import EventHandler.ReadyEventHandler
 import Effectful.DynamicLogger (DynamicLogger)
 import Effectful.DiscordGateway
 import Effectful
-import EnvConfig
 import Data.Discord.Response
 import Effectful.NonDet 
+import Effectful.DiscordApiTokenReader (DiscordApiTokenReader)
 
-dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
-dispatchEventHandlers c r = do
-  _ <- runNonDet OnEmptyKeep (readyEventHandler c r <|> helloEventHandler c r)
+dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es, DiscordApiTokenReader :> es) =>  Response -> Eff es ()
+dispatchEventHandlers  r = do
+  _ <- runNonDet OnEmptyKeep (readyEventHandler r <|> helloEventHandler r)
   pure ()
 --  dispatchMessageEventHandlers c r
 

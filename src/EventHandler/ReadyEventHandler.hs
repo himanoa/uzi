@@ -1,19 +1,18 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module EventHandler.ReadyEventHandler where
 
-import Effectful.DiscordGateway (DiscordGateway)
 import Effectful.DynamicLogger
-import EnvConfig
 import Data.Discord.Response
 import Effectful
 import Data.String.Conversions (ConvertibleStrings(convertString))
 import Effectful.NonDet
 
 
-readyEventHandler :: (DiscordGateway :> es, DynamicLogger :> es, NonDet :> es) => EnvConfig -> Response -> Eff es ()
-readyEventHandler _ = \case
+readyEventHandler :: (DynamicLogger :> es, NonDet :> es) =>  Response -> Eff es ()
+readyEventHandler = \case
   Ready r -> do
     info "Dispatch ReadyEventHandler"
     info . convertString . show $ r

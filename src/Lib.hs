@@ -21,15 +21,12 @@ import Effectful.Concurrent.Async (concurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
 import Effectful.DiscordGateway
 import Effectful.DynamicLogger
-import Effectful.Environment (Environment, lookupEnv, runEnvironment)
+import Effectful.Environment (Environment, runEnvironment)
 import Effectful.Log
-import EnvConfig
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
 import EventHandler
-
-makeEnvConfig :: Text -> EnvConfig
-makeEnvConfig discordApiToken = EnvConfig {discordApiToken}
+import Effectful.DiscordApiTokenReader
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -39,12 +36,6 @@ instance Exception FromEnvironmentError
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
 
-fromEnvironment :: (Environment :> es) => Eff es EnvConfig
-fromEnvironment = do
-  discordApiTokenMaybe <- lookupEnv "UZI_DISCORD_API_TOKEN"
-  discordApiToken <- maybe (throw DiscordApiTokenIsUndefined) pure discordApiTokenMaybe
-  pure $ makeEnvConfig . convertToText $ discordApiToken
-
 runUzi :: IO ()
 
 data UziError = CrashError
@@ -52,21 +43,16 @@ data UziError = CrashError
 
 instance Exception UziError
 
-runUzi = runEff $ do
-  withStdOutLogger $ \stdoutLogger -> do
-    runConcurrent $ do
-      runEnvironment $ do
-        runLog "Uzi" stdoutLogger defaultLogLevel $ do
-          runDynamicLogger startUp
+runUzi = runEff $ withStdOutLogger $ \stdoutLogger -> runConcurrent . runEnvironment . runLog "Uzi" stdoutLogger defaultLogLevel . runDynamicLogger . runDiscordApiTokenReader $ startUp
 
-startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es) => Eff es ()
+startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es) => Eff es ()
 startUp = do
   _ <- info "Hello uzi"
   _ <- info "Load enviroments"
   withDiscordGatewayConnection onConnect
   pure ()
 
-onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es) => Connection -> Eff es ()
+onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- info "Connected websocket"
   _ <- withPingThread c 15 (pure ()) $ do
@@ -86,9 +72,8 @@ receiver queue = do
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, Environment :> es) => TQueue Response -> Eff es ()
+sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
-  config <- fromEnvironment
   info . convertToText $ ("Received Log " <> show event)
-  dispatchEventHandlers config event
+  dispatchEventHandlers event

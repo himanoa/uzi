@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module EventHandler.HelloEventHandler where
@@ -12,15 +11,16 @@ import Data.Text.Encoding (decodeUtf8)
 import Effectful
 import Effectful.DiscordGateway (DiscordGateway, sendEvent)
 import Effectful.DynamicLogger
-import EnvConfig
 import Effectful.NonDet
+import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
 
-helloEventHandler :: (DiscordGateway :> es, DynamicLogger :> es, NonDet :> es) => EnvConfig -> Response -> Eff es ()
-helloEventHandler config = \case
+helloEventHandler :: (DiscordGateway :> es, DynamicLogger :> es, NonDet :> es, DiscordApiTokenReader :> es) => Response -> Eff es ()
+helloEventHandler = \case
   Hello _ -> do
-    sendEvent . Identify . defaultIdentifyRequest $ config.discordApiToken
+    discordApiToken <- getToken
+    sendEvent . Identify . defaultIdentifyRequest $ discordApiToken
     info "Sent HelloEvetnt"
   _ -> emptyEff

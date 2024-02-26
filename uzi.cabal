@@ -41,6 +41,9 @@ library
       Data.Discord.Response.MessageCreateEventResponse
       Data.Discord.Response.ReadyEventResponse
       Data.Discord.SendOperation
+      Effectful.DiscordApiTokenReader
+      Effectful.DiscordApiTokenReader.Effect
+      Effectful.DiscordApiTokenReader.Interpreter
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
