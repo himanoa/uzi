@@ -7,9 +7,8 @@ import EventHandler.MessageCreateEventHandler.Ping
 import Effectful.DiscordGateway
 import Effectful
 import Effectful.DynamicLogger
-import EnvConfig
 import Data.Discord
 
-dispatchMessageEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es) => EnvConfig -> Response -> Eff es ()
+dispatchMessageEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers =
   pingEventHandler
