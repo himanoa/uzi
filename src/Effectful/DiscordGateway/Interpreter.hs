@@ -7,22 +7,22 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
-import Data.Aeson (decode, encode, eitherDecode)
+import Data.Aeson (decode, eitherDecode, encode)
 import Data.ByteString.Lazy (LazyByteString)
 import Data.ByteString.Lazy qualified as BL
 import Data.Discord
+import Data.String.Conversions (ConvertibleStrings (convertString))
 import Data.Text.Encoding qualified as LT
 import Effectful
 import Effectful.DiscordGateway.Effect
 import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.DynamicLogger
+import Effectful.Environment
 import Network.Socket
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Network.WebSockets qualified as Wuss
 import Wuss qualified as WS
-import Effectful.Environment
-import Effectful.DynamicLogger
-import Data.String.Conversions (ConvertibleStrings(convertString))
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
 runClient host port path opt headers inner =
@@ -44,7 +44,7 @@ runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.C
 runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
     d <- liftIO . Wuss.receiveData $ conn
-    lookupEnv "UZI_IS_DEBUG"  >>= \case
+    lookupEnv "UZI_IS_DEBUG" >>= \case
       Just _ -> info d
       Nothing -> pure ()
     case handleEvent (BL.fromStrict . LT.encodeUtf8 $ d) of
@@ -55,7 +55,7 @@ runDiscordGateway conn = interpret $ \_ -> \case
         pure . Just $ p
   SendEvent request -> do
     let text = encode request
-    lookupEnv "UZI_IS_DEBUG"  >>= \case
+    lookupEnv "UZI_IS_DEBUG" >>= \case
       Just _ -> info . convertString $ text
       Nothing -> pure ()
     liftIO . Wuss.sendTextData conn $ text

@@ -1,24 +1,25 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingVia #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
-{-# LANGUAGE DeriveAnyClass #-}
-module Data.Discord.Member (
-  Role(..),
-  Member(..)
-)where
+
+module Data.Discord.Member
+  ( Role (..),
+    Member (..),
+  )
+where
 
 import Data.Aeson
+import Data.Discord.Nickname
 import Data.Text
-import GHC.Generics 
-import Data.Discord.Nickname 
+import GHC.Generics
 
 newtype Role = Role Text
   deriving (Show, Eq)
-  deriving FromJSON via Text
+  deriving (FromJSON) via Text
 
-
-data Member = Member {
-  roles :: [Role],
-  nick :: Maybe Nickname
-}
+data Member = Member
+  { roles :: [Role],
+    nick :: Maybe Nickname
+  }
   deriving (Show, Eq, Generic)
-  deriving anyclass FromJSON
+  deriving anyclass (FromJSON)

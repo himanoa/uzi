@@ -1,10 +1,8 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE IncoherentInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE IncoherentInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EventHandler.HelloEventHandlerSpec
   ( spec,
@@ -15,18 +13,18 @@ import Data.Discord
 import Data.Discord.Request.IdentifyRequest
 import Data.Discord.Response.HelloEventResponse
 import Effectful
-import Effectful.DynamicLogger
 import Effectful.DiscordApiTokenReader
+import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.DynamicLogger
+import Effectful.NonDet
 import Effectful.State.Static.Local (runState)
 import EventHandler.HelloEventHandler (helloEventHandler)
 import Helper.DummyDiscordGatewayInterpreter (runDummyDiscordGateway)
 import Test.Hspec
-import Effectful.NonDet
-import Effectful.Dispatch.Dynamic (interpret)
 
-runDummyDiscordApiTokenReader ::  Eff (DiscordApiTokenReader : es) a -> Eff es a
+runDummyDiscordApiTokenReader :: Eff (DiscordApiTokenReader : es) a -> Eff es a
 runDummyDiscordApiTokenReader = interpret $ \_ -> \case
-  GetToken -> pure  "xxx"
+  GetToken -> pure "xxx"
 
 spec :: Spec
 spec = describe "HelloEventHandler" $ do
@@ -34,6 +32,6 @@ spec = describe "HelloEventHandler" $ do
     it "should be send identify response" $ do
       let helloEventResponse = Hello HelloEventResponse
       (_, request) <- pure . runPureEff $ do
-         runState @(Maybe Request) Nothing . runNonDet OnEmptyKeep . runSilentDynamicLogger . runDummyDiscordGateway $ runDummyDiscordApiTokenReader (helloEventHandler helloEventResponse)
+        runState @(Maybe Request) Nothing . runNonDet OnEmptyKeep . runSilentDynamicLogger . runDummyDiscordGateway $ runDummyDiscordApiTokenReader (helloEventHandler helloEventResponse)
 
       request `shouldBe` (Just . Identify . defaultIdentifyRequest $ "xxx")

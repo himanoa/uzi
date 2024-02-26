@@ -19,14 +19,14 @@ import Effectful (Eff, IOE, runEff, (:>))
 import Effectful.Concurrent (Concurrent)
 import Effectful.Concurrent.Async (concurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
+import Effectful.DiscordApiTokenReader
 import Effectful.DiscordGateway
 import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
 import Effectful.Log
+import EventHandler
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import EventHandler
-import Effectful.DiscordApiTokenReader
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

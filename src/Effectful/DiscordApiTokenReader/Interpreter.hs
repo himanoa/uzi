@@ -1,15 +1,16 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
+
 module Effectful.DiscordApiTokenReader.Interpreter where
 
+import Control.Exception
+import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful
-import Effectful.Environment
 import Effectful.DiscordApiTokenReader.Effect
 import Effectful.Dispatch.Dynamic (interpret)
-import Control.Exception
-import Data.String.Conversions (ConvertibleStrings(convertString))
+import Effectful.Environment
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -23,5 +24,3 @@ runDiscordApiTokenReader = interpret $ \_ -> \case
     case tokenMaybe of
       Just token -> pure . convertString $ token
       Nothing -> throw DiscordApiTokenIsUndefined
-
-

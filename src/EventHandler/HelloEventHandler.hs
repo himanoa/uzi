@@ -9,10 +9,10 @@ import Data.Discord.Request.IdentifyRequest (defaultIdentifyRequest)
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful
+import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordGateway (DiscordGateway, sendEvent)
 import Effectful.DynamicLogger
 import Effectful.NonDet
-import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack

@@ -29,4 +29,3 @@ instance FromJSON ReceiveEventOperationCode where
     Just 10 -> pure Hello
     Just 0 -> pure Ready
     op -> prependFailure ("Not supported op code " <> show op) (typeMismatch "Opcode" (Number v))
-

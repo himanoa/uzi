@@ -1,33 +1,34 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module Data.Discord.Response.MessageCreateEventResponse (
-  MessageCreateEventResponse(..),
-  ChannelId(..),
-  Content(..)
-) where
+module Data.Discord.Response.MessageCreateEventResponse
+  ( MessageCreateEventResponse (..),
+    ChannelId (..),
+    Content (..),
+  )
+where
 
-import Data.Text
 import Data.Aeson
-import Data.Maybe (fromMaybe)
 import Data.Discord.Member
+import Data.Maybe (fromMaybe)
+import Data.Text
 
 newtype ChannelId = ChannelId Text
   deriving (Show, Eq)
-  deriving FromJSON via Text
+  deriving (FromJSON) via Text
 
 newtype Content = Content Text
   deriving (Show, Eq)
-  deriving FromJSON via Text
+  deriving (FromJSON) via Text
 
-data MessageCreateEventResponse = MessageCreateEventResponse {
-  channelId :: ChannelId,
-  content :: Content,
-  mentions :: [Member],
-  member :: Member,
-  isBot :: Bool
-}
+data MessageCreateEventResponse = MessageCreateEventResponse
+  { channelId :: ChannelId,
+    content :: Content,
+    mentions :: [Member],
+    member :: Member,
+    isBot :: Bool
+  }
   deriving (Show, Eq)
 
 instance FromJSON MessageCreateEventResponse where
@@ -38,11 +39,12 @@ instance FromJSON MessageCreateEventResponse where
     mentions <- parseJSON @[Member] =<< dataSection .: "mentions"
     member <- parseJSON @Member =<< dataSection .: "member"
     author <- dataSection .: "author"
-    isBot <-  author .:? "bot"
-    pure MessageCreateEventResponse {
-      channelId = channelId,
-      content = content,
-      mentions = mentions,
-      member = member,
-      isBot = fromMaybe False isBot
-    }
+    isBot <- author .:? "bot"
+    pure
+      MessageCreateEventResponse
+        { channelId = channelId,
+          content = content,
+          mentions = mentions,
+          member = member,
+          isBot = fromMaybe False isBot
+        }
