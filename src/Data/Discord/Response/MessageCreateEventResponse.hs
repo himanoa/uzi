@@ -5,20 +5,16 @@
 module Data.Discord.Response.MessageCreateEventResponse
   ( MessageCreateEventResponse (..),
     ChannelId (..),
-    Content (..),
   )
 where
 
 import Data.Aeson
 import Data.Discord.Member
+import Data.Discord.Content
 import Data.Maybe (fromMaybe)
 import Data.Text
 
 newtype ChannelId = ChannelId Text
-  deriving (Show, Eq)
-  deriving (FromJSON) via Text
-
-newtype Content = Content Text
   deriving (Show, Eq)
   deriving (FromJSON) via Text
 

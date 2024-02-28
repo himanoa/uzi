@@ -7,11 +7,11 @@ where
 
 import Data.Aeson (decode)
 import Data.Discord
-import Data.Discord.Response
 import Data.Discord.Response.HelloEventResponse
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Discord.Response.ReadyEventResponse
 import Test.Hspec
+import Data.Discord.Content 
 
 spec :: Spec
 spec = describe "Response" $ do
@@ -32,7 +32,7 @@ spec = describe "Response" $ do
             `shouldBe` Just
               MessageCreateEventResponse
                 { channelId = ChannelId "576775857839013888",
-                  content = Content "",
+                  content =  makeUnsafeContent "",
                   mentions = [],
                   member =
                     Member

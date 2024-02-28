@@ -38,6 +38,7 @@ dependencies:
 - scientific
 - string-conversions
 - req
+- either
 
 
 ghc-options:

@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Data.Discord
+      Data.Discord.Content
       Data.Discord.EventName
       Data.Discord.Internal
       Data.Discord.Member
@@ -71,6 +72,7 @@ library
     , bytestring
     , effectful
     , effectful-core
+    , either
     , lens
     , log-base
     , log-effectful
@@ -100,6 +102,7 @@ executable uzi-exe
     , bytestring
     , effectful
     , effectful-core
+    , either
     , lens
     , log-base
     , log-effectful
@@ -138,6 +141,7 @@ test-suite uzi-test
     , bytestring
     , effectful
     , effectful-core
+    , either
     , hspec
     , lens
     , log-base

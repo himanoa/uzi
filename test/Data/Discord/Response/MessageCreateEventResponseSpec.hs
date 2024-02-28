@@ -7,6 +7,7 @@ where
 
 import Data.Aeson
 import Data.Discord
+import Data.Discord.Content
 import Data.Discord.Response.MessageCreateEventResponse
 import Test.Hspec
 
@@ -21,7 +22,7 @@ spec = describe "MessageCreateEventResponse" $ do
             `shouldBe` Just
               MessageCreateEventResponse
                 { channelId = ChannelId "576775857839013888",
-                  content = Content "",
+                  content = makeUnsafeContent "",
                   mentions = [],
                   member =
                     Member
