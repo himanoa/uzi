@@ -135,6 +135,8 @@ test-suite uzi-test
       Data.Discord.Response.InternalSpec
       Data.Discord.Response.MessageCreateEventResponseSpec
       EventHandler.HelloEventHandlerSpec
+      EventHandler.MessageCreateEventHandler.PingSpec
+      Helper.DummyDiscordChannelInterpreter
       Helper.DummyDiscordGatewayInterpreter
       Paths_uzi
   autogen-modules:
