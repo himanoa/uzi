@@ -11,11 +11,11 @@ module Data.Discord
   )
 where
 
+import Data.Discord.ChannelId
+import Data.Discord.Content
 import Data.Discord.EventName
 import Data.Discord.Member
+import Data.Discord.MessageReferencesObject
 import Data.Discord.Nickname
 import Data.Discord.Request
 import Data.Discord.Response
-import Data.Discord.Content
-import Data.Discord.ChannelId
-import Data.Discord.MessageReferencesObject

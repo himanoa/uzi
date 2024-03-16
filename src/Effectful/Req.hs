@@ -7,7 +7,7 @@
 
 module Effectful.Req
   ( request,
-    Request(..),
+    Request (..),
     runRequest,
   )
 where

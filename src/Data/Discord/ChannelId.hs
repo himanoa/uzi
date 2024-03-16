@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingVia #-}
+
 module Data.Discord.ChannelId where
 
 import Data.Aeson

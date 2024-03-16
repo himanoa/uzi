@@ -19,6 +19,7 @@ instance Exception FromEnvironmentError
 
 runDiscordApiTokenReader :: (Environment :> es) => Eff (DiscordApiTokenReader : es) a -> Eff es a
 runDiscordApiTokenReader = interpret $ \_ -> \case
-  GetToken -> lookupEnv "UZI_DISCORD_API_TOKEN" >>= \case
-    Just token -> pure . convertString $ token
-    Nothing -> throw DiscordApiTokenIsUndefined
+  GetToken ->
+    lookupEnv "UZI_DISCORD_API_TOKEN" >>= \case
+      Just token -> pure . convertString $ token
+      Nothing -> throw DiscordApiTokenIsUndefined

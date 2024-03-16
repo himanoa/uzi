@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Discord.Response.MessageCreateEventResponse
@@ -11,16 +11,16 @@ module Data.Discord.Response.MessageCreateEventResponse
     mentions,
     member,
     isBot,
-    makeMessageCreateEventResponse
+    makeMessageCreateEventResponse,
   )
 where
 
-import Data.Aeson
-import Data.Discord.Member
-import Data.Discord.Content
-import Data.Maybe (fromMaybe)
-import Data.Discord.ChannelId
 import Control.Lens
+import Data.Aeson
+import Data.Discord.ChannelId
+import Data.Discord.Content
+import Data.Discord.Member
+import Data.Maybe (fromMaybe)
 
 data MessageCreateEventResponse = MessageCreateEventResponse
   { _channelId :: ChannelId,
@@ -34,8 +34,8 @@ data MessageCreateEventResponse = MessageCreateEventResponse
 makeLenses ''MessageCreateEventResponse
 
 makeMessageCreateEventResponse :: ChannelId -> Content -> [Member] -> Member -> Bool -> MessageCreateEventResponse
-makeMessageCreateEventResponse = MessageCreateEventResponse 
-  
+makeMessageCreateEventResponse = MessageCreateEventResponse
+
 instance FromJSON MessageCreateEventResponse where
   parseJSON = withObject "MessageCreateEventResponse" $ \o -> do
     dataSection <- o .: "d"
@@ -47,6 +47,5 @@ instance FromJSON MessageCreateEventResponse where
     _isBot <- fromMaybe False <$> _author .:? "bot"
     pure
       MessageCreateEventResponse
-        {
-          ..
+        { ..
         }

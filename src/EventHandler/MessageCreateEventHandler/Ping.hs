@@ -4,16 +4,16 @@
 
 module EventHandler.MessageCreateEventHandler.Ping where
 
+import Control.Lens
 import Data.Discord
+import Data.Discord.Content (makeUnsafeContent)
+import Data.Discord.Response.MessageCreateEventResponse qualified as MC
+import Data.Either.Validation
 import Effectful
 import Effectful.DiscordChannel
-import Data.Either.Validation
-import Data.Discord.Response.MessageCreateEventResponse qualified as MC
-import Control.Lens
 import Effectful.NonDet
-import Data.Discord.Content (makeUnsafeContent)
 
-pingEventHandler :: ( DiscordChannel :> es, NonDet :> es) =>Response -> Eff es ()
+pingEventHandler :: (DiscordChannel :> es, NonDet :> es) => Response -> Eff es ()
 pingEventHandler = \case
   MessageCreate event -> do
     if (event ^. MC.content) == makeUnsafeContent "ping"
