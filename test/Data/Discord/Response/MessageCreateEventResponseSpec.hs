@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
 
 module Data.Discord.Response.MessageCreateEventResponseSpec
   ( spec,

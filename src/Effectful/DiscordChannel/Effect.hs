@@ -3,16 +3,20 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Effectful.DiscordChannel.Effect where
 
 import Effectful
-import Data.Discord
+import Data.Discord hiding (channelId)
 import Data.Text
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
 import Data.Aeson
+import Control.Lens hiding ((.=))
 
 data AllowedMentionTypes  = Roles | Users | Everyone
   deriving (Show,Eq, Generic)
@@ -29,17 +33,25 @@ data AllowedMention = AllowedMention {
   deriving (ToJSON)
 
 data SendMessageParams = SendMessageParams {
-  channelId :: ChannelId,
-  content :: Content,
-  nonce :: Maybe Text,
-  tts :: Bool,
+  _channelId :: ChannelId,
+  _content :: Content,
+  _nonce :: Maybe Text,
+  _tts :: Bool,
   -- embeds is unsupported
-  allowedMentions :: Maybe  AllowedMention,
-  message_reference :: Maybe MessageReferencesObject,
-  stickerIds :: Maybe Text
+  _allowedMentions :: Maybe  AllowedMention,
+  _messageReference :: Maybe MessageReferencesObject,
+  _stickerIds :: Maybe Text
 }
   deriving (Show,Eq, Generic)
-  deriving ToJSON
+
+makeLenses ''SendMessageParams
+
+instance ToJSON SendMessageParams where
+  toJSON p = object ["channelId" .= (p ^. channelId), "content" .= (p ^. content), "nonce" .= (p^. nonce), "tts" .= (p ^. tts), "allowedMentions" .= (p ^. allowedMentions), "messageReference" .= (p ^. messageReference), "stickerIds" .= (p ^. stickerIds)]
+
+
+makeSendMessageParams :: ChannelId -> Content -> Maybe Text -> Bool -> Maybe AllowedMention -> Maybe MessageReferencesObject -> Maybe Text -> SendMessageParams
+makeSendMessageParams = SendMessageParams
 
 data DiscordChannel :: Effect where 
   SendMessage :: SendMessageParams -> DiscordChannel m ()

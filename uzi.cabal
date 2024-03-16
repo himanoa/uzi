@@ -47,6 +47,7 @@ library
       Effectful.DiscordApiTokenReader
       Effectful.DiscordApiTokenReader.Effect
       Effectful.DiscordApiTokenReader.Interpreter
+      Effectful.DiscordChannel
       Effectful.DiscordChannel.Effect
       Effectful.DiscordChannel.Interpreter
       Effectful.DiscordGateway

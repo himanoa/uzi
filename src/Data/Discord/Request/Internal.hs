@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -9,9 +8,9 @@ where
 
 import Data.Aeson
 import Data.Discord.Request.IdentifyRequest (IdentifyRequest)
-import GHC.Generics (Generic)
 
-data Request = Identify IdentifyRequest
+data Request where
+  Identify :: IdentifyRequest -> Request
   deriving (Show, Eq)
 
 instance ToJSON Request where
