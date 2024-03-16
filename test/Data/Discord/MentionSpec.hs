@@ -7,6 +7,8 @@ where
 
 import Data.Aeson hiding (json)
 import Data.Discord.Mention
+import Data.Discord.UserId
+import Data.Discord.UserName
 import Test.Hspec
 
 spec :: Spec

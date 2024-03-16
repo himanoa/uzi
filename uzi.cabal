@@ -29,6 +29,7 @@ library
       Data.Discord.ChannelId
       Data.Discord.Content
       Data.Discord.EventName
+      Data.Discord.GlobalName
       Data.Discord.Internal
       Data.Discord.Member
       Data.Discord.Mention
@@ -45,6 +46,12 @@ library
       Data.Discord.Response.MessageCreateEventResponse
       Data.Discord.Response.ReadyEventResponse
       Data.Discord.SendOperation
+      Data.Discord.User
+      Data.Discord.UserId
+      Data.Discord.UserName
+      Effectful.BotUser
+      Effectful.BotUser.Effect
+      Effectful.BotUser.Interpreter
       Effectful.DiscordApiTokenReader
       Effectful.DiscordApiTokenReader.Effect
       Effectful.DiscordApiTokenReader.Interpreter
@@ -76,6 +83,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , data-default
     , effectful
     , effectful-core
     , either
@@ -107,6 +115,7 @@ executable uzi-exe
       aeson
     , base >=4.7 && <5
     , bytestring
+    , data-default
     , effectful
     , effectful-core
     , either
@@ -136,6 +145,7 @@ test-suite uzi-test
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
       Data.Discord.Response.MessageCreateEventResponseSpec
+      Effectful.BotUser.InterpreterSpec
       EventHandler.HelloEventHandlerSpec
       EventHandler.MessageCreateEventHandler.PingSpec
       Helper.DummyDiscordChannelInterpreter
@@ -150,6 +160,7 @@ test-suite uzi-test
       aeson
     , base >=4.7 && <5
     , bytestring
+    , data-default
     , effectful
     , effectful-core
     , either

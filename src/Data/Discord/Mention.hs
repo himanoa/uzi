@@ -9,19 +9,9 @@ module Data.Discord.Mention where
 import Control.Lens
 import Data.Aeson
 import Data.Maybe
-import Data.Text
-
-newtype UserId = UserId Text
-  deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via Text
-
-newtype UserName = UserName Text
-  deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via Text
-
-newtype GlobalName = GlobalName Text
-  deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via Text
+import Data.Discord.UserId
+import Data.Discord.UserName
+import Data.Discord.GlobalName
 
 data Mention = Mention
   { _id :: UserId,

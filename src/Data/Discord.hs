@@ -6,7 +6,7 @@ module Data.Discord
     module Data.Discord.Member,
     module Data.Discord.ChannelId,
     module Data.Discord.MessageReferencesObject,
-    module Data.Discord.Member,
+    module Data.Discord.Mention,
     makeContent,
     Content,
   )

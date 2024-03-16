@@ -40,6 +40,7 @@ dependencies:
 - req
 - either
 - interpolate
+- data-default
 
 
 ghc-options:
