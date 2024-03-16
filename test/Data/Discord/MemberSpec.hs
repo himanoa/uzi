@@ -7,7 +7,6 @@ where
 
 import Data.Aeson (decode)
 import Data.Discord
-import Data.Discord.Member
 import Test.Hspec
 
 spec :: Spec
@@ -18,8 +17,11 @@ spec = describe "Member" $ do
         it "should be return to Member" $ do
           let json = "{\"roles\": [], \"nick\": null}"
           decode @Member json `shouldBe` Just Member {roles = [], nick = Nothing}
-    describe "parseJSON" $ do
       context "if nick is himanoa" $ do
         it "should be return to Member" $ do
           let json = "{\"roles\": [], \"nick\": \"himanoa\"}"
           decode @Member json `shouldBe` Just Member {roles = [], nick = Just . Nickname $ "himanoa"}
+      context "if role is not empty" $ do
+        it "should be return to Member" $ do
+          let json = "{\"roles\": [\"xxxx\"], \"nick\": \"himanoa\"}"
+          decode @Member json `shouldBe` Just Member {roles = [Role "xxxx"], nick = Just . Nickname $ "himanoa"}

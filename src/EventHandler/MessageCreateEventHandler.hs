@@ -7,14 +7,13 @@ where
 
 import Control.Lens
 import Data.Discord
-import Data.Discord.Response.MessageCreateEventResponse (isBot)
+import Data.Discord.Response.MessageCreateEventResponse (isBot, mentions)
 import Effectful
 import Effectful.DiscordChannel
-import Effectful.DynamicLogger
 import Effectful.NonDet
 import EventHandler.MessageCreateEventHandler.Ping
 
-dispatchMessageEventHandlers :: (DynamicLogger :> es, DiscordChannel :> es, NonDet :> es) => Response -> Eff es ()
+dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
   MessageCreate e ->
     if e ^. isBot

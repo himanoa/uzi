@@ -6,6 +6,7 @@ module Data.Discord
     module Data.Discord.Member,
     module Data.Discord.ChannelId,
     module Data.Discord.MessageReferencesObject,
+    module Data.Discord.Member,
     makeContent,
     Content,
   )
@@ -19,3 +20,4 @@ import Data.Discord.MessageReferencesObject
 import Data.Discord.Nickname
 import Data.Discord.Request
 import Data.Discord.Response
+import Data.Discord.Mention

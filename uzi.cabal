@@ -31,6 +31,7 @@ library
       Data.Discord.EventName
       Data.Discord.Internal
       Data.Discord.Member
+      Data.Discord.Mention
       Data.Discord.MessageReferencesObject
       Data.Discord.Nickname
       Data.Discord.ReceiveEvent
@@ -131,6 +132,7 @@ test-suite uzi-test
   other-modules:
       Data.Discord.EventNameSpec
       Data.Discord.MemberSpec
+      Data.Discord.MentionSpec
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
       Data.Discord.Response.MessageCreateEventResponseSpec
