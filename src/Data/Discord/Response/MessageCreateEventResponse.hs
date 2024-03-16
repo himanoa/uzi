@@ -20,8 +20,8 @@ import Data.Aeson
 import Data.Discord.ChannelId
 import Data.Discord.Content
 import Data.Discord.Member
-import Data.Maybe (fromMaybe)
 import Data.Discord.Mention
+import Data.Maybe (fromMaybe)
 
 data MessageCreateEventResponse = MessageCreateEventResponse
   { _channelId :: ChannelId,
@@ -46,4 +46,4 @@ instance FromJSON MessageCreateEventResponse where
     _member <- parseJSON @Member =<< dataSection .: "member"
     _author <- dataSection .: "author"
     _isBot <- fromMaybe False <$> _author .:? "bot"
-    pure MessageCreateEventResponse { .. }
+    pure MessageCreateEventResponse {..}
