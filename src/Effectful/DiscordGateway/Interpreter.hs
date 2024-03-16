@@ -7,7 +7,7 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
-import Data.Aeson (decode, eitherDecode, encode)
+import Data.Aeson (eitherDecode, encode)
 import Data.ByteString.Lazy (LazyByteString)
 import Data.ByteString.Lazy qualified as BL
 import Data.Discord

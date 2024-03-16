@@ -39,6 +39,7 @@ dependencies:
 - string-conversions
 - req
 - either
+- interpolate
 
 
 ghc-options:

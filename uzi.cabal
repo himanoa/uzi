@@ -26,10 +26,12 @@ source-repository head
 library
   exposed-modules:
       Data.Discord
+      Data.Discord.ChannelId
       Data.Discord.Content
       Data.Discord.EventName
       Data.Discord.Internal
       Data.Discord.Member
+      Data.Discord.MessageReferencesObject
       Data.Discord.Nickname
       Data.Discord.ReceiveEvent
       Data.Discord.ReceiveEventOperationCode
@@ -45,6 +47,8 @@ library
       Effectful.DiscordApiTokenReader
       Effectful.DiscordApiTokenReader.Effect
       Effectful.DiscordApiTokenReader.Interpreter
+      Effectful.DiscordChannel.Effect
+      Effectful.DiscordChannel.Interpreter
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
@@ -73,6 +77,7 @@ library
     , effectful
     , effectful-core
     , either
+    , interpolate
     , lens
     , log-base
     , log-effectful
@@ -103,6 +108,7 @@ executable uzi-exe
     , effectful
     , effectful-core
     , either
+    , interpolate
     , lens
     , log-base
     , log-effectful
@@ -143,6 +149,7 @@ test-suite uzi-test
     , effectful-core
     , either
     , hspec
+    , interpolate
     , lens
     , log-base
     , log-effectful
