@@ -5,6 +5,7 @@ module Data.Discord
     module Data.Discord.Nickname,
     module Data.Discord.Member,
     module Data.Discord.ChannelId,
+    module Data.Discord.GuildId,
     module Data.Discord.MessageReferencesObject,
     module Data.Discord.Mention,
     module Data.Discord.ChannelName,
@@ -14,6 +15,7 @@ module Data.Discord
 where
 
 import Data.Discord.ChannelId
+import Data.Discord.GuildId
 import Data.Discord.Content
 import Data.Discord.EventName
 import Data.Discord.Member
@@ -23,3 +25,5 @@ import Data.Discord.Nickname
 import Data.Discord.Request
 import Data.Discord.Response
 import Data.Discord.ChannelName
+import qualified Data.Discord.GuildId as Data.Discord
+

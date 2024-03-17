@@ -69,7 +69,7 @@ instance ToJSON CreateChannelParams where
 
 data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
-  CreateChannel :: CreateChannelParams -> DiscordChannel m ()
+  CreateChannel :: GuildId -> CreateChannelParams -> DiscordChannel m ()
 
 type instance DispatchOf DiscordChannel = Dynamic
 
