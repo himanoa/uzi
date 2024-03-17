@@ -79,5 +79,4 @@ data SenderError = EventQueueIsEmpty
 sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
-  info . RIO.displayShow $ "[Internal] Received Log " <> show event
   dispatchEventHandlers event

@@ -10,6 +10,9 @@ module Effectful.DiscordGateway.Interpreter where
 import Data.Aeson (eitherDecode, encode)
 import Data.ByteString.Lazy qualified as LB
 import Data.Discord
+import Data.String.Conversions (ConvertibleStrings (convertString))
+import Data.Text
+import Data.Text.Encoding (encodeUtf8)
 import Effectful
 import Effectful.DiscordGateway.Effect
 import Effectful.Dispatch.Dynamic (interpret)
@@ -43,11 +46,11 @@ runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
     d <- liftIO . Wuss.receiveData @LB.LazyByteString $ conn
     lookupEnv "UZI_IS_DEBUG" >>= \case
-      Just _ -> info . RIO.displayShow $ d
+      Just _ -> info . RIO.displayBytesUtf8 . encodeUtf8 . convertString $ d
       Nothing -> pure ()
     case handleEvent d of
       Left s -> do
-        attention . RIO.displayShow $ s
+        attention . RIO.displayBytesUtf8 . encodeUtf8 . pack $ s
         pure Nothing
       Right p -> do
         pure . Just $ p

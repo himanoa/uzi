@@ -15,10 +15,11 @@ import Data.Discord.User qualified as U
 import Effectful
 import Effectful.BotUser
 import Effectful.DiscordChannel
+import Effectful.DynamicLogger
 import Effectful.NonDet
 import EventHandler.MessageCreateEventHandler.Ping
 
-dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es) => Response -> Eff es ()
+dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
   MessageCreate e ->
     getBotUser >>= \case
