@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Discord.MessageReferencesObject where
 

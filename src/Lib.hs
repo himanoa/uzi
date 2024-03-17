@@ -11,11 +11,8 @@ where
 
 import Control.Exception.Safe
 import Control.Monad (forever)
-import Data.ByteString.Char8 qualified as ByteString
 import Data.Discord
 import Data.Discord.User
-import Data.Text
-import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, runEff, (:>))
 import Effectful.BotUser
 import Effectful.Concurrent (Concurrent)

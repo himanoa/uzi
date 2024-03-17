@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingVia #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Discord.ChannelId where
 
