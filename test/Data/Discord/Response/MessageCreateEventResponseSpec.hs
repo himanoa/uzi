@@ -39,6 +39,6 @@ spec = describe "MessageCreateEventResponse" $ do
                         ],
                     nick = Just . Nickname $ "himanoa"
                   }
-          let response = makeMessageCreateEventResponse (ChannelId "576775857839013888") (makeUnsafeContent "") [] mem False
+          let response = makeMessageCreateEventResponse (ChannelId "576775857839013888") (makeUnsafeContent "") [] mem False (GuildId "576648644942495744")
           decode @MessageCreateEventResponse j
             `shouldBe` Just response

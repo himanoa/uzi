@@ -27,9 +27,11 @@ library
   exposed-modules:
       Data.Discord
       Data.Discord.ChannelId
+      Data.Discord.ChannelName
       Data.Discord.Content
       Data.Discord.EventName
       Data.Discord.GlobalName
+      Data.Discord.GuildId
       Data.Discord.Internal
       Data.Discord.Member
       Data.Discord.Mention

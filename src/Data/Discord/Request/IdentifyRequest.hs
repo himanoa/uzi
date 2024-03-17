@@ -15,6 +15,12 @@ messageContentIntent = shift 1 15
 guildMessageContentIntent :: Integer
 guildMessageContentIntent = shift 1 9
 
+guildManageChannelsIntent :: Integer
+guildManageChannelsIntent = shift 1 4
+
+guildManageServerIntent :: Integer
+guildManageServerIntent = shift 1 5
+
 data IdentifyRequestProperties = IdentifyRequestProperties
   { os :: String,
     browser :: String,
@@ -40,7 +46,7 @@ defaultIdentifyRequestProperties =
     }
 
 defaultIntents :: Integer
-defaultIntents = messageContentIntent .|. guildMessageContentIntent
+defaultIntents = messageContentIntent .|. guildMessageContentIntent .|. guildManageChannelsIntent .|. guildManageServerIntent
 
 defaultIdentifyRequest :: Text -> IdentifyRequest
 defaultIdentifyRequest token =
