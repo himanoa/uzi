@@ -15,6 +15,7 @@ import Data.Discord.Response.HelloEventResponse
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Discord.Response.ReadyEventResponse
 import Data.Functor
+import Data.Discord.User
 
 data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse
   deriving (Show, Eq)
@@ -25,6 +26,9 @@ instance FromJSON Response where
       OC.Hello -> pure . Hello $ HelloEventResponse
       OC.Ready ->
         v .: "t" >>= parseJSON @EventName >>= \case
-          ReadyEventName -> pure . Ready $ ReadyEventResponse
+          ReadyEventName -> do
+            d <- v .: "d"
+            userObj <- parseJSON @User =<< d .: "user"
+            pure . Ready $ ReadyEventResponse { _user =  userObj }
           MessageCreateEventName -> parseJSON @MessageCreateEventResponse (Object v) <&> MessageCreate
           _ -> prependFailure "Not Supported" (typeMismatch "t" "xxx")

@@ -4,7 +4,7 @@ module Effectful.BotUser.InterpreterSpec (
 ) where
 
 import Test.Hspec
-import Effectful.State.Static.Local (evalState,  execState)
+import Effectful.State.Static.Shared (evalState,  execState)
 import Effectful.BotUser.Effect (getBotUser, setBotUser)
 import Effectful.BotUser.Interpreter
 import Effectful

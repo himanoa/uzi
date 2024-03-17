@@ -9,10 +9,14 @@ import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful
 import Effectful.DynamicLogger
 import Effectful.NonDet
+import Control.Lens
+import Data.Discord.Response.ReadyEventResponse
+import Effectful.BotUser.Effect
 
-readyEventHandler :: (DynamicLogger :> es, NonDet :> es) => Response -> Eff es ()
+readyEventHandler :: (DynamicLogger :> es, NonDet :> es, BotUser :> es) => Response -> Eff es ()
 readyEventHandler = \case
   Ready r -> do
     info "Dispatch ReadyEventHandler"
     info . convertString . show $ r
+    setBotUser (r ^. user)
   _ -> emptyEff

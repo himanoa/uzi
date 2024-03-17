@@ -41,6 +41,7 @@ dependencies:
 - either
 - interpolate
 - data-default
+- parsec
 
 
 ghc-options:

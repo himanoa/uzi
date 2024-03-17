@@ -29,6 +29,9 @@ import Effectful.Req
 import EventHandler
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
+import Effectful.BotUser
+import Data.Discord.User 
+import Effectful.State.Static.Shared 
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -45,16 +48,16 @@ data UziError = CrashError
 
 instance Exception UziError
 
-runUzi = runEff $ withStdOutLogger $ \stdoutLogger -> runConcurrent . runEnvironment . runLog "Uzi" stdoutLogger defaultLogLevel . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel $ startUp
+runUzi = runEff $ withStdOutLogger $ \stdoutLogger -> runConcurrent . runEnvironment . runLog "Uzi" stdoutLogger defaultLogLevel . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel . evalState @(Maybe User) Nothing . runBotUser $ startUp
 
-startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es) => Eff es ()
+startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => Eff es ()
 startUp = do
   _ <- info "Hello uzi"
   _ <- info "Load enviroments"
   withDiscordGatewayConnection onConnect
   pure ()
 
-onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es) => Connection -> Eff es ()
+onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- info "Connected websocket"
   _ <- withPingThread c 15 (pure ()) $ do
@@ -74,7 +77,7 @@ receiver queue = do
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es) => TQueue Response -> Eff es ()
+sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
   info . convertToText $ ("Received Log " <> show event)

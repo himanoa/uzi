@@ -7,7 +7,7 @@
 
 module Effectful.BotUser.Interpreter where
 import Data.Discord.User (User)
-import Effectful.State.Static.Local
+import Effectful.State.Static.Shared
 import Effectful
 import Effectful.BotUser.Effect
 import Effectful.Dispatch.Dynamic (interpret)

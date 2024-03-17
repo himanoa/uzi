@@ -92,6 +92,7 @@ library
     , log-base
     , log-effectful
     , network
+    , parsec
     , req
     , safe-exceptions
     , scientific
@@ -124,6 +125,7 @@ executable uzi-exe
     , log-base
     , log-effectful
     , network
+    , parsec
     , req
     , safe-exceptions
     , scientific
@@ -139,6 +141,7 @@ test-suite uzi-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Data.Discord.ContentSpec
       Data.Discord.EventNameSpec
       Data.Discord.MemberSpec
       Data.Discord.MentionSpec
@@ -170,6 +173,7 @@ test-suite uzi-test
     , log-base
     , log-effectful
     , network
+    , parsec
     , req
     , safe-exceptions
     , scientific
