@@ -18,4 +18,16 @@ jobs:
           cabal-version: "3.10.2.1"
           enable-stack: true
           stack-version: "2.15.1"
-      - run: stack test
+      - name: test
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KEY_PUBLIC: ${{ secrets.SSH_KEY_PUBLIC }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          echo "$SSH_KEY_PUBLIC" | tr -d '\r' > ~/.ssh/id_ed25519.pub
+          chmod 700 ~/.ssh/id_ed25519
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          stack test
