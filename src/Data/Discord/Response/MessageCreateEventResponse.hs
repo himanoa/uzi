@@ -11,6 +11,7 @@ module Data.Discord.Response.MessageCreateEventResponse
     mentions,
     member,
     isBot,
+    guildId,
     makeMessageCreateEventResponse,
   )
 where
@@ -22,19 +23,21 @@ import Data.Discord.Content
 import Data.Discord.Member
 import Data.Discord.Mention
 import Data.Maybe (fromMaybe)
+import Data.Discord.GuildId (GuildId)
 
 data MessageCreateEventResponse = MessageCreateEventResponse
   { _channelId :: ChannelId,
     _content :: Content,
     _mentions :: [Mention],
     _member :: Member,
-    _isBot :: Bool
+    _isBot :: Bool,
+    _guildId :: GuildId
   }
   deriving (Show, Eq)
 
 makeLenses ''MessageCreateEventResponse
 
-makeMessageCreateEventResponse :: ChannelId -> Content -> [Mention] -> Member -> Bool -> MessageCreateEventResponse
+makeMessageCreateEventResponse :: ChannelId -> Content -> [Mention] -> Member -> Bool -> GuildId -> MessageCreateEventResponse
 makeMessageCreateEventResponse = MessageCreateEventResponse
 
 instance FromJSON MessageCreateEventResponse where
@@ -46,4 +49,5 @@ instance FromJSON MessageCreateEventResponse where
     _member <- parseJSON @Member =<< dataSection .: "member"
     _author <- dataSection .: "author"
     _isBot <- fromMaybe False <$> _author .:? "bot"
+    _guildId <- parseJSON @GuildId =<< dataSection .: "guild_id"
     pure MessageCreateEventResponse {..}
