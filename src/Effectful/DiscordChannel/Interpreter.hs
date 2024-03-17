@@ -10,6 +10,7 @@ import Control.Lens
 import Data.Aeson
 import Data.Coerce (coerce)
 import Data.Discord.ChannelId
+import Data.Discord.GuildId
 import Data.Text (Text)
 import Data.Text.Encoding
 import Effectful
@@ -35,7 +36,7 @@ runDiscordChannel = interpret $ \_ -> \case
     pure ()
   CreateChannel guildId params -> do
     token <- getToken
-    -- _ <-
-    --   request POST (https host /: "api" /: version /: "channels" /: coerce (params ^. channelId) /: "messages") (ReqBodyJson . toJSON $ params) ignoreResponse $
-    --     header "Authorization" ("Bot " <> encodeUtf8 token)
+    _ <-
+      request POST (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") (ReqBodyJson . toJSON $ params) ignoreResponse $
+        header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()

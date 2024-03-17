@@ -61,11 +61,13 @@ data CreateChannelParams = CreateChannelParams {
 makeLenses ''CreateChannelParams
 
 instance FromJSON CreateChannelParams where
-  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 1}
+  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 2}
 
 instance ToJSON CreateChannelParams where
-  toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 1}
+  toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 2}
 
+makeCreateChannelParams :: ChannelName  -> CreateChannelParams
+makeCreateChannelParams __name =  CreateChannelParams { __name = __name, __type = 0 }
 
 data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
@@ -75,3 +77,6 @@ type instance DispatchOf DiscordChannel = Dynamic
 
 sendMessage :: (HasCallStack, DiscordChannel :> es) => SendMessageParams -> Eff es ()
 sendMessage = send . SendMessage
+
+createChannel :: (HasCallStack, DiscordChannel :> es) => GuildId ->  CreateChannelParams -> Eff es ()
+createChannel guildId params = send (CreateChannel guildId params)
