@@ -42,7 +42,7 @@ dependencies:
 - interpolate
 - data-default
 - parsec
-
+- rio-log-effectful
 
 ghc-options:
 - -Wall

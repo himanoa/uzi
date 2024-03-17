@@ -94,6 +94,7 @@ library
     , network
     , parsec
     , req
+    , rio-log-effectful
     , safe-exceptions
     , scientific
     , string-conversions
@@ -127,6 +128,7 @@ executable uzi-exe
     , network
     , parsec
     , req
+    , rio-log-effectful
     , safe-exceptions
     , scientific
     , string-conversions
@@ -175,6 +177,7 @@ test-suite uzi-test
     , network
     , parsec
     , req
+    , rio-log-effectful
     , safe-exceptions
     , scientific
     , string-conversions
