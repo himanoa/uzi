@@ -26,20 +26,17 @@ import Effectful.DiscordChannel
 import Effectful.DiscordGateway
 import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
-import Effectful.Log
+import Effectful.Log.Static
 import Effectful.Req
 import Effectful.State.Static.Shared
 import EventHandler
-import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
+import RIO qualified
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
 
 instance Exception FromEnvironmentError
-
-convertToText :: String -> Text
-convertToText = decodeUtf8 . ByteString.pack
 
 runUzi :: IO ()
 
@@ -48,7 +45,9 @@ data UziError = CrashError
 
 instance Exception UziError
 
-runUzi = runEff $ withStdOutLogger $ \stdoutLogger -> runConcurrent . runEnvironment . runLog "Uzi" stdoutLogger defaultLogLevel . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel . evalState @(Maybe User) Nothing . runBotUser $ startUp
+runUzi = runEff $ do
+  logOptions <- logOptionsHandle RIO.stderr True
+  runConcurrent . runEnvironment . runLog logOptions . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel . evalState @(Maybe User) Nothing . runBotUser $ startUp
 
 startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => Eff es ()
 startUp = do
@@ -80,5 +79,5 @@ data SenderError = EventQueueIsEmpty
 sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
-  info . convertToText $ ("Received Log " <> show event)
+  info . RIO.displayShow $ "[Internal] Received Log " <> show event
   dispatchEventHandlers event

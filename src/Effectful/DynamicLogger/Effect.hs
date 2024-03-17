@@ -3,18 +3,18 @@
 
 module Effectful.DynamicLogger.Effect where
 
-import Data.Text
 import Effectful
-import Effectful.Dispatch.Dynamic (HasCallStack, send)
+import Effectful.Dispatch.Dynamic (send)
+import RIO
 
 data DynamicLogger :: Effect where
-  Info :: Text -> DynamicLogger m ()
-  Attention :: Text -> DynamicLogger m ()
+  Info :: Utf8Builder -> DynamicLogger m ()
+  Attention :: Utf8Builder -> DynamicLogger m ()
 
 type instance DispatchOf DynamicLogger = Dynamic
 
-info :: (HasCallStack, DynamicLogger :> es) => Text -> Eff es ()
+info :: (HasCallStack, DynamicLogger :> es) => Utf8Builder -> Eff es ()
 info t = send (Info t)
 
-attention :: (HasCallStack, DynamicLogger :> es) => Text -> Eff es ()
+attention :: (HasCallStack, DynamicLogger :> es) => Utf8Builder -> Eff es ()
 attention t = send (Attention t)
