@@ -26,12 +26,12 @@ import Effectful.DiscordChannel
 import Effectful.DiscordGateway
 import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
+import Effectful.Log.Static
 import Effectful.Req
 import Effectful.State.Static.Shared
 import EventHandler
 import Network.WebSockets (Connection)
-import Effectful.Log.Static
-import RIO  qualified
+import RIO qualified
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

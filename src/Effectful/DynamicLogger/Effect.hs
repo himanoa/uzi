@@ -3,9 +3,9 @@
 
 module Effectful.DynamicLogger.Effect where
 
-import RIO
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
+import RIO
 
 data DynamicLogger :: Effect where
   Info :: Utf8Builder -> DynamicLogger m ()

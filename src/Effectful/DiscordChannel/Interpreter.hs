@@ -19,6 +19,7 @@ import Effectful.DiscordChannel.Effect
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.Req (Request, request)
 import Network.HTTP.Req (POST (POST), ReqBodyJson (ReqBodyJson), header, https, ignoreResponse, (/:))
+
 host :: Text
 host = "discord.com"
 
