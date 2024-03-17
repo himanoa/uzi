@@ -1,6 +1,7 @@
 module Effectful.DiscordChannel
   ( makeSendMessageParams,
     makeCreateChannelParams,
+    createChannel,
     sendMessage,
     runDiscordChannel,
     channelId,

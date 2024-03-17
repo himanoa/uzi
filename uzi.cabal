@@ -70,6 +70,7 @@ library
       EventHandler
       EventHandler.HelloEventHandler
       EventHandler.MessageCreateEventHandler
+      EventHandler.MessageCreateEventHandler.CreateChannel
       EventHandler.MessageCreateEventHandler.Ping
       EventHandler.ReadyEventHandler
       Lib
@@ -152,6 +153,7 @@ test-suite uzi-test
       Data.Discord.Response.MessageCreateEventResponseSpec
       Effectful.BotUser.InterpreterSpec
       EventHandler.HelloEventHandlerSpec
+      EventHandler.MessageCreateEventHandler.CreateChannelSpec
       EventHandler.MessageCreateEventHandler.PingSpec
       Helper.DummyDiscordChannelInterpreter
       Helper.DummyDiscordGatewayInterpreter
