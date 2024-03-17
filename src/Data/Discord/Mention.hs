@@ -8,10 +8,10 @@ module Data.Discord.Mention where
 
 import Control.Lens
 import Data.Aeson
-import Data.Maybe
+import Data.Discord.GlobalName
 import Data.Discord.UserId
 import Data.Discord.UserName
-import Data.Discord.GlobalName
+import Data.Maybe
 
 data Mention = Mention
   { _id :: UserId,

@@ -2,24 +2,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 {-# HLINT ignore "Use newtype instead of data" #-}
 
 module Data.Discord.Content
   ( Content,
     makeContent,
     makeUnsafeContent,
-    body
+    body,
   )
 where
 
 import Data.Aeson hiding (Success)
+import Data.Coerce
+import Data.Either.Combinators (rightToMaybe)
 import Data.Either.Validation
 import Data.Text hiding (concat)
 import Text.Parsec qualified as P
+import Text.Parsec.Text qualified as P
 import Prelude hiding (length)
-import qualified Text.Parsec.Text as P
-import Data.Coerce
-import Data.Either.Combinators (rightToMaybe)
 
 newtype Content = Content Text
   deriving (Show, Eq)
@@ -40,19 +41,17 @@ makeUnsafeContent = Content
 body :: Content -> Maybe Text
 body c = do
   let contentText = id @Text . coerce $ c
-  let contentMaybe =  rightToMaybe (P.runParser parser () "dummy" contentText)
+  let contentMaybe = rightToMaybe (P.runParser parser () "dummy" contentText)
   fmap (strip . pack . concat) contentMaybe
-
   where
     userIdSymParser :: P.Parser String
     userIdSymParser = P.between (P.char '<') (P.char '>') (P.char '@' >> P.many1 P.digit)
 
     contentParser :: P.Parser String
-    contentParser =  P.many1 . P.noneOf $ "<"
+    contentParser = P.many1 . P.noneOf $ "<"
 
     fallbackParser :: P.Parser String
-    fallbackParser =  P.many1 P.anyChar
+    fallbackParser = P.many1 P.anyChar
 
-    parser :: P.Parser [String] 
-    parser = P.many1 $ (P.try userIdSymParser >> return "" ) P.<|> contentParser P.<|> fallbackParser
-
+    parser :: P.Parser [String]
+    parser = P.many1 $ (P.try userIdSymParser >> return "") P.<|> contentParser P.<|> fallbackParser

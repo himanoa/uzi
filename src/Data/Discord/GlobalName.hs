@@ -1,8 +1,10 @@
 {-# LANGUAGE DerivingVia #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
+
 module Data.Discord.GlobalName where
-import Data.Text
+
 import Data.Aeson
+import Data.Text
 
 newtype GlobalName = GlobalName Text
   deriving (Show, Eq)

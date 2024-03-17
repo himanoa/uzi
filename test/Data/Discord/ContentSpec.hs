@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Discord.ContentSpec (
-  spec
-) where
 
-import Test.Hspec
+module Data.Discord.ContentSpec
+  ( spec,
+  )
+where
+
 import Data.Discord.Content
+import Test.Hspec
 
 spec :: Spec
 spec = describe "Content" $ do
@@ -23,4 +25,3 @@ spec = describe "Content" $ do
       it "should be exclude mention block " $ do
         (body . makeUnsafeContent $ "<@123123123> <@124123112> foo") `shouldBe` Just "foo"
         (body . makeUnsafeContent $ "<@123123123> <@124123112> foo bar <@123123>") `shouldBe` Just "foo bar"
-

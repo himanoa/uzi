@@ -13,9 +13,11 @@ import Control.Exception.Safe
 import Control.Monad (forever)
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Discord
+import Data.Discord.User
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful (Eff, IOE, runEff, (:>))
+import Effectful.BotUser
 import Effectful.Concurrent (Concurrent)
 import Effectful.Concurrent.Async (concurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
@@ -26,12 +28,10 @@ import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
 import Effectful.Log
 import Effectful.Req
+import Effectful.State.Static.Shared
 import EventHandler
 import Log.Backend.StandardOutput
 import Network.WebSockets (Connection)
-import Effectful.BotUser
-import Data.Discord.User 
-import Effectful.State.Static.Shared 
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

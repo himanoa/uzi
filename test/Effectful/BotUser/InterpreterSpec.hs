@@ -1,18 +1,19 @@
 {-# LANGUAGE BlockArguments #-}
-module Effectful.BotUser.InterpreterSpec (
-  spec
-) where
 
-import Test.Hspec
-import Effectful.State.Static.Shared (evalState,  execState)
-import Effectful.BotUser.Effect (getBotUser, setBotUser)
-import Effectful.BotUser.Interpreter
-import Effectful
+module Effectful.BotUser.InterpreterSpec
+  ( spec,
+  )
+where
+
 import Data.Default
 import Data.Discord.User
+import Effectful
+import Effectful.BotUser.Effect (getBotUser, setBotUser)
+import Effectful.BotUser.Interpreter
+import Effectful.State.Static.Shared (evalState, execState)
+import Test.Hspec
 
 spec :: Spec
-
 spec = describe "BotUserInterpreter" $ do
   describe "runBotUser" $ do
     describe "getBotUser" $ do
@@ -28,11 +29,7 @@ spec = describe "BotUserInterpreter" $ do
       context "when not set user" $ do
         it "should be return to Just user" $ do
           let user = def @User
-          actual <- pure . runPureEff . execState @(Maybe User) Nothing . runBotUser $ do 
+          actual <- pure . runPureEff . execState @(Maybe User) Nothing . runBotUser $ do
             _ <- setBotUser user
             pure ()
-          actual  `shouldBe`  Just user
-
-
-
-
+          actual `shouldBe` Just user

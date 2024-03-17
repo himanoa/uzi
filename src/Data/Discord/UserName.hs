@@ -1,10 +1,10 @@
 {-# LANGUAGE DerivingVia #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module Data.Discord.UserName where 
+module Data.Discord.UserName where
 
-import Data.Text
 import Data.Aeson
+import Data.Text
 
 newtype UserName = UserName Text
   deriving (Show, Eq)

@@ -1,16 +1,16 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Data.Discord.Response.ReadyEventResponse where
 
+import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Discord.ReceiveEventOperationCode
+import Data.Discord.User
 import GHC.Generics
-import Data.Discord.User 
-import Control.Lens (makeLenses)
 
-newtype ReadyEventResponse = ReadyEventResponse { _user :: User }
+newtype ReadyEventResponse = ReadyEventResponse {_user :: User}
   deriving (Show, Generic, Eq)
 
 makeLenses ''ReadyEventResponse
@@ -20,7 +20,7 @@ instance FromJSON ReadyEventResponse where
     operationCode <- parseJSON @ReceiveEventOperationCode =<< v .: "op"
     case operationCode of
       Ready -> do
-        d <- v.: "d"
-        userObj <- parseJSON @User =<< d.: "user"
-        pure ReadyEventResponse { _user = userObj }
+        d <- v .: "d"
+        userObj <- parseJSON @User =<< d .: "user"
+        pure ReadyEventResponse {_user = userObj}
       _ -> prependFailure "Not supported op code" (typeMismatch "op" "")
