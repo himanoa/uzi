@@ -13,7 +13,6 @@ import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
-import Effectful.DiscordChannel.Effect (createChannel)
 
 pingEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 pingEventHandler = \case
@@ -24,7 +23,6 @@ pingEventHandler = \case
           info "Dispatched Ping Handler"
           let params = makeSendMessageParams (event ^. MC.channelId) c Nothing False Nothing Nothing Nothing
           sendMessage params
-          createChannel (event ^. MC.guildId) (makeCreateChannelParams (ChannelName "test"))
           pure ()
         Failure _ -> pure ()
       else emptyEff
