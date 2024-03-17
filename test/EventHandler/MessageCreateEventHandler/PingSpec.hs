@@ -32,7 +32,7 @@ spec = describe "PingSpec" $ do
     context "when provide MessageCreateEvent" $ do
       context "when response message is ping" $ do
         it "should be return to pong response" $ do
-          let response = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "ping") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True  (GuildId "576648644942495744")
+          let response = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "ping") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
           let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel . pingEventHandler . MessageCreate $ response
           let (_, paramsMaybe) = fromRight ((), Nothing) actual
           let params = fromJust paramsMaybe

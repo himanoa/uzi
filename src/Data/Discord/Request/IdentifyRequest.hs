@@ -21,7 +21,6 @@ guildManageChannelsIntent = shift 1 4
 guildManageServerIntent :: Integer
 guildManageServerIntent = shift 1 5
 
-
 data IdentifyRequestProperties = IdentifyRequestProperties
   { os :: String,
     browser :: String,
