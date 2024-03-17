@@ -13,7 +13,7 @@ module Effectful.DiscordChannel.Effect where
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
-import Data.Text
+import Data.Text hiding (drop)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
@@ -52,8 +52,24 @@ instance ToJSON SendMessageParams where
 makeSendMessageParams :: ChannelId -> Content -> Maybe Text -> Bool -> Maybe AllowedMention -> Maybe MessageReferencesObject -> Maybe Text -> SendMessageParams
 makeSendMessageParams = SendMessageParams
 
+data CreateChannelParams = CreateChannelParams {
+  __name :: ChannelName,
+  __type :: Int
+}
+  deriving (Show, Eq, Generic)
+
+makeLenses ''CreateChannelParams
+
+instance FromJSON CreateChannelParams where
+  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 1}
+
+instance ToJSON CreateChannelParams where
+  toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 1}
+
+
 data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
+  CreateChannel :: CreateChannelParams -> DiscordChannel m ()
 
 type instance DispatchOf DiscordChannel = Dynamic
 

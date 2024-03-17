@@ -7,6 +7,7 @@ module Data.Discord
     module Data.Discord.ChannelId,
     module Data.Discord.MessageReferencesObject,
     module Data.Discord.Mention,
+    module Data.Discord.ChannelName,
     makeContent,
     Content,
   )
@@ -21,3 +22,4 @@ import Data.Discord.MessageReferencesObject
 import Data.Discord.Nickname
 import Data.Discord.Request
 import Data.Discord.Response
+import Data.Discord.ChannelName
