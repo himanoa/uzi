@@ -1,4 +1,5 @@
 # uzi
+[![ci](https://github.com/himanoa/uzi/actions/workflows/ci.yaml/badge.svg)](https://github.com/himanoa/uzi/actions/workflows/ci.yaml)
 
 宇治共和国用のDiscordBotです
 
