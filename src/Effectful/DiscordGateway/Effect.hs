@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Effectful.DiscordGateway.Effect where
 

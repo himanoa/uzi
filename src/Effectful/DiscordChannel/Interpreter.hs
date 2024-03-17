@@ -10,7 +10,6 @@ import Control.Lens
 import Data.Aeson
 import Data.Coerce (coerce)
 import Data.Discord.ChannelId
-import Data.String.Conversions
 import Data.Text (Text)
 import Data.Text.Encoding
 import Effectful
