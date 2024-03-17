@@ -1,8 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Effectful.DiscordChannel.Interpreter where
 
@@ -17,20 +17,16 @@ import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordChannel.Effect
 import Effectful.Dispatch.Dynamic (interpret)
-import Effectful.DynamicLogger
 import Effectful.Req (Request, request)
 import Network.HTTP.Req (POST (POST), ReqBodyJson (ReqBodyJson), header, https, ignoreResponse, (/:))
-
 host :: Text
 host = "discord.com"
 
-runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es, DynamicLogger :> es) => Eff (DiscordChannel : es) a -> Eff es a
+runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es) => Eff (DiscordChannel : es) a -> Eff es a
 runDiscordChannel = interpret $ \_ -> \case
   SendMessage params -> do
     token <- getToken
-    info . coerce $ params ^. channelId
-    info . convertString . encode $ params
     _ <-
-      request POST (https host /: "api" /: "v10" /: "channels" /: (coerce $ params ^. channelId) /: "messages") (ReqBodyJson . toJSON $ params) ignoreResponse $
+      request POST (https host /: "api" /: "v10" /: "channels" /: coerce (params ^. channelId) /: "messages") (ReqBodyJson . toJSON $ params) ignoreResponse $
         header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()

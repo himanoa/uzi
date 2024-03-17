@@ -12,16 +12,16 @@ packages:
   original:
     hackage: log-effectful-1.0.0.0@sha256:126f328c9325c10998289378191dc69e55b5ffdc37a7845f2d0ee57f6f13392e,2433
 - completed:
+    commit: d7ec31819bc0b582bb5b6f049baa9098704b6004
+    git: git@github.com:lugendre/rio-log-effectful.git
     name: rio-log-effectful
     pantry-tree:
       sha256: 366430d8a3304bd644205668249e855ecb8c2ea801c0182656774f037b34158e
       size: 711
-    sha256: c0fe2c3bef97f9db4000496457ea990b5719fc627cd363c78ca759c58c5f49fb
-    size: 5788
-    url: https://github.com/lugendre/rio-log-effectful/archive/d7ec31819bc0b582bb5b6f049baa9098704b6004.tar.gz
     version: 0.1.0.0
   original:
-    url: https://github.com/lugendre/rio-log-effectful/archive/d7ec31819bc0b582bb5b6f049baa9098704b6004.tar.gz
+    commit: d7ec31819bc0b582bb5b6f049baa9098704b6004
+    git: git@github.com:lugendre/rio-log-effectful.git
 snapshots:
 - completed:
     sha256: 2fdd7d3e54540062ef75ca0a73ca3a804c527dbf8a4cadafabf340e66ac4af40

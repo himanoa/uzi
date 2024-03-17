@@ -89,11 +89,10 @@ library
     , either
     , interpolate
     , lens
-    , log-base
-    , log-effectful
     , network
     , parsec
     , req
+    , rio
     , rio-log-effectful
     , safe-exceptions
     , scientific
@@ -123,11 +122,10 @@ executable uzi-exe
     , either
     , interpolate
     , lens
-    , log-base
-    , log-effectful
     , network
     , parsec
     , req
+    , rio
     , rio-log-effectful
     , safe-exceptions
     , scientific
@@ -172,11 +170,10 @@ test-suite uzi-test
     , hspec
     , interpolate
     , lens
-    , log-base
-    , log-effectful
     , network
     , parsec
     , req
+    , rio
     , rio-log-effectful
     , safe-exceptions
     , scientific

@@ -28,8 +28,6 @@ dependencies:
 - aeson
 - effectful
 - effectful-core
-- log-effectful
-- log-base
 - websockets
 - wuss
 - unliftio
@@ -43,6 +41,7 @@ dependencies:
 - data-default
 - parsec
 - rio-log-effectful
+- rio
 
 ghc-options:
 - -Wall
