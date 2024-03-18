@@ -15,8 +15,9 @@ import Effectful.DiscordChannel
 createChannelEventHandler :: (DiscordChannel :> es, NonDet :> es , DynamicLogger :> es) => Response -> Eff es ()
 createChannelEventHandler = \case
   MessageCreate res ->  do
-    info "CreateChannelEventHandler dispatched"
+    -- FIXME: create-channel foobar みたいな構文のみ受けれるようにする
     let guildId = res ^. MCE.guildId
+    info "CreateChannelEventHandler dispatched"
     createChannel guildId (makeCreateChannelParams . ChannelName $ "test")
     pure ()
   _ -> emptyEff
