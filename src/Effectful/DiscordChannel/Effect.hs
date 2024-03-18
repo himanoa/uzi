@@ -17,6 +17,7 @@ import Data.Text hiding (drop)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
+import Data.Discord.Channel (Channel)
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)
@@ -76,6 +77,7 @@ makeCreateChannelParams __name = CreateChannelParams {__name = __name, __type = 
 data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
   CreateChannel :: GuildId -> CreateChannelParams -> DiscordChannel m ()
+  GetChannels :: GuildId -> DiscordChannel m [Channel]
 
 type instance DispatchOf DiscordChannel = Dynamic
 
@@ -84,3 +86,6 @@ sendMessage = send . SendMessage
 
 createChannel :: (HasCallStack, DiscordChannel :> es) => GuildId -> CreateChannelParams -> Eff es ()
 createChannel guildId params = send (CreateChannel guildId params)
+
+getChannels :: (HasCallStack, DiscordChannel :> es) => GuildId -> Eff es [Channel]
+getChannels guildId = send (GetChannels guildId)
