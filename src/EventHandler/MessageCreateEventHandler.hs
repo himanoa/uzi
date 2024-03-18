@@ -17,8 +17,8 @@ import Effectful.BotUser
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
-import EventHandler.MessageCreateEventHandler.Ping
 import EventHandler.MessageCreateEventHandler.OrganizeTimes
+import EventHandler.MessageCreateEventHandler.Ping
 
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of

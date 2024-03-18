@@ -155,6 +155,7 @@ test-suite uzi-test
       Effectful.BotUser.InterpreterSpec
       EventHandler.HelloEventHandlerSpec
       EventHandler.MessageCreateEventHandler.CreateChannelSpec
+      EventHandler.MessageCreateEventHandler.OrganizeTimesSpec
       EventHandler.MessageCreateEventHandler.PingSpec
       Helper.DummyDiscordChannelInterpreter
       Helper.DummyDiscordGatewayInterpreter

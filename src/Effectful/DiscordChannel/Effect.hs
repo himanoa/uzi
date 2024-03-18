@@ -56,7 +56,6 @@ makeMessage :: ChannelId -> Content -> SendMessageParams
 makeMessage cid con = do
   makeSendMessageParams cid con Nothing False Nothing Nothing Nothing
 
-
 data CreateChannelParams = CreateChannelParams
   { __name :: ChannelName,
     __type :: Int
