@@ -9,9 +9,11 @@ module Effectful.Req
   ( request,
     Request (..),
     runRequest,
+    getResponseBodyAsJsonResponse,
   )
 where
 
+import Data.Aeson
 import Data.Proxy
 import Effectful
 import Effectful.Dispatch.Dynamic
@@ -53,3 +55,6 @@ runRequest :: Eff (Request : es) a -> Eff es a
 runRequest = interpret $ \_ -> \case
   Req method url body r o -> unsafeEff_ . R.runReq R.defaultHttpConfig $ do
     R.req method url body r o
+
+getResponseBodyAsJsonResponse :: (FromJSON a) => R.JsonResponse a -> IO a
+getResponseBodyAsJsonResponse resp = return $ R.responseBody resp

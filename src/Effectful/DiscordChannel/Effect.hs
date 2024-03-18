@@ -13,11 +13,11 @@ module Effectful.DiscordChannel.Effect where
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
+import Data.Discord.Channel (Channel)
 import Data.Text hiding (drop)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
-import Data.Discord.Channel (Channel)
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)
