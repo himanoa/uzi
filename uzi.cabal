@@ -54,6 +54,7 @@ library
       Data.Discord.UserName
       Data.Uzi
       Data.Uzi.TimesChannel
+      Data.Uzi.TimesChannelGroup
       Effectful.BotUser
       Effectful.BotUser.Effect
       Effectful.BotUser.Interpreter
