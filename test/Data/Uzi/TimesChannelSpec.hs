@@ -41,12 +41,12 @@ spec = describe "TimesChannel" $ do
         it "should be return Justing TimesChannel object " $ do
           makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "the-ny-times"} `shouldBe` Just TimesChannel {Data.Uzi.TimesChannel._id = ChannelId "xxx", Data.Uzi.TimesChannel._name = TimesName "ny"}
 
-  describe "makeTimesChannels" $ do
+  describe "fromChannels" $ do
     context "when input is empty vec" $ do
       it "should be return empty vec" $ do
-        makeTimesChannels (RIO.mempty @(RIO.Vector Channel)) `shouldBe` (RIO.mempty @(RIO.Vector TimesChannel))
+        fromChannels (RIO.mempty @(RIO.Vector Channel)) `shouldBe` (RIO.mempty @(RIO.Vector TimesChannel))
 
     context "when the input is consists exclusively of voice channels" $ do
       it "should be return empty vec" $ do
         let channel = Channel {__id = ChannelId "", __type = GuildVoice, __position = ChannelPosition 1, __name = ChannelName "xxxx"}
-        makeTimesChannels (RV.singleton channel) `shouldBe` (RIO.mempty @(RIO.Vector TimesChannel))
+        fromChannels (RV.singleton channel) `shouldBe` (RIO.mempty @(RIO.Vector TimesChannel))

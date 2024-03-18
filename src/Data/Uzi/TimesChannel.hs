@@ -61,8 +61,8 @@ makeTimesChannel c = case c ^. C._type of
     timesNameParser :: P.Parser TimesName
     timesNameParser = theNyTimesParser P.<|> shortTimesNameParser P.<|> basicTimesNameParser
 
-makeTimesChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
-makeTimesChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)
+fromChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
+fromChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)
 
 instance Ord TimesChannel where
   compare a b = compare (a ^. name) (b ^. name)
