@@ -7,5 +7,5 @@ import Data.Aeson
 import Data.Text
 
 newtype ChannelId = ChannelId Text
-  deriving (Eq)
-  deriving (FromJSON, ToJSON, Show) via Text
+  deriving (Show, Eq)
+  deriving (FromJSON, ToJSON) via Text
