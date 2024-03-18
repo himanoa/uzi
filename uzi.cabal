@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Data.Discord
+      Data.Discord.Channel
       Data.Discord.ChannelId
       Data.Discord.ChannelName
       Data.Discord.Content
