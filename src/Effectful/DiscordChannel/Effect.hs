@@ -52,6 +52,11 @@ instance ToJSON SendMessageParams where
 makeSendMessageParams :: ChannelId -> Content -> Maybe Text -> Bool -> Maybe AllowedMention -> Maybe MessageReferencesObject -> Maybe Text -> SendMessageParams
 makeSendMessageParams = SendMessageParams
 
+makeMessage :: ChannelId -> Content -> SendMessageParams
+makeMessage cid con = do
+  makeSendMessageParams cid con Nothing False Nothing Nothing Nothing
+
+
 data CreateChannelParams = CreateChannelParams
   { __name :: ChannelName,
     __type :: Int

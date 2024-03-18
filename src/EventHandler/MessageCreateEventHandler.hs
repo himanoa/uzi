@@ -18,6 +18,7 @@ import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
 import EventHandler.MessageCreateEventHandler.Ping
+import EventHandler.MessageCreateEventHandler.OrganizeTimes
 
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
@@ -26,7 +27,7 @@ dispatchMessageEventHandlers res = case res of
       Just botUser -> do
         let mentionIds = map (^. M.id) (e ^. mentions)
         if not (e ^. isBot) && any (\m -> m == (botUser ^. U.id)) mentionIds
-          then pingEventHandler res
+          then pingEventHandler res <|> organizeTimesHandler res
           else emptyEff
       Nothing -> emptyEff
   _ -> emptyEff

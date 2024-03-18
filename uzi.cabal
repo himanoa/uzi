@@ -71,6 +71,7 @@ library
       EventHandler.HelloEventHandler
       EventHandler.MessageCreateEventHandler
       EventHandler.MessageCreateEventHandler.CreateChannel
+      EventHandler.MessageCreateEventHandler.OrganizeTimes
       EventHandler.MessageCreateEventHandler.Ping
       EventHandler.ReadyEventHandler
       Lib
