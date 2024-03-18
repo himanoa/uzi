@@ -12,6 +12,8 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
 import Data.Text
+import RIO qualified
+import RIO.Vector qualified as RIOV
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P
 
@@ -58,6 +60,9 @@ makeTimesChannel c = case c ^. C._type of
 
     timesNameParser :: P.Parser TimesName
     timesNameParser = theNyTimesParser P.<|> shortTimesNameParser P.<|> basicTimesNameParser
+
+makeTimesChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
+makeTimesChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)
 
 instance Ord TimesChannel where
   compare a b = compare (a ^. name) (b ^. name)
