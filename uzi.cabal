@@ -155,6 +155,7 @@ test-suite uzi-test
       Data.Discord.Response.HelloEventResponseSpec
       Data.Discord.Response.InternalSpec
       Data.Discord.Response.MessageCreateEventResponseSpec
+      Data.Uzi.TimesChannelSpec
       Effectful.BotUser.InterpreterSpec
       EventHandler.HelloEventHandlerSpec
       EventHandler.MessageCreateEventHandler.CreateChannelSpec

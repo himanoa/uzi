@@ -26,6 +26,7 @@ runDummyDiscordChannel :: (State (Maybe CreateChannelParams) :> es) => Eff (Disc
 runDummyDiscordChannel = interpret $ \_ -> \case
   SendMessage _ -> pure ()
   CreateChannel _ params -> put . Just $ params
+  GetChannels _ -> pure []
 
 spec :: Spec
 spec = describe "OrganizeTimes" $ do
