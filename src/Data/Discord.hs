@@ -19,7 +19,6 @@ import Data.Discord.ChannelName
 import Data.Discord.Content
 import Data.Discord.EventName
 import Data.Discord.GuildId
-import Data.Discord.GuildId qualified as Data.Discord
 import Data.Discord.Member
 import Data.Discord.Mention
 import Data.Discord.MessageReferencesObject
