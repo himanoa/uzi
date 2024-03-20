@@ -13,7 +13,7 @@ module Effectful.DiscordChannel
     messageReference,
     stickerIds,
     DiscordChannel,
-    modifyChannel
+    modifyChannel,
   )
 where
 

@@ -15,10 +15,10 @@ import Data.Aeson
 import Data.Discord hiding (channelId)
 import Data.Discord.Channel (Channel, ChannelPosition)
 import Data.Text hiding (drop)
+import Data.Uzi.TimesChannel (TimesChannel)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
-import Data.Uzi.TimesChannel (TimesChannel)
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)
@@ -93,6 +93,5 @@ createChannel guildId params = send (CreateChannel guildId params)
 getChannels :: (HasCallStack, DiscordChannel :> es) => GuildId -> Eff es [Channel]
 getChannels guildId = send (GetChannels guildId)
 
-
 modifyChannel :: (HasCallStack, DiscordChannel :> es) => GuildId -> ChannelId -> TimesChannel -> ChannelPosition -> Eff es ()
-modifyChannel guildId cId channel position  = send (ModifyChannel guildId cId channel position)
+modifyChannel guildId cId channel position = send (ModifyChannel guildId cId channel position)

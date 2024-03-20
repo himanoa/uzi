@@ -9,9 +9,9 @@ where
 
 import Effectful
 import Effectful.DiscordChannel
+import Effectful.DiscordChannel.Effect
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.State.Static.Local
-import Effectful.DiscordChannel.Effect
 
 runDummyDiscordChannel :: (State (Maybe SendMessageParams) :> es) => Eff (DiscordChannel : es) a -> Eff es a
 runDummyDiscordChannel = interpret $ \_ -> \case
@@ -19,4 +19,3 @@ runDummyDiscordChannel = interpret $ \_ -> \case
   CreateChannel _ _ -> pure ()
   GetChannels _ -> pure []
   ModifyChannel _ _ -> pure ()
-

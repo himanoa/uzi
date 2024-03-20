@@ -7,11 +7,11 @@ where
 
 import Data.Discord.Channel
 import Data.Discord.ChannelName
+import Data.List qualified as RIO.List
 import Data.Uzi.TimesChannel qualified as TC
 import RIO qualified
 import RIO.Vector qualified as RV
 import Test.Hspec
-import qualified Data.List as RIO.List
 
 spec :: Spec
 spec = describe "TimesChannel" $ do
@@ -54,7 +54,7 @@ spec = describe "TimesChannel" $ do
 
   describe "Ord" $ do
     it "should be return to a,b,c" $ do
-      let a = TC.TimesChannel { TC._id = ChannelId "xxx", TC._name = TC.TimesName "a" }
-      let b = TC.TimesChannel { TC._id = ChannelId "xxx", TC._name = TC.TimesName "b" }
-      let c = TC.TimesChannel { TC._id = ChannelId "xxx", TC._name = TC.TimesName "c" }
-      RIO.List.sort [b,c,a] `shouldBe` [a,b,c]
+      let a = TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "a"}
+      let b = TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "b"}
+      let c = TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "c"}
+      RIO.List.sort [b, c, a] `shouldBe` [a, b, c]

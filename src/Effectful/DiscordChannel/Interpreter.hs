@@ -18,10 +18,10 @@ import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordChannel.Effect
 import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.DynamicLogger
 import Effectful.Internal.Monad
 import Effectful.Req (Request, getResponseBodyAsJsonResponse, request)
 import Network.HTTP.Req
-import Effectful.DynamicLogger
 import RIO (displayShow)
 
 host :: Text
@@ -55,5 +55,5 @@ runDiscordChannel = interpret $ \_ -> \case
     -- WIP: あとでDiscordAPIに繋ぐ
     info ("guildId: " <> displayShow guildId)
     info ("parentChannelId: " <> displayShow cid)
-    info ("times: : " <> displayShow times )
+    info ("times: : " <> displayShow times)
     info ("newPosition: : " <> displayShow pos)

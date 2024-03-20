@@ -34,7 +34,7 @@ data TimesChannel = TimesChannel
 
 makeLenses ''TimesChannel
 
-instance Ord TimesChannel where 
+instance Ord TimesChannel where
   compare a b = compare (a ^. name) (b ^. name)
 
 makeTimesChannel :: C.Channel -> Maybe TimesChannel

@@ -8,8 +8,8 @@ module Data.Discord.Channel where
 import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
-import Data.Discord.ChannelName
 import Data.Discord.ChannelId
+import Data.Discord.ChannelName
 import Data.Scientific
 import Data.Text hiding (drop)
 import GHC.Generics

@@ -1,8 +1,8 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unused-matches #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Data.Uzi.TimesChannelGroup
   ( TimesChannelGroup (..),
@@ -10,7 +10,7 @@ module Data.Uzi.TimesChannelGroup
     findTimesCategories,
     groupByFirstLetter,
     sortTimesChannelGroupMap,
-    coerceChannelId
+    coerceChannelId,
   )
 where
 
@@ -18,12 +18,12 @@ import Control.Lens
 import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
+import Data.List (sort)
 import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
 import RIO qualified
 import RIO.Map qualified as Map
 import RIO.Vector qualified as RIOV
-import Data.List (sort)
 
 data TimesChannelGroup = AtoMGroup C.ChannelId | NtoZGroup C.ChannelId
   deriving (Show, Eq)
@@ -97,4 +97,4 @@ groupByFirstLetter channels aToM nToZ = do
         _ -> Nothing
 
 sortTimesChannelGroupMap :: RIO.Map TimesChannelGroup [TC.TimesChannel] -> RIO.Map TimesChannelGroup [TC.TimesChannel]
-sortTimesChannelGroupMap = Map.map sort 
+sortTimesChannelGroupMap = Map.map sort

@@ -8,13 +8,13 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.MessageCreateEventResponse qualified as MC
+import Data.Text (pack)
+import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
-import Effectful.NonDet
-import Data.Uzi.OrganizeTimes 
 import Effectful.Error.Dynamic
-import Data.Text (pack)
+import Effectful.NonDet
 
 organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 organizeTimesHandler = \case
@@ -24,12 +24,12 @@ organizeTimesHandler = \case
       then do
         sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent "times channelの整理を開始したよ！"))
         organizeTimesEither <- runError @OrganizeTimesError (organizeTimes (event ^. MC.guildId))
-        case organizeTimesEither of 
+        case organizeTimesEither of
           Right _ -> do
             info "Organized times"
             sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent "times channelを整理したよ！"))
           Left (_, e) -> do
-            attention "Failed organize times" 
+            attention "Failed organize times"
             sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (pack . show $ e))))
       else emptyEff
   _ -> emptyEff
