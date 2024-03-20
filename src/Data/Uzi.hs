@@ -3,10 +3,13 @@ module Data.Uzi
     timesName,
     TC.TimesChannel,
     TC.TimesName,
+    OT.organizeTimes,
+    OT.OrganizeTimesError (..),
   )
 where
 
 import Data.Discord.ChannelId
+import Data.Uzi.OrganizeTimes as OT
 import Data.Uzi.TimesChannel qualified as TC
 
 timesId ::

@@ -8,10 +8,10 @@ module Data.Discord.Channel where
 import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
+import Data.Coerce
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Scientific
-import Data.Text hiding (drop)
 import GHC.Generics
 
 data ChannelType = GuildText | GuildVoice | GuildCategory
@@ -33,6 +33,9 @@ instance ToJSON ChannelType where
 newtype ChannelPosition = ChannelPosition Integer
   deriving (Show, Eq)
   deriving (FromJSON, ToJSON) via Integer
+
+coerceChannelPosition :: ChannelPosition -> Integer
+coerceChannelPosition = coerce
 
 channelTypeFromInteger :: Int -> Maybe ChannelType
 channelTypeFromInteger 0 = Just GuildText

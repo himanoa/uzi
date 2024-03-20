@@ -18,4 +18,4 @@ runDummyDiscordChannel = interpret $ \_ -> \case
   SendMessage params -> modify . const . Just $ params
   CreateChannel _ _ -> pure ()
   GetChannels _ -> pure []
-  ModifyChannel _ _ -> pure ()
+  ModifyChannel {} -> pure ()

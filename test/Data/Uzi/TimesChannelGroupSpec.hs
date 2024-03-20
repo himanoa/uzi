@@ -7,6 +7,7 @@ module Data.Uzi.TimesChannelGroupSpec
 where
 
 import Data.Discord.Channel qualified as C
+import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.Uzi.TimesChannel qualified as TC
 import Data.Uzi.TimesChannelGroup

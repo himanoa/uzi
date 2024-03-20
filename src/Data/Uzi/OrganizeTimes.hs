@@ -1,5 +1,4 @@
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Uzi.OrganizeTimes where
@@ -12,7 +11,6 @@ import Data.Uzi.TimesChannelGroup
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DiscordChannel.Effect (getChannels)
-import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.State.Static.Local
 import RIO.Map qualified as M

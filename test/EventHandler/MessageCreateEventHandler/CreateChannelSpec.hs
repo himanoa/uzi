@@ -27,7 +27,7 @@ runDummyDiscordChannel = interpret $ \_ -> \case
   SendMessage _ -> pure ()
   CreateChannel _ params -> put . Just $ params
   GetChannels _ -> pure []
-  ModifyChannel _ _ -> pure ()
+  ModifyChannel {} -> pure ()
 
 spec :: Spec
 spec = describe "CreateChannel" $ do

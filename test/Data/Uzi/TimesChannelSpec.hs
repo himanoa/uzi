@@ -6,6 +6,7 @@ module Data.Uzi.TimesChannelSpec
 where
 
 import Data.Discord.Channel
+import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.List qualified as RIO.List
 import Data.Uzi.TimesChannel qualified as TC

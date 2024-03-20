@@ -6,7 +6,7 @@
 
 module Effectful.DiscordChannel.Interpreter where
 
-import Control.Lens
+import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Coerce (coerce)
 import Data.Discord.Channel
@@ -14,6 +14,7 @@ import Data.Discord.ChannelId
 import Data.Discord.GuildId
 import Data.Text (Text)
 import Data.Text.Encoding
+import Data.Uzi.TimesChannel qualified as TC
 import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordChannel.Effect
@@ -51,9 +52,10 @@ runDiscordChannel = interpret $ \_ -> \case
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr $
         header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
-  ModifyChannel guildId cid times pos -> do
-    -- WIP: あとでDiscordAPIに繋ぐ
-    info ("guildId: " <> displayShow guildId)
-    info ("parentChannelId: " <> displayShow cid)
-    info ("times: : " <> displayShow times)
-    info ("newPosition: : " <> displayShow pos)
+  ModifyChannel _ _ times pos -> do
+    token <- getToken
+    let payload = object ["type" .= (0 :: Integer), "position" .= coerceChannelPosition pos]
+    _ <-
+      request PATCH (https host /: "api" /: version /: "channels" /: coerce (times ^. TC.id)) (ReqBodyJson payload) ignoreResponse $
+        header "Authorization" ("Bot " <> encodeUtf8 token)
+    pure ()
