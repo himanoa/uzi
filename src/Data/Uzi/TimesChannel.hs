@@ -11,6 +11,7 @@ import Data.Coerce
 import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
+import Data.Maybe
 import Data.Text
 import RIO qualified
 import RIO.Vector qualified as RIOV
@@ -20,6 +21,9 @@ import Text.Parsec.Text qualified as P
 newtype TimesName = TimesName Text
   deriving (Show, Eq)
   deriving (FromJSON, ToJSON, Ord) via Text
+
+coerceTimesName :: TimesName -> Text
+coerceTimesName = coerce
 
 data TimesChannel = TimesChannel
   { _id :: C.ChannelId,
@@ -62,7 +66,4 @@ makeTimesChannel c = case c ^. C._type of
     timesNameParser = theNyTimesParser P.<|> shortTimesNameParser P.<|> basicTimesNameParser
 
 fromChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
-fromChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)
-
-instance Ord TimesChannel where
-  compare a b = compare (a ^. name) (b ^. name)
+fromChannels = fromMaybe RIOV.empty . traverse makeTimesChannel
