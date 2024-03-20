@@ -12,7 +12,6 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
-import Data.Maybe
 import Data.Text
 import RIO qualified
 import RIO.Vector qualified as RIOV
