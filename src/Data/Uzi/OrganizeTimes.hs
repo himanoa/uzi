@@ -3,7 +3,7 @@
 
 module Data.Uzi.OrganizeTimes where
 
-import Data.Discord
+import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
 import Data.Uzi.TimesChannel

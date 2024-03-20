@@ -19,9 +19,9 @@ import Effectful.NonDet
 organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 organizeTimesHandler = \case
   MessageCreate event -> do
-    info "organizeTimesHandler dispatched"
     if body (event ^. MC.content) == Just "organize-times"
       then do
+        info "organizeTimesHandler dispatched"
         sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent "times channelの整理を開始したよ！"))
         organizeTimesEither <- runError @OrganizeTimesError (organizeTimes (event ^. MC.guildId))
         case organizeTimesEither of

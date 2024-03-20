@@ -19,11 +19,9 @@ import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordChannel.Effect
 import Effectful.Dispatch.Dynamic (interpret)
-import Effectful.DynamicLogger
 import Effectful.Internal.Monad
 import Effectful.Req (Request, getResponseBodyAsJsonResponse, request)
 import Network.HTTP.Req
-import RIO (displayShow)
 
 host :: Text
 host = "discord.com"
@@ -31,7 +29,7 @@ host = "discord.com"
 version :: Text
 version = "v10"
 
-runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es, DynamicLogger :> es) => Eff (DiscordChannel : es) a -> Eff es a
+runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es) => Eff (DiscordChannel : es) a -> Eff es a
 runDiscordChannel = interpret $ \_ -> \case
   SendMessage params -> do
     token <- getToken
@@ -52,9 +50,9 @@ runDiscordChannel = interpret $ \_ -> \case
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr $
         header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
-  ModifyChannel _ _ times pos -> do
+  ModifyChannel _ parentId times pos -> do
     token <- getToken
-    let payload = object ["type" .= (0 :: Integer), "position" .= coerceChannelPosition pos]
+    let payload = object ["type" .= (0 :: Integer), "position" .= coerceChannelPosition pos, "parent_id" .= coerceChannelId parentId]
     _ <-
       request PATCH (https host /: "api" /: version /: "channels" /: coerce (times ^. TC.id)) (ReqBodyJson payload) ignoreResponse $
         header "Authorization" ("Bot " <> encodeUtf8 token)
