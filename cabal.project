@@ -1,6 +1,6 @@
 packages: *.cabal
 
-souce-repository-package 
+source-repository-package 
   type: git
   location: https://github.com/lugendre/rio-log-effectful.git
-  commit: d7ec31819bc0b582bb5b6f049baa9098704b6004
+  tag: d7ec31819bc0b582bb5b6f049baa9098704b6004
