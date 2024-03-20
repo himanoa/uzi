@@ -39,7 +39,7 @@ spec = describe "CreateChannel" $ do
         isLeft actual `shouldBe` True
     context "when MessageCreate event provided" $ do
       it "should be call create channel instruction" $ do
-        let msg = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "ping") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
+        let msg = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "create-times a") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
         let response = MessageCreate msg
         let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . execState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ createChannelEventHandler response
         isRight actual `shouldBe` True

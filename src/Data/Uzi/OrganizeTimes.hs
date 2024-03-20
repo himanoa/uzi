@@ -16,6 +16,7 @@ import Effectful.State.Static.Local
 import RIO.Map qualified as M
 import RIO.Vector qualified as V
 import RIO.Vector.Boxed qualified as VU
+import RIO qualified
 
 newtype OrganizeTimesError = FindTimesError FindTimesChannelGroupsError
   deriving (Show, Eq)
@@ -32,17 +33,14 @@ organizeTimes guildId = do
   let channelsMap = groupByFirstLetter (fromChannels channelsVector) aToM nToZ
   let sortedChannelsMap = sortTimesChannelGroupMap channelsMap
 
-  _ <- M.traverseWithKey updateChannelPositions sortedChannelsMap
-  pure ()
+  RIO.void $ M.traverseWithKey updateChannelPositions sortedChannelsMap
   where
     updateChannelPositions :: (DiscordChannel :> es) => TimesChannelGroup -> [TimesChannel] -> Eff es ()
     updateChannelPositions group channels = do
-      _ <- evalState @Integer 1 (traverse (updateChannelPosition (coerceChannelId group)) channels)
-      pure ()
+      RIO.void $ evalState @Integer 1 (traverse (updateChannelPosition (coerceChannelId group)) channels)
 
     updateChannelPosition :: (DiscordChannel :> es, State Integer :> es) => ChannelId -> TimesChannel -> Eff es ()
     updateChannelPosition parentId tc = do
       count <- get
-      _ <- modifyChannel guildId parentId tc (ChannelPosition count)
-      _ <- put (count + 1)
-      pure ()
+      RIO.void $ modifyChannel guildId parentId tc (ChannelPosition count)
+      RIO.void $ put (count + 1)
