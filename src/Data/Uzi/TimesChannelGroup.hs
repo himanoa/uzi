@@ -8,6 +8,7 @@ module Data.Uzi.TimesChannelGroup
     FindTimesChannelGroupsError (..),
     findTimesCategories,
     groupByFirstLetter,
+    sortTimesChannelGroupMap
   )
 where
 
@@ -19,6 +20,7 @@ import Data.Uzi.TimesChannel qualified as TC
 import RIO qualified
 import RIO.Map qualified as Map
 import RIO.Vector qualified as RIOV
+import Data.List (sort)
 
 data TimesChannelGroup = AtoMGroup C.ChannelId | NtoZGroup C.ChannelId
   deriving (Show, Eq)
@@ -85,3 +87,6 @@ groupByFirstLetter channels aToM nToZ = do
         "y" -> Just (nToZG, [c])
         "z" -> Just (nToZG, [c])
         _ -> Nothing
+
+sortTimesChannelGroupMap :: RIO.Map TimesChannelGroup [TC.TimesChannel] -> RIO.Map TimesChannelGroup [TC.TimesChannel]
+sortTimesChannelGroupMap = Map.map sort 

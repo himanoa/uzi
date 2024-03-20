@@ -18,6 +18,7 @@ import Data.Text hiding (drop)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import GHC.Generics
+import Data.Uzi.TimesChannel (TimesChannel)
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)
@@ -78,6 +79,8 @@ data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
   CreateChannel :: GuildId -> CreateChannelParams -> DiscordChannel m ()
   GetChannels :: GuildId -> DiscordChannel m [Channel]
+  -- FIXME: 手抜き実装でTimesに依存していて、他のChannelを変更する時に困るのでその時にリファクタリングする
+  ModifyChannel :: GuildId -> TimesChannel -> DiscordChannel m ()
 
 type instance DispatchOf DiscordChannel = Dynamic
 
@@ -89,3 +92,7 @@ createChannel guildId params = send (CreateChannel guildId params)
 
 getChannels :: (HasCallStack, DiscordChannel :> es) => GuildId -> Eff es [Channel]
 getChannels guildId = send (GetChannels guildId)
+
+
+modifyChannel :: (HasCallStack, DiscordChannel :> es) => GuildId -> TimesChannel -> Eff es ()
+modifyChannel guildId channel = send (ModifyChannel guildId channel)

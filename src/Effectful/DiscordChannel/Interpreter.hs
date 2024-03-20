@@ -21,6 +21,8 @@ import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.Internal.Monad
 import Effectful.Req (Request, getResponseBodyAsJsonResponse, request)
 import Network.HTTP.Req
+import Effectful.DynamicLogger
+import RIO (displayShow)
 
 host :: Text
 host = "discord.com"
@@ -28,7 +30,7 @@ host = "discord.com"
 version :: Text
 version = "v10"
 
-runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es) => Eff (DiscordChannel : es) a -> Eff es a
+runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es, DynamicLogger :> es) => Eff (DiscordChannel : es) a -> Eff es a
 runDiscordChannel = interpret $ \_ -> \case
   SendMessage params -> do
     token <- getToken
@@ -49,3 +51,7 @@ runDiscordChannel = interpret $ \_ -> \case
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr $
         header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
+  ModifyChannel guildId times -> do
+    -- WIP: あとでDiscordAPIに繋ぐ
+    info . displayShow $ guildId
+    info . displayShow $ times
