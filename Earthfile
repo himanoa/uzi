@@ -19,5 +19,6 @@ build:
     --target="all" \
     --output="output" \
     --extra-args="--jobs --constraint=\"vector -boundschecks\""
+  RUN strip output/uzi-exe
   SAVE ARTIFACT output AS LOCAL output
   SAVE IMAGE --push "${BASE_TAG}uzi-exe"
