@@ -9,13 +9,10 @@ import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Discord.ChannelName
+import Data.Discord.ChannelId
 import Data.Scientific
 import Data.Text hiding (drop)
 import GHC.Generics
-
-newtype ChannelId = ChannelId Text
-  deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via Text
 
 data ChannelType = GuildText | GuildVoice | GuildCategory
   deriving (Show, Eq, Generic)

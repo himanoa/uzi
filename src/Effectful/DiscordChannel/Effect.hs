@@ -13,7 +13,7 @@ module Effectful.DiscordChannel.Effect where
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
-import Data.Discord.Channel (Channel)
+import Data.Discord.Channel (Channel, ChannelPosition)
 import Data.Text hiding (drop)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
@@ -80,7 +80,7 @@ data DiscordChannel :: Effect where
   CreateChannel :: GuildId -> CreateChannelParams -> DiscordChannel m ()
   GetChannels :: GuildId -> DiscordChannel m [Channel]
   -- FIXME: 手抜き実装でTimesに依存していて、他のChannelを変更する時に困るのでその時にリファクタリングする
-  ModifyChannel :: GuildId -> TimesChannel -> DiscordChannel m ()
+  ModifyChannel :: GuildId -> ChannelId -> TimesChannel -> ChannelPosition -> DiscordChannel m ()
 
 type instance DispatchOf DiscordChannel = Dynamic
 
@@ -94,5 +94,5 @@ getChannels :: (HasCallStack, DiscordChannel :> es) => GuildId -> Eff es [Channe
 getChannels guildId = send (GetChannels guildId)
 
 
-modifyChannel :: (HasCallStack, DiscordChannel :> es) => GuildId -> TimesChannel -> Eff es ()
-modifyChannel guildId channel = send (ModifyChannel guildId channel)
+modifyChannel :: (HasCallStack, DiscordChannel :> es) => GuildId -> ChannelId -> TimesChannel -> ChannelPosition -> Eff es ()
+modifyChannel guildId cId channel position  = send (ModifyChannel guildId cId channel position)

@@ -51,7 +51,9 @@ runDiscordChannel = interpret $ \_ -> \case
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr $
         header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
-  ModifyChannel guildId times -> do
+  ModifyChannel guildId cid times pos -> do
     -- WIP: あとでDiscordAPIに繋ぐ
-    info . displayShow $ guildId
-    info . displayShow $ times
+    info ("guildId: " <> displayShow guildId)
+    info ("parentChannelId: " <> displayShow cid)
+    info ("times: : " <> displayShow times )
+    info ("newPosition: : " <> displayShow pos)

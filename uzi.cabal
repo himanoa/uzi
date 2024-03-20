@@ -53,6 +53,7 @@ library
       Data.Discord.UserId
       Data.Discord.UserName
       Data.Uzi
+      Data.Uzi.OrganizeTimes
       Data.Uzi.TimesChannel
       Data.Uzi.TimesChannelGroup
       Effectful.BotUser

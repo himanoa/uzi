@@ -9,6 +9,7 @@ import Control.Lens
 import Data.Aeson
 import Data.Coerce
 import Data.Discord.Channel qualified as C
+import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
 import Data.Maybe
@@ -26,7 +27,7 @@ coerceTimesName :: TimesName -> Text
 coerceTimesName = coerce
 
 data TimesChannel = TimesChannel
-  { _id :: C.ChannelId,
+  { _id :: ChannelId,
     _name :: TimesName
   }
   deriving (Show, Eq)
@@ -69,4 +70,4 @@ makeTimesChannel c = case c ^. C._type of
     timesNameParser = theNyTimesParser P.<|> shortTimesNameParser P.<|> basicTimesNameParser
 
 fromChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
-fromChannels = fromMaybe RIOV.empty . traverse makeTimesChannel
+fromChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)

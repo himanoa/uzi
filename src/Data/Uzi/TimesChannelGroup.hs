@@ -2,18 +2,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unused-matches #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Data.Uzi.TimesChannelGroup
   ( TimesChannelGroup (..),
     FindTimesChannelGroupsError (..),
     findTimesCategories,
     groupByFirstLetter,
-    sortTimesChannelGroupMap
+    sortTimesChannelGroupMap,
+    coerceChannelId
   )
 where
 
 import Control.Lens
 import Data.Discord.Channel qualified as C
+import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
@@ -24,6 +27,11 @@ import Data.List (sort)
 
 data TimesChannelGroup = AtoMGroup C.ChannelId | NtoZGroup C.ChannelId
   deriving (Show, Eq)
+
+coerceChannelId :: TimesChannelGroup -> C.ChannelId
+coerceChannelId = \case
+  AtoMGroup cid -> cid
+  NtoZGroup cid -> cid
 
 instance Ord TimesChannelGroup where
   compare a b = case (a, b) of

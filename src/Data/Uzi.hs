@@ -6,7 +6,7 @@ module Data.Uzi
   )
 where
 
-import Data.Discord.Channel
+import Data.Discord.ChannelId
 import Data.Uzi.TimesChannel qualified as TC
 
 timesId ::
