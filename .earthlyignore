@@ -1,1 +1,4 @@
 .envrc
+dist-newstyle/
+.tmp-earthly-out/
+output

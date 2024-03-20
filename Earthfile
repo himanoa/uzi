@@ -17,6 +17,7 @@ build:
   DO haskell+CABAL --args="update"
   DO haskell+PRODUCTION_BUILD_STATIC \
     --target="all" \
-    --output="all" \
+    --output="output" \
     --extra-args="--jobs --constraint=\"vector -boundschecks\""
-  SAVE ARTIFACT output output
+  SAVE ARTIFACT output AS LOCAL output
+  SAVE IMAGE --push "${BASE_TAG}uzi-exe"
