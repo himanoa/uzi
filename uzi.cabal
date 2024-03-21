@@ -160,7 +160,6 @@ test-suite uzi-test
       Data.Uzi.TimesChannelGroupSpec
       Data.Uzi.TimesChannelSpec
       Effectful.BotUser.InterpreterSpec
-      EventHandler.HelloEventHandlerSpec
       EventHandler.MessageCreateEventHandler.CreateChannelSpec
       EventHandler.MessageCreateEventHandler.OrganizeTimesSpec
       EventHandler.MessageCreateEventHandler.PingSpec

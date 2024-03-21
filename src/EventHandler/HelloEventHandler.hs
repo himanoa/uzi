@@ -6,7 +6,6 @@ module EventHandler.HelloEventHandler where
 
 import Data.ByteString.Char8 qualified as ByteString
 import Data.Discord
-import Data.Discord.Request.IdentifyRequest (defaultIdentifyRequest)
 import Data.Text
 import Data.Text.Encoding (decodeUtf8)
 import Effectful
@@ -14,9 +13,8 @@ import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordGateway (DiscordGateway, sendEvent)
 import Effectful.DynamicLogger
 import Effectful.NonDet
-import Effectful.Concurrent
-import Data.Aeson (object)
-import Data.Aeson.Types
+import Effectful.Concurrent (forkIO, Concurrent, threadDelay)
+import RIO (void)
 
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
@@ -27,9 +25,10 @@ helloEventHandler = \case
     discordApiToken <- getToken
     sendEvent . Identify . defaultIdentifyRequest $ discordApiToken
     info "Sent HelloEvetnt"
+    info "Fork heartbeart send task"
   _ -> emptyEff
 
-sendHeartbeat  :: (DiscordGateway :> es) => Int -> Eff es ()
+sendHeartbeat  :: (DiscordGateway :> es, Concurrent :> es) => Int -> Eff es ()
 sendHeartbeat interval = do
-  let heartbeartObject = object ["op" .= (1 :: Int), "d" .= (251 :: Int)]
-  undefined
+  sendEvent Heartbeat
+  void . threadDelay $ (interval * (1 :: Int))

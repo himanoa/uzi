@@ -22,8 +22,8 @@ spec = describe "Response" $ do
     describe "parseJSON" $ do
       describe "if receive HelloEventResponse" $ do
         it "is return to Hello" $ do
-          let json = "{\"op\": 10}"
-          decode @Response json `shouldBe` (Just . Hello $ HelloEventResponse)
+          let json = "{\"op\": 10, \"d\": { \"heartbeat_interval\": 10 }}"
+          decode @Response json `shouldBe` (Just . Hello $ HelloEventResponse { _interval = 10 })
       describe "if receive ReadyEventResponse" $ do
         it "is return to Ready" $ do
           let json = "{\"op\": 0, \"t\": \"READY\", \"d\": { \"user\": { \"id\": \"\", \"username\": \"\", \"globalname\": \"\" }}}"

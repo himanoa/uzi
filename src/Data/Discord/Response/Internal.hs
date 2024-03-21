@@ -21,9 +21,11 @@ data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCre
   deriving (Show, Eq)
 
 instance FromJSON Response where
-  parseJSON = withObject "Response" $ \v ->
+  parseJSON  = withObject "Response" $ \v ->
     v .: "op" >>= parseJSON @ReceiveEventOperationCode >>= \case
-      OC.Hello -> pure . Hello $ HelloEventResponse
+      OC.Hello -> do
+        response <- parseJSON @HelloEventResponse (Object v)
+        pure . Hello $ response
       OC.Ready ->
         v .: "t" >>= parseJSON @EventName >>= \case
           ReadyEventName -> do
