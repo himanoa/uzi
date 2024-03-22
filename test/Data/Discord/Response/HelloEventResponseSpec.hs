@@ -16,7 +16,7 @@ spec = describe "HelloEventResponse" $ do
       describe "if op equal 10" $ do
         it "is return to Just HelloEventResponse" $ do
           let json = "{\"op\": 10, \"d\": { \"heartbeat_interval\": 10 }}"
-          Data.Aeson.decode @HelloEventResponse json `shouldBe` Just HelloEventResponse { _interval = 10 }
+          Data.Aeson.decode @HelloEventResponse json `shouldBe` Just HelloEventResponse {_interval = 10}
       describe "if op equal 11" $ do
         it "is return to Just HelloEventResponse" $ do
           let json = "{\"op\": 11}"

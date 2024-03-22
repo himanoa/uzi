@@ -17,11 +17,11 @@ import Data.Discord.Response.ReadyEventResponse
 import Data.Discord.User
 import Data.Functor
 
-data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse
+data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse | HeartbeatAck
   deriving (Show, Eq)
 
 instance FromJSON Response where
-  parseJSON  = withObject "Response" $ \v ->
+  parseJSON = withObject "Response" $ \v ->
     v .: "op" >>= parseJSON @ReceiveEventOperationCode >>= \case
       OC.Hello -> do
         response <- parseJSON @HelloEventResponse (Object v)
@@ -34,3 +34,4 @@ instance FromJSON Response where
             pure . Ready $ ReadyEventResponse {_user = userObj}
           MessageCreateEventName -> parseJSON @MessageCreateEventResponse (Object v) <&> MessageCreate
           _ -> prependFailure "Not Supported" (typeMismatch "t" "xxx")
+      OC.HeartbeatAck -> pure HeartbeatAck

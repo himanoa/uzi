@@ -26,7 +26,7 @@ spec = describe "PingSpec" $ do
   describe "pingEventHandler" $ do
     context "when provide not MessageCreateEvent" $ do
       it "should be return to emptyEff" $ do
-        let response = Hello HelloEventResponse { _interval = 10 }
+        let response = Hello HelloEventResponse {_interval = 10}
         let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel $ pingEventHandler response
         isLeft actual `shouldBe` True
     context "when provide MessageCreateEvent" $ do

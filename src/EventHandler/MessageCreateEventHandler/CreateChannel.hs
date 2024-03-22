@@ -8,6 +8,7 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.MessageCreateEventResponse qualified as MCE
+import Data.Text
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
@@ -16,7 +17,6 @@ import Effectful.Error.Dynamic
 import Effectful.NonDet
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P
-import Data.Text
 
 craeteChannelCommandParser :: P.Parser Text
 craeteChannelCommandParser = do
@@ -44,4 +44,3 @@ createChannelEventHandler = \case
             pure ()
       Nothing -> emptyEff
   _ -> emptyEff
-

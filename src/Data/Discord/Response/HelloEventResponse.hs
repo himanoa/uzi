@@ -5,17 +5,17 @@
 
 module Data.Discord.Response.HelloEventResponse
   ( HelloEventResponse (..),
-    interval
+    interval,
   )
 where
 
-import Data.Aeson 
+import Control.Lens
+import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode (Hello))
 import GHC.Generics
-import Control.Lens
 
-newtype HelloEventResponse = HelloEventResponse { _interval :: Int }
+newtype HelloEventResponse = HelloEventResponse {_interval :: Int}
   deriving (Show, Generic, Eq)
 
 makeLenses ''HelloEventResponse
@@ -28,5 +28,5 @@ instance FromJSON HelloEventResponse where
       Hello -> do
         dataSection <- v .: "d"
         i <- parseJSON @Int =<< dataSection .: "heartbeat_interval"
-        pure $ HelloEventResponse { _interval = i}
+        pure $ HelloEventResponse {_interval = i}
       _ -> prependFailure "Not supported op code" (typeMismatch "op" "")

@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
@@ -9,14 +10,16 @@ module Lib
   )
 where
 
+import Control.Exception qualified as RIO
 import Control.Exception.Safe
 import Control.Monad (forever)
 import Data.Discord
 import Data.Discord.User
+import Data.Uzi.HeartbeatInterval
 import Effectful (Eff, IOE, runEff, (:>))
 import Effectful.BotUser
-import Effectful.Concurrent (Concurrent)
-import Effectful.Concurrent.Async (concurrently_, runConcurrent)
+import Effectful.Concurrent (Concurrent, threadDelay)
+import Effectful.Concurrent.Async (forConcurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
 import Effectful.DiscordApiTokenReader
 import Effectful.DiscordChannel
@@ -44,21 +47,21 @@ instance Exception UziError
 
 runUzi = runEff $ do
   logOptions <- logOptionsHandle RIO.stderr True
-  runConcurrent . runEnvironment . runLog logOptions . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel . evalState @(Maybe User) Nothing . runBotUser $ startUp
+  runConcurrent . runEnvironment . runLog logOptions . runDynamicLogger . runDiscordApiTokenReader . runRequest . runDiscordChannel . evalState @(Maybe User) Nothing . runBotUser . evalState @(Maybe HeartbeatInterval) Nothing $ startUp
 
-startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => Eff es ()
+startUp :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es) => Eff es ()
 startUp = do
   _ <- info "Hello uzi"
   _ <- info "Load enviroments"
   withDiscordGatewayConnection onConnect
   pure ()
 
-onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => Connection -> Eff es ()
+onConnect :: (DynamicLogger :> es, IOE :> es, Concurrent :> es, Environment :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es) => Connection -> Eff es ()
 onConnect c = do
   _ <- info "Connected websocket"
   _ <- withPingThread c 15 (pure ()) $ do
     queue <- atomically newTQueue
-    concurrently_ (forever (runDiscordGateway c (receiver queue))) (forever $ runDiscordGateway c (sender queue))
+    forConcurrently_ [receiver queue, sender queue, sendHeartbeat `catch` \MissingHeartbeatInterval -> pure ()] (forever . runDiscordGateway c)
   -- TODO: Handle Ctrl + C and kill signal
   pure ()
 
@@ -73,7 +76,19 @@ receiver queue = do
 data SenderError = EventQueueIsEmpty
   deriving (Show)
 
-sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es) => TQueue Response -> Eff es ()
+sender :: (DynamicLogger :> es, Concurrent :> es, DiscordGateway :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es) => TQueue Response -> Eff es ()
 sender queue = do
   event <- atomically $ readTQueue queue
   dispatchEventHandlers event
+
+data SendHeartbeatError = MissingHeartbeatInterval
+  deriving (Show, Eq, Exception)
+
+sendHeartbeat :: (DiscordGateway :> es, Concurrent :> es, State (Maybe HeartbeatInterval) :> es, DynamicLogger :> es) => Eff es ()
+sendHeartbeat = do
+  intervalMaybe <- get @(Maybe HeartbeatInterval)
+  interval <- maybe (RIO.throw MissingHeartbeatInterval) pure intervalMaybe
+  info "Send heartbeart"
+  sendEvent Heartbeat
+  info "Send heartbeart"
+  RIO.void . threadDelay $ (coerceHeartbeatInterval interval * 1000 * (1 :: Int))

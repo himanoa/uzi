@@ -27,14 +27,14 @@ runDummyDiscordChannel = interpret $ \_ -> \case
   SendMessage _ -> pure ()
   CreateChannel _ params -> put . Just $ params
   GetChannels _ -> pure []
-  ModifyChannel  {} -> pure ()
+  ModifyChannel {} -> pure ()
 
 spec :: Spec
 spec = describe "OrganizeTimes" $ do
   describe "organizeTimesHandler" $ do
     context "when not MessageCreate event provided" $ do
       it "should be return to emptyEff" $ do
-        let response = Hello HelloEventResponse { _interval = 10}
+        let response = Hello HelloEventResponse {_interval = 10}
         let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ organizeTimesHandler response
         isLeft actual `shouldBe` True
     context "when MessageCreate event provided" $ do

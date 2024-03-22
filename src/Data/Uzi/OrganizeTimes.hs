@@ -13,10 +13,10 @@ import Effectful.DiscordChannel
 import Effectful.DiscordChannel.Effect (getChannels)
 import Effectful.Error.Dynamic
 import Effectful.State.Static.Local
+import RIO qualified
 import RIO.Map qualified as M
 import RIO.Vector qualified as V
 import RIO.Vector.Boxed qualified as VU
-import RIO qualified
 
 newtype OrganizeTimesError = FindTimesError FindTimesChannelGroupsError
   deriving (Show, Eq)

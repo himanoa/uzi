@@ -34,7 +34,7 @@ spec = describe "CreateChannel" $ do
   describe "createChannelEventHandler" $ do
     context "when not MessageCreate event provided" $ do
       it "should be return to emptyEff" $ do
-        let response = Hello HelloEventResponse { _interval = 10 }
+        let response = Hello HelloEventResponse {_interval = 10}
         let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ createChannelEventHandler response
         isLeft actual `shouldBe` True
     context "when MessageCreate event provided" $ do
