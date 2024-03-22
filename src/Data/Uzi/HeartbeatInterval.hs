@@ -1,13 +1,14 @@
-module Data.Uzi.HeartbeatInterval (
-  HeartbeatInterval(..),
-  coerceHeartbeatInterval,
-  makeHeartbeatInterval
-) where
+module Data.Uzi.HeartbeatInterval
+  ( HeartbeatInterval (..),
+    coerceHeartbeatInterval,
+    makeHeartbeatInterval,
+  )
+where
 
 import Data.Coerce (coerce)
 
 newtype HeartbeatInterval = HeartbeatInterval Int
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 coerceHeartbeatInterval :: HeartbeatInterval -> Int
 coerceHeartbeatInterval = coerce
