@@ -21,4 +21,9 @@ build:
     --extra-args="--jobs --constraint=\"vector -boundschecks\""
   RUN strip output/uzi-exe
   SAVE ARTIFACT output AS LOCAL output
-  SAVE IMAGE --push "${BASE_TAG}uzi-exe"
+
+docker:
+  FROM alpine:3.19.1
+  COPY +build/output .
+  ENTRYPOINT ["./uzi-exe"]
+  SAVE IMAGE himanoa/uzi:0.0.1-pre
