@@ -1,6 +1,6 @@
 name:                uzi
 language:            GHC2021
-version:             0.1.0.0
+version:             0.2.0.0
 github:              "githubuser/uzi"
 license:             BSD-3-Clause
 author:              "Author name here"
