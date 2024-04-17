@@ -1,6 +1,5 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module EventHandler.MessageCreateEventHandler
   ( dispatchMessageEventHandlers,
@@ -20,6 +19,7 @@ import Effectful.NonDet
 import EventHandler.MessageCreateEventHandler.CreateChannel (createChannelEventHandler)
 import EventHandler.MessageCreateEventHandler.OrganizeTimes
 import EventHandler.MessageCreateEventHandler.Ping
+import EventHandler.MessageCreateEventHandler.Help
 
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
@@ -28,7 +28,7 @@ dispatchMessageEventHandlers res = case res of
       Just botUser -> do
         let mentionIds = map (^. M.id) (e ^. mentions)
         if not (e ^. isBot) && any (\m -> m == (botUser ^. U.id)) mentionIds
-          then pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res
+          then pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res <|> helpEventHandler res
           else emptyEff
       Nothing -> emptyEff
   _ -> emptyEff
