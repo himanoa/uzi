@@ -19,6 +19,7 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.List (sort)
+import Data.Text (toUpper)
 import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
 import RIO qualified
@@ -54,11 +55,16 @@ findTimesCategories cs =
     findTimesChannelGroups :: C.Channel -> (Maybe TimesChannelGroup, Maybe TimesChannelGroup) -> (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
     findTimesChannelGroups c (aToM, nToZ) =
       if c ^. C._type == C.GuildCategory
-        then case c ^. C._name of
+        then -- Disocrdはグループチャンネルを入力した時times(a-z)のような小文字で構成されたがグループチャンネル名だったとしても、表示上はTIMES(A-Z)にしてくる。
+        -- しかし、データ上はtimes(a-z)として返ってくる
+        -- これだとパターンマッチ時に使っている名前を一意に特定しにくいため、この実装ではチャンネル名は全て大文字として扱う
+        case upperedChannelName c of
           ChannelName "TIMES(A-M)" -> (Just (AtoMGroup (c ^. C._id)), nToZ)
           ChannelName "TIMES(N-Z)" -> (aToM, Just (NtoZGroup (c ^. C._id)))
           _ -> (aToM, nToZ)
         else (aToM, nToZ)
+    upperedChannelName :: C.Channel -> ChannelName
+    upperedChannelName c = ChannelName . toUpper . coerceChannelName $ (c ^. C._name)
 
 groupByFirstLetter :: RIO.Vector TC.TimesChannel -> TimesChannelGroup -> TimesChannelGroup -> RIO.Map TimesChannelGroup [TC.TimesChannel]
 groupByFirstLetter channels aToM nToZ = do

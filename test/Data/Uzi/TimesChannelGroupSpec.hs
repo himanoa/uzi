@@ -50,7 +50,7 @@ spec = describe "TimesChannelGroup" $ do
         findTimesCategories cs `shouldBe` Left AtoMGroupMissing
 
     context "when vec includes aToM and nToZ group" $ do
-      it "should be return to Left NtoZGroupMissing" $ do
+      it "should be return to Right" $ do
         let cs =
               RIOV.fromList
                 [ C.Channel
@@ -64,6 +64,25 @@ spec = describe "TimesChannelGroup" $ do
                       C.__type = C.GuildCategory,
                       C.__position = C.ChannelPosition 0,
                       C.__name = ChannelName "TIMES(A-M)"
+                    }
+                ]
+        RIO.isRight (findTimesCategories cs) `shouldBe` True
+
+    context "when group name is lower case" $ do
+      it "should be return to Right" $ do
+        let cs =
+              RIOV.fromList
+                [ C.Channel
+                    { C.__id = C.ChannelId "x",
+                      C.__type = C.GuildCategory,
+                      C.__position = C.ChannelPosition 0,
+                      C.__name = ChannelName "times(n-z)"
+                    },
+                  C.Channel
+                    { C.__id = C.ChannelId "y",
+                      C.__type = C.GuildCategory,
+                      C.__position = C.ChannelPosition 0,
+                      C.__name = ChannelName "times(a-m)"
                     }
                 ]
         RIO.isRight (findTimesCategories cs) `shouldBe` True

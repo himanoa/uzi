@@ -1,16 +1,22 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Uzi.OrganizeTimes where
 
+import Data.Aeson
 import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
+import Data.String.Conversions
+import Data.Text.Encoding qualified as RIO
 import Data.Uzi.TimesChannel
 import Data.Uzi.TimesChannelGroup
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DiscordChannel.Effect (getChannels)
+import Effectful.DynamicLogger (DynamicLogger)
+import Effectful.DynamicLogger.Effect (info)
 import Effectful.Error.Dynamic
 import Effectful.State.Static.Local
 import RIO qualified
@@ -21,10 +27,12 @@ import RIO.Vector.Boxed qualified as VU
 newtype OrganizeTimesError = FindTimesError FindTimesChannelGroupsError
   deriving (Show, Eq)
 
-organizeTimes :: (DiscordChannel :> es, Error OrganizeTimesError :> es) => GuildId -> Eff es ()
+organizeTimes :: (DiscordChannel :> es, Error OrganizeTimesError :> es, DynamicLogger :> es) => GuildId -> Eff es ()
 organizeTimes guildId = do
   channels <- getChannels guildId
   let channelsVector = V.fromList channels :: VU.Vector C.Channel
+
+  RIO.void $ info $ RIO.displayShow $ RIO.decodeUtf8 . convertString $ ("channelsVector: " <> encode channelsVector)
 
   (aToM, nToZ) <- case findTimesCategories channelsVector of
     Right a -> pure a
