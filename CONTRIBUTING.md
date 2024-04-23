@@ -14,9 +14,8 @@
 
 Pull-Requestはいつでも歓迎しています。基本的にIssueを立てずにPull-Requestを送ってもらって問題ありません。
 
-次のPull-Requestは得に歓迎します。
-
-ここに書いていないものでも、Issueを立てたり直接メンテナに相談してください。
+次のPull-Requestは特に歓迎します。  
+ここに書いていないものでも、Issueを立てたり直接メンテナに相談してください。  
 
 - テスト追加
 - ドキュメントの修正
@@ -32,7 +31,7 @@ Pull-Requestはいつでも歓迎しています。基本的にIssueを立てず
 
 ## パッチの送り方
 
-次のワークフローに基づいてパッチを送ってください
+次のワークフローに基づいてパッチを送ってください  
 環境構築を行なっていない場合 TODO: 
 
 1. Forkする
@@ -48,13 +47,11 @@ Pull-Requestはいつでも歓迎しています。基本的にIssueを立てず
 
 ## コミットメッセージ
 
-現在は英語で書かれていますが、日本語で書いても問題ありません。
-
-**本リポジトリでは [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) は採用していません そのため、Convertional Commitsの流儀のタグが付いたコミットメッセージを書かないでください。**
-
+現在は英語で書かれていますが、日本語で書いても問題ありません。  
+**本リポジトリでは [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) は採用していません そのため、Convertional Commitsの流儀のタグが付いたコミットメッセージを書かないでください。**  
 また、コミットメッセージは変更の意図はなるべく明瞭なものが好ましいです。
 
 ### 例
 
-:x: Bad: `fix: foobar bug`
+:x: Bad: `fix: foobar bug`  
 :o: Good: `helpコマンドが末尾にスペースが入っていた場合に動かない問題の修正`
