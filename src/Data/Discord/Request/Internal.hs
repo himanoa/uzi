@@ -6,9 +6,9 @@ module Data.Discord.Request.Internal
   )
 where
 
-import RIO
 import Data.Aeson
 import Data.Discord.Request.IdentifyRequest (IdentifyRequest)
+import RIO
 
 data Request where
   Identify :: IdentifyRequest -> Request

@@ -3,10 +3,10 @@
 
 module Data.Discord.ChannelId where
 
-import RIO
 import Data.Aeson
 import Data.Coerce
 import Data.Text qualified as DT
+import RIO
 
 newtype ChannelId = ChannelId DT.Text
   deriving (Show, Eq)

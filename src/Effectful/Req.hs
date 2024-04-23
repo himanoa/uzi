@@ -13,12 +13,12 @@ module Effectful.Req
   )
 where
 
-import RIO
 import Data.Aeson
 import Effectful
 import Effectful.Dispatch.Dynamic
 import Effectful.Internal.Monad (unsafeEff_)
 import Network.HTTP.Req qualified as R
+import RIO
 
 data Request :: Effect where
   Req ::

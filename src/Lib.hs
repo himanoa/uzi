@@ -9,7 +9,6 @@ module Lib
   )
 where
 
-import RIO hiding (threadDelay, catch, forConcurrently_, atomically, TQueue, atomically, newTQueue, readTQueue, writeTQueue, threadDelay)
 import Control.Exception.Safe
 import Data.Discord
 import Data.Discord.User
@@ -29,6 +28,7 @@ import Effectful.Req
 import Effectful.State.Static.Shared
 import EventHandler
 import Network.WebSockets (Connection)
+import RIO hiding (TQueue, atomically, catch, forConcurrently_, newTQueue, readTQueue, threadDelay, writeTQueue)
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

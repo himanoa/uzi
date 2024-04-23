@@ -2,10 +2,10 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Data.Discord.GuildId where
-import RIO
 
 import Data.Aeson
 import Data.Text qualified as DT
+import RIO
 
 newtype GuildId = GuildId DT.Text
   deriving (Eq)

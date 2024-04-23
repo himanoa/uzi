@@ -6,7 +6,6 @@ module Data.Discord.Response.Internal
   )
 where
 
-import RIO
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Discord.EventName
@@ -16,6 +15,7 @@ import Data.Discord.Response.HelloEventResponse
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Discord.Response.ReadyEventResponse
 import Data.Discord.User
+import RIO
 
 data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse | HeartbeatAck
   deriving (Show, Eq)

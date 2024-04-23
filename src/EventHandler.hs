@@ -3,7 +3,6 @@ module EventHandler
   )
 where
 
-import RIO
 import Data.Discord.Response
 import Data.Uzi.HeartbeatInterval
 import Effectful
@@ -17,6 +16,7 @@ import Effectful.State.Static.Shared
 import EventHandler.HelloEventHandler
 import EventHandler.MessageCreateEventHandler
 import EventHandler.ReadyEventHandler
+import RIO
 
 dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es) => Response -> Eff es ()
 dispatchEventHandlers r = do

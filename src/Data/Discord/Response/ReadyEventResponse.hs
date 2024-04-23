@@ -4,12 +4,12 @@
 
 module Data.Discord.Response.ReadyEventResponse where
 
-import RIO
 import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Discord.ReceiveEventOperationCode
 import Data.Discord.User
+import RIO
 
 newtype ReadyEventResponse = ReadyEventResponse {_user :: User}
   deriving (Show, Generic, Eq)

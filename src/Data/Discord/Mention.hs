@@ -6,12 +6,12 @@
 
 module Data.Discord.Mention where
 
-import RIO
 import Control.Lens
 import Data.Aeson
 import Data.Discord.GlobalName
 import Data.Discord.UserId
 import Data.Discord.UserName
+import RIO
 
 data Mention = Mention
   { _id :: UserId,

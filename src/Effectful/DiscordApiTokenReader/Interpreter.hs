@@ -5,13 +5,13 @@
 
 module Effectful.DiscordApiTokenReader.Interpreter where
 
-import RIO
 import Control.Exception
 import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful
 import Effectful.DiscordApiTokenReader.Effect
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.Environment
+import RIO
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

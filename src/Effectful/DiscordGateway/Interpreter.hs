@@ -8,7 +8,6 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
-import RIO
 import Data.Aeson (eitherDecode, encode)
 import Data.ByteString.Lazy qualified as LB
 import Data.Discord
@@ -22,8 +21,9 @@ import Network.Socket
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Network.WebSockets qualified as Wuss
-import Wuss qualified as WS
+import RIO
 import RIO.Text qualified as T
+import Wuss qualified as WS
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
 runClient host port path opt headers inner =

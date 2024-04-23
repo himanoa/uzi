@@ -5,7 +5,6 @@
 
 module Data.Discord.Channel where
 
-import RIO
 import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
@@ -13,6 +12,7 @@ import Data.Coerce
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Scientific
+import RIO
 
 data ChannelType = GuildText | GuildVoice | GuildCategory
   deriving (Show, Eq, Generic)

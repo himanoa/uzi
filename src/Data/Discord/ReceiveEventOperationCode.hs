@@ -5,10 +5,10 @@ module Data.Discord.ReceiveEventOperationCode
   )
 where
 
-import RIO
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Scientific
+import RIO
 
 data ReceiveEventOperationCode = Hello | Ready | HeartbeatAck deriving (Show)
 

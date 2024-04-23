@@ -4,7 +4,6 @@
 
 module EventHandler.MessageCreateEventHandler.OrganizeTimes where
 
-import RIO hiding ((^.))
 import Control.Lens
 import Data.Discord
 import Data.Discord.Content
@@ -16,6 +15,7 @@ import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.NonDet
+import RIO hiding ((^.))
 
 organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 organizeTimesHandler = \case

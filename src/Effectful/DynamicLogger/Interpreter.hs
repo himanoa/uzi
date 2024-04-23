@@ -7,11 +7,11 @@
 
 module Effectful.DynamicLogger.Interpreter where
 
-import RIO hiding (logError, logInfo)
 import Effectful
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.DynamicLogger.Effect
 import Effectful.Log.Static
+import RIO hiding (logError, logInfo)
 
 runDynamicLogger :: (Log :> es) => Eff (DynamicLogger : es) a -> Eff es a
 runDynamicLogger = interpret $ \_ -> \case

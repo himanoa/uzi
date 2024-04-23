@@ -8,10 +8,10 @@ module Data.Uzi
   )
 where
 
-import RIO
 import Data.Discord.ChannelId
 import Data.Uzi.OrganizeTimes as OT
 import Data.Uzi.TimesChannel qualified as TC
+import RIO
 
 timesId ::
   (Functor f) =>

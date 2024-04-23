@@ -7,9 +7,9 @@
 
 module Data.Discord.SendOperation where
 
-import RIO
 import Control.Lens.TH
 import Data.Aeson (FromJSON, ToJSON)
+import RIO
 
 data SendOperation
   = Identify

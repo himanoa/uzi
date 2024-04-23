@@ -10,7 +10,6 @@
 
 module Effectful.DiscordChannel.Effect where
 
-import RIO hiding ((^.), HasCallStack)
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
@@ -18,6 +17,7 @@ import Data.Discord.Channel (Channel, ChannelPosition)
 import Data.Uzi.TimesChannel (TimesChannel)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
+import RIO hiding (HasCallStack, (^.))
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)

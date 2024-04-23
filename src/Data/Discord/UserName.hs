@@ -3,9 +3,9 @@
 
 module Data.Discord.UserName where
 
-import RIO
 import Data.Aeson
 import Data.Text qualified as DT
+import RIO
 
 newtype UserName = UserName DT.Text
   deriving (Show, Eq)

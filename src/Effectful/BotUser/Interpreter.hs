@@ -7,12 +7,12 @@
 
 module Effectful.BotUser.Interpreter where
 
-import RIO
 import Data.Discord.User (User)
 import Effectful
 import Effectful.BotUser.Effect
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.State.Static.Shared
+import RIO
 
 runBotUser :: (State (Maybe User) :> es) => Eff (BotUser : es) a -> Eff es a
 runBotUser = interpret $ \_ -> \case

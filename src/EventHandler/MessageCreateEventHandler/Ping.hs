@@ -4,7 +4,6 @@
 
 module EventHandler.MessageCreateEventHandler.Ping where
 
-import RIO hiding ((^.))
 import Control.Lens
 import Data.Discord
 import Data.Discord.Content (body)
@@ -14,6 +13,7 @@ import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
+import RIO hiding ((^.))
 
 pingEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 pingEventHandler = \case
