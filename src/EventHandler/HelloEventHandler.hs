@@ -17,7 +17,7 @@ import Effectful.DiscordGateway (DiscordGateway, sendEvent)
 import Effectful.DynamicLogger
 import Effectful.NonDet
 import Effectful.State.Static.Shared
-import RIO qualified
+import RIO hiding ((^.))
 
 convertToText :: String -> Text
 convertToText = decodeUtf8 . ByteString.pack
@@ -33,8 +33,3 @@ helloEventHandler = \case
     RIO.void $ put . Just . makeHeartbeatInterval $ interval'
     info ("Put heartbeat interval " <> RIO.displayShow interval')
   _ -> emptyEff
-
--- sendHeartbeat  :: (DiscordGateway :> es, Concurrent :> es) => Int -> Eff es ()
--- sendHeartbeat interval = do
---   sendEvent Heartbeat
---   void . threadDelay $ (interval * (1 :: Int))

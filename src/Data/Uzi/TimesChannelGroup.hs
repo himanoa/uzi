@@ -14,6 +14,7 @@ module Data.Uzi.TimesChannelGroup
   )
 where
 
+import RIO hiding ((^.))
 import Control.Lens
 import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
@@ -22,7 +23,6 @@ import Data.List (sort)
 import Data.Text (toUpper)
 import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
-import RIO qualified
 import RIO.Map qualified as Map
 import RIO.Vector qualified as RIOV
 

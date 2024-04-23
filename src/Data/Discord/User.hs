@@ -4,13 +4,13 @@
 
 module Data.Discord.User where
 
+import RIO
 import Control.Lens
 import Data.Aeson
 import Data.Default
 import Data.Discord.GlobalName (GlobalName (GlobalName))
 import Data.Discord.UserId
 import Data.Discord.UserName
-import GHC.Generics (Generic)
 
 data User = User
   { _id :: UserId,

@@ -8,12 +8,11 @@
 
 module Effectful.DiscordGateway.Interpreter where
 
+import RIO
 import Data.Aeson (eitherDecode, encode)
 import Data.ByteString.Lazy qualified as LB
 import Data.Discord
 import Data.String.Conversions (ConvertibleStrings (convertString))
-import Data.Text
-import Data.Text.Encoding (encodeUtf8)
 import Effectful
 import Effectful.DiscordGateway.Effect
 import Effectful.Dispatch.Dynamic (interpret)
@@ -23,8 +22,8 @@ import Network.Socket
 import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Network.WebSockets qualified as Wuss
-import RIO qualified
 import Wuss qualified as WS
+import RIO.Text qualified as T
 
 runClient :: (MonadUnliftIO m) => String -> PortNumber -> String -> WS.ConnectionOptions -> WS.Headers -> (WS.Connection -> m a) -> m a
 runClient host port path opt headers inner =
@@ -51,7 +50,7 @@ runDiscordGateway conn = interpret $ \_ -> \case
       Nothing -> pure ()
     case handleEvent d of
       Left s -> do
-        attention . RIO.displayBytesUtf8 . encodeUtf8 . pack $ s
+        attention . RIO.displayBytesUtf8 . encodeUtf8 . T.pack $ s
         pure Nothing
       Right p -> do
         pure . Just $ p

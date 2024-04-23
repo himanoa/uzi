@@ -3,6 +3,7 @@ module EventHandler
   )
 where
 
+import RIO
 import Data.Discord.Response
 import Data.Uzi.HeartbeatInterval
 import Effectful

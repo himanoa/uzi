@@ -6,14 +6,13 @@
 
 module Effectful.DiscordChannel.Interpreter where
 
+import RIO hiding((^.))
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Coerce (coerce)
 import Data.Discord.Channel
 import Data.Discord.ChannelId
 import Data.Discord.GuildId
-import Data.Text (Text)
-import Data.Text.Encoding
 import Data.Uzi.TimesChannel qualified as TC
 import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)

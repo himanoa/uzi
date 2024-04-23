@@ -5,6 +5,7 @@
 
 module Effectful.DiscordApiTokenReader.Interpreter where
 
+import RIO
 import Control.Exception
 import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful

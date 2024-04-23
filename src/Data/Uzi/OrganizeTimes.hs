@@ -4,6 +4,7 @@
 
 module Data.Uzi.OrganizeTimes where
 
+import RIO
 import Data.Aeson
 import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
@@ -19,7 +20,6 @@ import Effectful.DynamicLogger (DynamicLogger)
 import Effectful.DynamicLogger.Effect (info)
 import Effectful.Error.Dynamic
 import Effectful.State.Static.Local
-import RIO qualified
 import RIO.Map qualified as M
 import RIO.Vector qualified as V
 import RIO.Vector.Boxed qualified as VU

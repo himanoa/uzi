@@ -5,6 +5,8 @@
 
 module Data.Uzi.TimesChannel where
 
+import RIO hiding ((^.)) 
+import RIO.Vector qualified as RIOV
 import Control.Lens
 import Data.Aeson
 import Data.Coerce
@@ -13,8 +15,6 @@ import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
 import Data.Text
-import RIO qualified
-import RIO.Vector qualified as RIOV
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P
 

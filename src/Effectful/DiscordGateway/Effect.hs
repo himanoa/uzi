@@ -4,6 +4,7 @@
 
 module Effectful.DiscordGateway.Effect where
 
+import RIO hiding (HasCallStack)
 import Data.Discord.Request
 import Data.Discord.Response
 import Effectful

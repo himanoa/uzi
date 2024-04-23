@@ -7,6 +7,7 @@
 
 module Effectful.BotUser.Interpreter where
 
+import RIO
 import Data.Discord.User (User)
 import Effectful
 import Effectful.BotUser.Effect

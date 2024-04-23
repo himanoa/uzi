@@ -7,9 +7,9 @@
 
 module Data.Discord.Internal where
 
+import RIO
 import Control.Lens.TH
 import Data.Aeson (FromJSON, ToJSON)
-import GHC.Generics
 
 data PayloadStructure d = PayloadStructure
   { op :: Int,

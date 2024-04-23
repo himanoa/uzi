@@ -16,6 +16,7 @@ module Data.Discord.Response.MessageCreateEventResponse
   )
 where
 
+import RIO
 import Control.Lens
 import Data.Aeson
 import Data.Discord.ChannelId
@@ -23,7 +24,6 @@ import Data.Discord.Content
 import Data.Discord.GuildId (GuildId)
 import Data.Discord.Member
 import Data.Discord.Mention
-import Data.Maybe (fromMaybe)
 
 data MessageCreateEventResponse = MessageCreateEventResponse
   { _channelId :: ChannelId,

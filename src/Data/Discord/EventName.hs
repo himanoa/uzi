@@ -4,6 +4,7 @@
 
 module Data.Discord.EventName where
 
+import RIO
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 

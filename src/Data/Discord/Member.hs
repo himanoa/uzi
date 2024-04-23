@@ -8,14 +8,14 @@ module Data.Discord.Member
   )
 where
 
+import RIO
 import Data.Aeson
 import Data.Discord.Nickname
-import Data.Text
-import GHC.Generics
+import Data.Text qualified as DT
 
-newtype Role = Role Text
+newtype Role = Role DT.Text
   deriving (Show, Eq)
-  deriving (FromJSON) via Text
+  deriving (FromJSON) via DT.Text
 
 data Member = Member
   { roles :: [Role],

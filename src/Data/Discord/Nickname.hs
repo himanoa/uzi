@@ -3,9 +3,10 @@
 
 module Data.Discord.Nickname where
 
+import RIO
 import Data.Aeson
-import Data.Text
+import Data.Text qualified as DT
 
-newtype Nickname = Nickname Text
+newtype Nickname = Nickname DT.Text
   deriving (Show, Eq)
-  deriving (FromJSON) via Text
+  deriving (FromJSON) via DT.Text

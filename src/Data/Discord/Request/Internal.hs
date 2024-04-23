@@ -6,6 +6,7 @@ module Data.Discord.Request.Internal
   )
 where
 
+import RIO
 import Data.Aeson
 import Data.Discord.Request.IdentifyRequest (IdentifyRequest)
 

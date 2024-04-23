@@ -2,12 +2,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Effectful.DynamicLogger.Interpreter where
 
+import RIO hiding (logError, logInfo)
 import Effectful
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.DynamicLogger.Effect

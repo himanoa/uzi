@@ -7,9 +7,9 @@
 
 module Data.Discord.ReceiveEvent where
 
+import RIO
 import Control.Lens (makeLenses)
 import Data.Aeson
-import GHC.Generics
 
 data ReceiveEvent
   = Hello

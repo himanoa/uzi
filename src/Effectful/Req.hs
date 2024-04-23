@@ -13,8 +13,8 @@ module Effectful.Req
   )
 where
 
+import RIO
 import Data.Aeson
-import Data.Proxy
 import Effectful
 import Effectful.Dispatch.Dynamic
 import Effectful.Internal.Monad (unsafeEff_)

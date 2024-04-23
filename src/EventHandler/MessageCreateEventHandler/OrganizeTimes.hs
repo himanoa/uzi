@@ -4,6 +4,7 @@
 
 module EventHandler.MessageCreateEventHandler.OrganizeTimes where
 
+import RIO hiding ((^.))
 import Control.Lens
 import Data.Discord
 import Data.Discord.Content

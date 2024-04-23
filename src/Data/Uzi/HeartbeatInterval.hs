@@ -5,6 +5,7 @@ module Data.Uzi.HeartbeatInterval
   )
 where
 
+import RIO
 import Data.Coerce (coerce)
 
 newtype HeartbeatInterval = HeartbeatInterval Int
