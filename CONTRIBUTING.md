@@ -46,6 +46,11 @@ Pull-Requestはいつでも歓迎しています。基本的にIssueを立てず
 1. 変更をpushする `git push origin HEAD`
 1. Pull-Requestを送る
 
+
+## コードベースの解説
+
+See. [ProjectStructure.md](./docs/ProjectStructure.md)
+
 ## コミットメッセージ
 
 現在は英語で書かれていますが、日本語で書いても問題ありません。  
@@ -64,3 +69,4 @@ Pull-Requestはいつでも歓迎しています。基本的にIssueを立てず
 該当するIssueがある場合はIssue上で @himanoa にmentionしていただくか、Discord上でコミュニケーションを取ってもらえると助かります。
 
 作業が止まってパッチが送信されないことが一番の損失なため、どんなことでも相談してもらえると嬉しいです。
+
