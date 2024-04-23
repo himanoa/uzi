@@ -22,3 +22,41 @@ ghcup install stack 2.15.3
 Uziを開発するにあたって、動作確認用のDiscordサーバーを一つ作ってそちらで開発することを強く推奨します。
 
 このセクションでは、実際に動作確認用のDiscordサーバーを作成して、Uziを動かすまでの手順を解説します。
+
+### 1. 自分用のDiscordサーバーを作成
+ 
+1. 画像の箇所をクリックします  
+![f80cf14f565429968c01fecc932b4375](https://github.com/himanoa/uzi/assets/18651963/a69239ef-1cb2-4e32-8cb4-4b762ee4ad25)
+1. オリジナルを作成をクリックします  
+![b27248c49e43b9a7e355ba6a6257f130](https://github.com/himanoa/uzi/assets/18651963/ac1ad9ab-d205-44b5-b76c-3877bc2a7705)
+1. 「あなたのサーバーについてもう少し詳しく教えてください」は「自分と友達のため」を選択してください
+1. サーバー名と画像は好きに編集してもらって問題ないです。
+1. 次の画面になったらサーバーの作成は完了です
+![49962f3ae7d2f3170eb6b9330bde816f](https://github.com/himanoa/uzi/assets/18651963/d3c4fd6c-e3e2-401a-a56a-dd414cf4e6c6)
+
+## 2. 動作確認用のBotトークンの取得
+
+デバッグ用のサーバーができたら動作確認用のBotトークンを取得します。このトークンを読み込ませることでUziは初めてDiscordと通信することができます
+
+1. [Discord Developer PortalのApplication](https://discord.com/developers/applications) にアクセスします
+2. 「New Application」をクリックします
+![0dc1a10a61ae97b9c3ff89a5d3ff5f83](https://github.com/himanoa/uzi/assets/18651963/d457a751-e0f7-40c2-b24b-e842e27881ed)
+3. Botの名前を入力し、規約に同意したら 「Create」をクリックします。  
+![e90f8e2d94052cfae8d1926e5cc8efd3](https://github.com/himanoa/uzi/assets/18651963/ff44c13e-ec29-42c7-87d5-8ebe22549308)
+4. 「Bot」「Token」を参照し、Resetボタンを押すとトークンが出力されるのでこれを控えておきます  
+![395b03a7af8ae859079ccc396f24c58d](https://github.com/himanoa/uzi/assets/18651963/af6fa27f-676e-4392-9412-3036763f6925)  
+      1. ここで入手したトークンは紛失すると再発行するしかない & Uziを動かすために必要なため、大切に保管しておく必要があります
+      2. また、流通した場合他者がこのトークンを利用して、DiscordのAPIを使うことができるので流出しないように気をつけましょう
+ 
+### おすすめのトークン管理方法
+
+macOS or Linuxユーザーの方は uzi のルートディレクトリに `.env` を配置し下記のようなファイル名にして管理しておくことをおすすめします。  
+`.env` ファイルな理由は、gitignoreに追加されているため、gitは `.env` ファイルの内容を無視するためトークンが流出しにくいためです。
+
+```
+UZI_DISCORD_API_TOKEN="<発行されたトークン>"
+```
+
+この方式で管理しておくことで、Uziの開発をする時のみ `source .env` するとAPIトークンが読み込まれ、`stack run` するだけでUziを万全の状態で起動することができます。
+
+### 3. 動作確認用のDiscordBotを自分のサーバーに追加する
