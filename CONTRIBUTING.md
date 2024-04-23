@@ -36,6 +36,7 @@ Pull-Requestはいつでも歓迎しています。基本的にIssueを立てず
 
 1. Forkする
 1. `git clone <forkしたあなたのリポジトリ>`
+1. フォーマットなどに必要なツールのインストール `bin/install-deps`
 1. Branchを作成する `git checkout -b <feature-name>`
 1. テストが通るか確認する `stack test`
 1. コードを変更する
