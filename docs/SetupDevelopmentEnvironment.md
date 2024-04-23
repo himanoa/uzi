@@ -60,3 +60,23 @@ UZI_DISCORD_API_TOKEN="<発行されたトークン>"
 この方式で管理しておくことで、Uziの開発をする時のみ `source .env` するとAPIトークンが読み込まれ、`stack run` するだけでUziを万全の状態で起動することができます。
 
 ### 3. 動作確認用のDiscordBotを自分のサーバーに追加する
+
+最後に先ほどのセクションで作った動作確認用のDiscord Applicationを自分が作ったサーバーに参加させましょう。  
+このセクションではBotが必要な権限設定と、OAuthLinkを用いて自分の作ったサーバーにBotを参加させるまでの解説を行います。
+
+1.  [Discord Developer PortalのApplication](https://discord.com/developers/applications) から 「Bot」を開き 「Privileged Gateway Intents」の 「Message Content Intent」を有効にします
+![78741e2f9050210f8a32fbc1b56e66f0](https://github.com/himanoa/uzi/assets/18651963/2789a8b9-84c1-46c6-94d6-5e20452b49d8)
+2. その後出てきたポップアップの 「Save Changes」ボタンをクリックして設定を有効化します。
+3. 「OAuth2」をクリックして、「OAuth2 URL Generator」の中にある「bot」をクリックしてチェックを入れます
+![26e682a31fb3e2c59961b9cc2635e8f8](https://github.com/himanoa/uzi/assets/18651963/88c67947-ca5a-4f6d-94b0-42c5ca9990c2)
+4. 3を実施すると、下部に大量のチェックマークが入った表示になるので「Manage Server」「Manage Channels」にチェックを入れて、生成されたURLを踏みます
+![6e27f84d60f58e97742ccffd3aaf84b0](https://github.com/himanoa/uzi/assets/18651963/389183d2-54b1-4bd4-8b2f-773bc8ddf759)
+5. 下記の画面になったら、追加するサーバーに先ほど作ったサーバーを選択し、「はい」をクリックしてDiscord Applicationをサーバーに参加させます  
+![f110d679070e402d79c7382ec2a3323e](https://github.com/himanoa/uzi/assets/18651963/91b9c752-ec91-4eed-845a-5db62532c59c)
+7. 自分のDiscordの #一般 チャンネルにBotが参加してきたログが表示されたら完了です。お疲れさまでした。  
+  ![image](https://github.com/himanoa/uzi/assets/18651963/ff91cda0-51a2-45d9-b00a-77f40cb24627)
+
+
+
+
+
