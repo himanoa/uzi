@@ -7,6 +7,7 @@ module Effectful.BotUser.Effect where
 import Data.Discord.User
 import Effectful
 import Effectful.Dispatch.Dynamic
+import RIO
 
 data BotUser :: Effect where
   SetBotUser :: User -> BotUser m ()

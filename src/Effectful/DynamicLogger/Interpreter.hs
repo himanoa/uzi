@@ -2,7 +2,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
@@ -12,6 +11,7 @@ import Effectful
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.DynamicLogger.Effect
 import Effectful.Log.Static
+import RIO hiding (logError, logInfo)
 
 runDynamicLogger :: (Log :> es) => Eff (DynamicLogger : es) a -> Eff es a
 runDynamicLogger = interpret $ \_ -> \case

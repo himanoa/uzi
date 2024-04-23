@@ -5,11 +5,12 @@ module Data.Discord.ChannelName where
 
 import Data.Aeson
 import Data.Coerce
-import Data.Text
+import Data.Text qualified as DT
+import RIO
 
-newtype ChannelName = ChannelName Text
+newtype ChannelName = ChannelName DT.Text
   deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via Text
+  deriving (FromJSON, ToJSON) via DT.Text
 
-coerceChannelName :: ChannelName -> Text
+coerceChannelName :: ChannelName -> DT.Text
 coerceChannelName = coerce

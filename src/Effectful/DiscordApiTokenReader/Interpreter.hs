@@ -11,6 +11,7 @@ import Effectful
 import Effectful.DiscordApiTokenReader.Effect
 import Effectful.Dispatch.Dynamic (interpret)
 import Effectful.Environment
+import RIO
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

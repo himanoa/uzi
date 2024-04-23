@@ -14,11 +14,10 @@ import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
 import Data.Discord.Channel (Channel, ChannelPosition)
-import Data.Text hiding (drop)
 import Data.Uzi.TimesChannel (TimesChannel)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
-import GHC.Generics
+import RIO hiding (HasCallStack, (^.))
 
 data AllowedMentionTypes = Roles | Users | Everyone
   deriving (Show, Eq, Generic)

@@ -13,6 +13,7 @@ import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
+import RIO hiding ((^.))
 
 helpEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 helpEventHandler = \case

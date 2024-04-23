@@ -22,7 +22,7 @@ import Data.List (sort)
 import Data.Text (toUpper)
 import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
-import RIO qualified
+import RIO hiding ((^.))
 import RIO.Map qualified as Map
 import RIO.Vector qualified as RIOV
 

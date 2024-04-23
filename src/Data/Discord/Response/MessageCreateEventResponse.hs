@@ -23,7 +23,7 @@ import Data.Discord.Content
 import Data.Discord.GuildId (GuildId)
 import Data.Discord.Member
 import Data.Discord.Mention
-import Data.Maybe (fromMaybe)
+import RIO
 
 data MessageCreateEventResponse = MessageCreateEventResponse
   { _channelId :: ChannelId,

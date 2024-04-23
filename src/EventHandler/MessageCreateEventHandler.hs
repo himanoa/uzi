@@ -20,6 +20,7 @@ import EventHandler.MessageCreateEventHandler.CreateChannel (createChannelEventH
 import EventHandler.MessageCreateEventHandler.Help
 import EventHandler.MessageCreateEventHandler.OrganizeTimes
 import EventHandler.MessageCreateEventHandler.Ping
+import RIO hiding ((^.))
 
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of

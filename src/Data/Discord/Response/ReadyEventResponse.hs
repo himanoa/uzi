@@ -9,7 +9,7 @@ import Data.Aeson
 import Data.Aeson.Types
 import Data.Discord.ReceiveEventOperationCode
 import Data.Discord.User
-import GHC.Generics
+import RIO
 
 newtype ReadyEventResponse = ReadyEventResponse {_user :: User}
   deriving (Show, Generic, Eq)

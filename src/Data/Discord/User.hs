@@ -10,7 +10,7 @@ import Data.Default
 import Data.Discord.GlobalName (GlobalName (GlobalName))
 import Data.Discord.UserId
 import Data.Discord.UserName
-import GHC.Generics (Generic)
+import RIO
 
 data User = User
   { _id :: UserId,

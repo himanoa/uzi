@@ -12,7 +12,7 @@ import Data.Coerce
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Scientific
-import GHC.Generics
+import RIO
 
 data ChannelType = GuildText | GuildVoice | GuildCategory
   deriving (Show, Eq, Generic)

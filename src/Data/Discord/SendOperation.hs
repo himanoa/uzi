@@ -9,7 +9,7 @@ module Data.Discord.SendOperation where
 
 import Control.Lens.TH
 import Data.Aeson (FromJSON, ToJSON)
-import GHC.Generics
+import RIO
 
 data SendOperation
   = Identify

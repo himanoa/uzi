@@ -8,6 +8,7 @@ import Data.Discord.Request
 import Data.Discord.Response
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
+import RIO hiding (HasCallStack)
 
 data DiscordGateway :: Effect where
   ReceiveEvent :: DiscordGateway m (Maybe Response)

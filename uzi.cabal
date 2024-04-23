@@ -82,13 +82,14 @@ library
       EventHandler.MessageCreateEventHandler.Ping
       EventHandler.ReadyEventHandler
       Lib
-      Protocol
   other-modules:
       Paths_uzi
   autogen-modules:
       Paths_uzi
   hs-source-dirs:
       src
+  default-extensions:
+      NoImplicitPrelude
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson

@@ -11,7 +11,7 @@ import Data.Aeson
 import Data.Discord.GlobalName
 import Data.Discord.UserId
 import Data.Discord.UserName
-import Data.Maybe
+import RIO
 
 data Mention = Mention
   { _id :: UserId,

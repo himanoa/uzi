@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -10,9 +9,7 @@ module Lib
   )
 where
 
-import Control.Exception qualified as RIO
 import Control.Exception.Safe
-import Control.Monad (forever)
 import Data.Discord
 import Data.Discord.User
 import Data.Uzi.HeartbeatInterval
@@ -31,7 +28,7 @@ import Effectful.Req
 import Effectful.State.Static.Shared
 import EventHandler
 import Network.WebSockets (Connection)
-import RIO qualified
+import RIO hiding (TQueue, atomically, catch, forConcurrently_, newTQueue, readTQueue, threadDelay, writeTQueue)
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -139,7 +136,7 @@ sendHeartbeat ::
   Eff es ()
 sendHeartbeat = do
   intervalMaybe <- get @(Maybe HeartbeatInterval)
-  interval <- maybe (RIO.throw MissingHeartbeatInterval) pure intervalMaybe
+  interval <- maybe (RIO.throwM MissingHeartbeatInterval) pure intervalMaybe
   info "Start send heartbeart"
   sendEvent Heartbeat
   info "Sent heartbeart"

@@ -11,7 +11,7 @@ import Effectful
 import Effectful.BotUser.Effect
 import Effectful.DynamicLogger
 import Effectful.NonDet
-import RIO (displayShow)
+import RIO hiding ((^.))
 
 readyEventHandler :: (DynamicLogger :> es, NonDet :> es, BotUser :> es) => Response -> Eff es ()
 readyEventHandler = \case

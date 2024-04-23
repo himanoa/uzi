@@ -13,7 +13,7 @@ import Control.Lens
 import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode (Hello))
-import GHC.Generics
+import RIO
 
 newtype HelloEventResponse = HelloEventResponse {_interval :: Int}
   deriving (Show, Generic, Eq)

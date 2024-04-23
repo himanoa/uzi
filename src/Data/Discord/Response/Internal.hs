@@ -15,7 +15,7 @@ import Data.Discord.Response.HelloEventResponse
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Discord.Response.ReadyEventResponse
 import Data.Discord.User
-import Data.Functor
+import RIO
 
 data Response = Hello HelloEventResponse | Ready ReadyEventResponse | MessageCreate MessageCreateEventResponse | HeartbeatAck
   deriving (Show, Eq)

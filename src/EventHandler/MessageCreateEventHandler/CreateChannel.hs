@@ -15,6 +15,7 @@ import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.NonDet
+import RIO hiding ((^.))
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P
 
