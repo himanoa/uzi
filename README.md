@@ -27,6 +27,14 @@ See. https://github.com/himanoa/uzi/blob/master/docs/HELP.md
 
 次のコマンドを実行することでテストを実行することができます。 `stack test`
 
+## ドキュメントのビルド
+
+次のコマンドを実行してください
+
+```bash
+stack build --haddoc
+```
+
 ## コントリビューション
 
 See. [CONTRIBUTING.md](./CONTRIBUTING.md)
