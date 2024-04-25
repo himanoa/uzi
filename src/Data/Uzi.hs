@@ -1,3 +1,9 @@
+{-|
+ Module: Data.Uzi
+ Description: 宇治共和国特有のロジックや構造を表すモジュール
+ Maintainer: himanoa <matsunoappy@gmail.com>
+-}
+
 module Data.Uzi
   ( timesId,
     timesName,
