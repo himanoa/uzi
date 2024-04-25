@@ -3,6 +3,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
+{-|
+ Module: Effectful.DiscordApiTokenReader.Effect
+ Description: UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
+ Maintainer: himanoa <matsunoappy@gmail.com>
+
+ UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
+-}
 module Effectful.DiscordApiTokenReader.Interpreter where
 
 import Control.Exception
@@ -18,6 +25,9 @@ data FromEnvironmentError = DiscordApiTokenIsUndefined
 
 instance Exception FromEnvironmentError
 
+-- | 'Data.Effectful.DiscordApiTokenReader' Effectを実行します
+--
+--  このインタプリタでは環境変数 UZI_DISCORD_API_TOKEN に入ったDiscordAPiTokenを取得します
 runDiscordApiTokenReader :: (Environment :> es) => Eff (DiscordApiTokenReader : es) a -> Eff es a
 runDiscordApiTokenReader = interpret $ \_ -> \case
   GetToken ->
