@@ -105,6 +105,6 @@ makeTimesChannel c = case c ^. C._type of
     timesNameParser :: P.Parser TimesName
     timesNameParser = theNyTimesParser P.<|> shortTimesNameParser P.<|> basicTimesNameParser
 
--- | 複数の 'Data.Discord.Channel' に対して変換処理を行い、成功したもののみを返す関数です
+-- | 複数の 'Data.Discord.Channel' に対して変換処理を行い、成功したもののみを返す関数
 fromChannels :: RIO.Vector C.Channel -> RIO.Vector TimesChannel
 fromChannels cs = RIOV.fromList $ RIO.catMaybes $ fmap makeTimesChannel (RIO.toList cs)

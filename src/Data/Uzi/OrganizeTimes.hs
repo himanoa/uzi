@@ -37,7 +37,7 @@ import RIO.Vector.Boxed qualified as VU
 -- | 'Data.Uzi.OrganizeTimes.organizeTimes' を実行した時に発生しうるエラーをまとめたデータ構造です。
 -- 発生しうるエラーとシチュエーションは次の通りです
 --
--- 'OrganizeTimesError.FindTimesError': TIMES(A-M) TIMES(N-Z) という名前のグループチャンネルがGuildIdが指すサーバーにどちらか片方でも存在しない場合に発生します
+-- 'Data.Uzi.OrganizeTimes.FindTimesError': TIMES(A-M) TIMES(N-Z) という名前のグループチャンネルがGuildIdが指すサーバーにどちらか片方でも存在しない場合に発生します
 --
 newtype OrganizeTimesError = FindTimesError FindTimesChannelGroupsError
   deriving (Show, Eq)
