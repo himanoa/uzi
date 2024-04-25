@@ -15,7 +15,6 @@ module Effectful.DiscordApiTokenReader.Effect where
 import Data.Text
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
-import qualified Effectful.DiscordChannel as 'Effectful
 
 -- | UziBotが使うDiscordのアクセストークンを読み出すためのEffectの定義
 data DiscordApiTokenReader :: Effect where

@@ -4,6 +4,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
+{-|
+ Module: Effectful.DiscordChannel.Interpreter
+ Description: 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+ Maintainer: himanoa <matsunoappy@gmail.com>
+
+'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+-}
 module Effectful.DiscordChannel.Interpreter where
 
 import Control.Lens hiding ((.=))
@@ -22,12 +29,15 @@ import Effectful.Req (Request, getResponseBodyAsJsonResponse, request)
 import Network.HTTP.Req
 import RIO hiding ((^.))
 
+-- | DiscordAPIのホスト部分を返す
 host :: Text
 host = "discord.com"
 
+-- | DiscordAPIのversionを返す
 version :: Text
 version = "v10"
 
+-- | DiscordChannelAPIを実行します
 runDiscordChannel :: (DiscordApiTokenReader :> es, Request :> es) => Eff (DiscordChannel : es) a -> Eff es a
 runDiscordChannel = interpret $ \_ -> \case
   SendMessage params -> do
