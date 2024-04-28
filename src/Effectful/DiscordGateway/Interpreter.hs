@@ -6,6 +6,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
+{-|
+ Module: Effectful.DiscordGateway.Interpreter
+ Description: 'Effectful.DiscortdGateway.Effect' を実行します
+ Maintainer: himanoa <matsunoappy@gmail.com>
+
+ 'Effectful.DiscordGateway.Effect' を実行するインタプリタです。
+-}
 module Effectful.DiscordGateway.Interpreter where
 
 import Data.Aeson (eitherDecode, encode)
@@ -38,9 +45,11 @@ withPingThread conn interval after_sending inner =
 handleEvent :: LB.LazyByteString -> Either String Response
 handleEvent = eitherDecode @Response
 
+-- | DiscordGatewayAPIに接続します
 withDiscordGatewayConnection :: (MonadUnliftIO m) => (WS.Connection -> m a) -> m a
 withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=14&encoding-json" WS.defaultConnectionOptions []
 
+-- | DiscordGatewayのEffectを実行します。
 runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.Connection -> Eff (DiscordGateway : es) a -> Eff es a
 runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
