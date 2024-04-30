@@ -3,14 +3,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Data.Uzi.TimesChannel
- Description: 宇治共和国のDiscordに存在するtimesテキストチャンネルの定義
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- 宇治共和国のDiscordに存在するtimesテキストチャンネルの定義
--}
-
+-- |
+-- Module: Data.Uzi.TimesChannel
+-- Description: 宇治共和国のDiscordに存在するtimesテキストチャンネルの定義
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- 宇治共和国のDiscordに存在するtimesテキストチャンネルの定義
 module Data.Uzi.TimesChannel where
 
 import Control.Lens
@@ -43,11 +41,10 @@ coerceTimesName = coerce
 
 -- | Timesチャンネルを表すデータ構造です。
 data TimesChannel = TimesChannel
-  {
-    -- | TimesChannelのDiscord上でのチャンネルID
-    _id :: ChannelId, 
+  { -- | TimesChannelのDiscord上でのチャンネルID
+    _id :: ChannelId,
     -- | チャンネルの名前
-    _name :: TimesName 
+    _name :: TimesName
   }
   deriving (Show, Eq)
 
@@ -68,12 +65,11 @@ instance Ord TimesChannel where
 -- * BasicTimesName: #times-{name} の形式
 -- * ShortTimesName: #time${name} の形式
 -- * TheNyTimesName: #the-{name}-times の形式
---
 makeTimesChannel ::
   -- | TimesChannelに変換したいDiscord上のChannel
-  C.Channel 
+  C.Channel ->
   -- | 変換に成功した場合は'Just' 。失敗した場合は 'Nothing'
-  -> Maybe TimesChannel 
+  Maybe TimesChannel
 makeTimesChannel c = case c ^. C._type of
   C.GuildVoice -> Nothing
   C.GuildCategory -> Nothing

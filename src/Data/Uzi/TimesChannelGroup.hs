@@ -4,16 +4,14 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unused-matches #-}
 
-{-|
- Module: Data.Uzi.TimesChannelGroup
- Description: 宇治共和国のDiscordに存在するtimesチャンネルをグルーピングしたチャンネルの定義
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- 宇治共和国のDiscordに存在するtimesチャンネルをグルーピングしたチャンネルの定義です。
-
- 具体的には名前が TIMES(A-M) TIMES(N-Z) なグループチャンネルのことを指します
--}
-
+-- |
+-- Module: Data.Uzi.TimesChannelGroup
+-- Description: 宇治共和国のDiscordに存在するtimesチャンネルをグルーピングしたチャンネルの定義
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- 宇治共和国のDiscordに存在するtimesチャンネルをグルーピングしたチャンネルの定義です。
+--
+-- 具体的には名前が TIMES(A-M) TIMES(N-Z) なグループチャンネルのことを指します
 module Data.Uzi.TimesChannelGroup
   ( TimesChannelGroup (..),
     FindTimesChannelGroupsError (..),
@@ -40,7 +38,6 @@ import RIO.Vector qualified as RIOV
 --
 -- * 'Data.Uzi.TimesChannelGroup.AtoMGroup' は頭文字をA-MのTimesChannelをまとめたグループ
 -- * 'Data.Uzi.TimesChannelGroup.NtoZGroup' は頭文字をN-ZのTimesChannelをまとめたグループ
---
 data TimesChannelGroup = AtoMGroup C.ChannelId | NtoZGroup C.ChannelId
   deriving (Show, Eq)
 
@@ -56,15 +53,13 @@ instance Ord TimesChannelGroup where
     (NtoZGroup _, AtoMGroup _) -> LT
     _ -> EQ
 
-
 -- | 'Data.Uzi.TimesChannelGroup.findTimesCategories' を実行した時に発生しうるエラーをまとめたデータ構造です。
--- 
+--
 -- 発生しうるエラーとシチュエーションは次の通りです
 --
 -- * 'Data.Uzi.TimesChannelGroup.AtoMGroupMissing' 引数で渡されたチャンネル一覧の中に AtoMになりうるグループチャンネルが存在しなかった場合
 -- * 'Data.Uzi.TimesChannelGroup.NtoZGroupMissing' 引数で渡されたチャンネル一覧の中に NtoZになりうるグループチャンネルが存在しなかった場合
 -- * 'Data.Uzi.TimesChannelGroup.AllMissing' 引数で渡されたチャンネル一覧の中に、AtoM,NtoZどちらも存在しなかった場合
---
 data FindTimesChannelGroupsError = AtoMGroupMissing | NtoZGroupMissing | AllMissing
   deriving (Show, Eq)
 
@@ -73,14 +68,14 @@ data FindTimesChannelGroupsError = AtoMGroupMissing | NtoZGroupMissing | AllMiss
 -- この関数は失敗する可能性があります。
 --
 -- 失敗した場合に発生するエラーについては 'Data.Uzi.TimesChannelGroup.FindTimesChannelGroupsError'を参照してください。
---
 findTimesCategories ::
   -- | チャンネルの一覧
   RIO.Vector C.Channel ->
   -- | 失敗した場合はLeft。成功した場合はRight(AtoMGroup, NtoZGroup)
-  Either FindTimesChannelGroupsError (
-    TimesChannelGroup,
-    TimesChannelGroup
+  Either
+    FindTimesChannelGroupsError
+    ( TimesChannelGroup,
+      TimesChannelGroup
     )
 findTimesCategories cs =
   case RIOV.foldr' findTimesChannelGroups (Nothing, Nothing) cs of
@@ -104,12 +99,12 @@ findTimesCategories cs =
     upperedChannelName c = ChannelName . toUpper . coerceChannelName $ (c ^. C._name)
 
 --
+
 -- | timesチャンネルの名前の頭文字を使ってAtoM,NtoZにグルーピングする関数
 --
 -- グルーピングされたTimesChannelの順番がアルファベット順なことは保証されない
 --
 -- ソートしたい場合は戻り値に対して 'Data.Uzi.TimesChannelGroup.sortTimesChannelGroupMap' を呼び出してください
---
 groupByFirstLetter ::
   -- | サーバーに存在する全てのTimesChannel
   RIO.Vector TC.TimesChannel ->
