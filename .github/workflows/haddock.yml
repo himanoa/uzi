@@ -1,0 +1,45 @@
+name: Haddock
+on:
+  push:
+    branches:
+    - master
+jobs:
+  build:
+    env:
+      FLAGS: -fenable-cluster-counting --disable-library-profiling --enable-documentation
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - id: setup-haskell
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.6.4'
+        cabal-version: "3.10.2.1"
+        enable-stack: true
+        stack-version: "2.15.1"
+    - name: Configure the build plan
+      run: |
+        cabal configure ${FLAGS}
+        cabal build --dry-run
+    - env:
+        key: haddock.yml-${{ runner.os }}-ghc-${{ steps.setup-haskell.outputs.ghc-version
+          }}-cabal-${{ steps.setup-haskell.outputs.cabal-version }}
+      id: cache
+    - name: Build Haddock
+      run: |
+        cabal haddock --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs' --haddock-hyperlink-source --haddock-quickjump
+    - name: Prepare to upload built htmls
+      run: |
+        find dist-newstyle -path '*/doc/html/Agda' -type d -exec cp -R {} html \;
+        find html -name '*.md' -delete
+        ls -R html
+    - if: github.ref == 'refs/heads/master'
+      name: Deploy haddock
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        destination_dir: docs
+        force_orphan: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: html
