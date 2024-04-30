@@ -23,10 +23,6 @@ jobs:
       run: |
         cabal configure ${FLAGS}
         cabal build --dry-run
-    - env:
-        key: haddock.yml-${{ runner.os }}-ghc-${{ steps.setup-haskell.outputs.ghc-version
-          }}-cabal-${{ steps.setup-haskell.outputs.cabal-version }}
-      id: cache
     - name: Build Haddock
       run: |
         cabal haddock --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs' --haddock-hyperlink-source --haddock-quickjump
