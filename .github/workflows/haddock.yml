@@ -19,10 +19,6 @@ jobs:
         cabal-version: "3.10.2.1"
         enable-stack: true
         stack-version: "2.15.1"
-    - name: Configure the build plan
-      run: |
-        cabal configure ${FLAGS}
-        cabal build --dry-run
     - name: Build Haddock
       run: |
         cabal haddock --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs' --haddock-hyperlink-source --haddock-quickjump
