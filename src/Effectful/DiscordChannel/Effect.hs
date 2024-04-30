@@ -8,16 +8,14 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DiscordChannel.Effect
- Description: DiscordChannelのAPIを実行するためのEffectです
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- DiscordChannelに関するAPIを実行するためのEffectです。
-
- Discord本家のChannelAPIの仕様はこちらです https://discord.com/developers/docs/resources/channel#channels-resource
--}
-
+-- |
+-- Module: Effectful.DiscordChannel.Effect
+-- Description: DiscordChannelのAPIを実行するためのEffectです
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- DiscordChannelに関するAPIを実行するためのEffectです。
+--
+-- Discord本家のChannelAPIの仕様はこちらです https://discord.com/developers/docs/resources/channel#channels-resource
 module Effectful.DiscordChannel.Effect where
 
 import Control.Lens hiding ((.=))
@@ -47,8 +45,7 @@ data AllowedMention = AllowedMention
 
 -- | チャンネルにメッセージを投稿するためのデータ構造
 data SendMessageParams = SendMessageParams
-  {
-    -- | 投稿先のチャンネルID
+  { -- | 投稿先のチャンネルID
     _channelId :: ChannelId,
     -- | 投稿内容
     _content :: Content,
@@ -73,18 +70,18 @@ makeSendMessageParams :: ChannelId -> Content -> Maybe Text -> Bool -> Maybe All
 makeSendMessageParams = SendMessageParams
 
 -- | 'Effectful.DiscordChannel.makeSendMessageParams' のラッパー
---
 makeMessage ::
-  ChannelId -- ^ 投稿先のチャンネルID
-  -> Content -- ^ 投稿内容
-  -> SendMessageParams
+  -- | 投稿先のチャンネルID
+  ChannelId ->
+  -- | 投稿内容
+  Content ->
+  SendMessageParams
 makeMessage cid con = do
   makeSendMessageParams cid con Nothing False Nothing Nothing Nothing
 
 -- | チャンネルを作成するために必要なパラメータ
 data CreateChannelParams = CreateChannelParams
-  { 
-    -- | 作成したいチャンネル名
+  { -- | 作成したいチャンネル名
     __name :: ChannelName,
     -- | チャンネルの種類。[詳細](https://discord.com/developers/docs/resources/channel#channel-object-channel-types)
     __type :: Int
@@ -101,8 +98,9 @@ instance ToJSON CreateChannelParams where
 
 -- | 'Effectful.DiscordChannel.CreateChannelParams' を生成するためのスマートコンストラクタ
 makeCreateChannelParams ::
-  ChannelName -- ^ 作成したいチャンネル名
-  -> CreateChannelParams
+  -- | 作成したいチャンネル名
+  ChannelName ->
+  CreateChannelParams
 makeCreateChannelParams __name = CreateChannelParams {__name = __name, __type = 0}
 
 data DiscordChannel :: Effect where
@@ -116,31 +114,39 @@ type instance DispatchOf DiscordChannel = Dynamic
 
 -- | DiscordChannelにBotでテキストメッセージを送信します
 sendMessage ::
-  (HasCallStack, DiscordChannel :> es)
-  => SendMessageParams
-  -> Eff es ()
+  (HasCallStack, DiscordChannel :> es) =>
+  SendMessageParams ->
+  Eff es ()
 sendMessage = send . SendMessage
 
 -- | 新たにDiscordChannelを作成します
-createChannel :: (HasCallStack, DiscordChannel :> es) =>
-  GuildId -- ^ DiscordChannelを作成するサーバーのギルドID
-  -> CreateChannelParams
-  -> Eff es ()
+createChannel ::
+  (HasCallStack, DiscordChannel :> es) =>
+  -- | DiscordChannelを作成するサーバーのギルドID
+  GuildId ->
+  CreateChannelParams ->
+  Eff es ()
 createChannel guildId params = send (CreateChannel guildId params)
 
 -- | 引数のギルドIDのサーバーに存在するチャンネルの一覧を取得します
 getChannels ::
-  (HasCallStack, DiscordChannel :> es)
-  => GuildId -- ^ 一覧を取得したいサーバーのギルドID
-  -> Eff es [Channel] -- ^ チャンネルの一覧
+  (HasCallStack, DiscordChannel :> es) =>
+  -- | 一覧を取得したいサーバーのギルドID
+  GuildId ->
+  -- | チャンネルの一覧
+  Eff es [Channel]
 getChannels guildId = send (GetChannels guildId)
 
 -- | チャンネルの情報を更新します
 modifyChannel ::
-  (HasCallStack, DiscordChannel :> es)
-  => GuildId -- ^ 更新したいチャンネルが存在するDiscordサーバーのギルドId
-  -> ChannelId -- ^ チャンネル情報を更新したいチャンネルのID
-  -> TimesChannel -- ^ 更新後のChannelの情報
-  -> ChannelPosition -- ^ 更新後のチャンネルの順番
-  -> Eff es ()
+  (HasCallStack, DiscordChannel :> es) =>
+  -- | 更新したいチャンネルが存在するDiscordサーバーのギルドId
+  GuildId ->
+  -- | チャンネル情報を更新したいチャンネルのID
+  ChannelId ->
+  -- | 更新後のChannelの情報
+  TimesChannel ->
+  -- | 更新後のチャンネルの順番
+  ChannelPosition ->
+  Eff es ()
 modifyChannel guildId cId channel position = send (ModifyChannel guildId cId channel position)

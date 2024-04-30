@@ -4,13 +4,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DiscordChannel.Interpreter
- Description: 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
- Maintainer: himanoa <matsunoappy@gmail.com>
-
-'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
--}
+-- |
+-- Module: Effectful.DiscordChannel.Interpreter
+-- Description: 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
 module Effectful.DiscordChannel.Interpreter where
 
 import Control.Lens hiding ((.=))

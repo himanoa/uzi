@@ -2,15 +2,14 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DiscordGateway.Effect
- Description: DiscordGatewayを実行するためのEffectの定義です。
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
-
- 詳細: https://discord.com/developers/docs/topics/gateway
--}
+-- |
+-- Module: Effectful.DiscordGateway.Effect
+-- Description: DiscordGatewayを実行するためのEffectの定義です。
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+--
+-- 詳細: https://discord.com/developers/docs/topics/gateway
 module Effectful.DiscordGateway.Effect where
 
 import Data.Discord.Request

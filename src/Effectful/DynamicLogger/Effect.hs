@@ -2,13 +2,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DynamicLogger.Effect
- Description: ログを出力するためのEffectです
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- Logを出力するためのEffectです。
--}
+-- |
+-- Module: Effectful.DynamicLogger.Effect
+-- Description: ログを出力するためのEffectです
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- Logを出力するためのEffectです。
 module Effectful.DynamicLogger.Effect where
 
 import Effectful
@@ -23,15 +22,16 @@ type instance DispatchOf DynamicLogger = Dynamic
 
 -- | ログを出力します
 info ::
-  (HasCallStack, DynamicLogger :> es)
-  => Utf8Builder -- ^ ログに出力する内容
-  -> Eff es ()
+  (HasCallStack, DynamicLogger :> es) =>
+  -- | ログに出力する内容
+  Utf8Builder ->
+  Eff es ()
 info t = send (Info t)
 
 -- | エラーログを出力します
 attention ::
-  (HasCallStack, DynamicLogger :> es)
-  => Utf8Builder -- ^ ログに出力する内容
-  -> Eff es ()
-
+  (HasCallStack, DynamicLogger :> es) =>
+  -- | ログに出力する内容
+  Utf8Builder ->
+  Eff es ()
 attention t = send (Attention t)

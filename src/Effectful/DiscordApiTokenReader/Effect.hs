@@ -2,14 +2,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DiscordApiTokenReader.Effect
- Description: UziBotが使うDiscordのアクセストークンを取得するEffect
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- UziBotが使うDiscordのアクセストークンを読み出すためのEffect Moduleです
-
--}
+-- |
+-- Module: Effectful.DiscordApiTokenReader.Effect
+-- Description: UziBotが使うDiscordのアクセストークンを取得するEffect
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- UziBotが使うDiscordのアクセストークンを読み出すためのEffect Moduleです
 module Effectful.DiscordApiTokenReader.Effect where
 
 import Data.Text

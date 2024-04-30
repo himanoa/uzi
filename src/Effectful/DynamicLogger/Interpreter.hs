@@ -7,13 +7,12 @@
 
 module Effectful.DynamicLogger.Interpreter where
 
-{-|
- Module: Effectful.DynamicLogger.Effect
- Description: ログを出力するためのEffectです
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- Logを出力するためのEffectです。
--}
+-- \|
+-- Module: Effectful.DynamicLogger.Effect
+-- Description: ログを出力するためのEffectです
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- Logを出力するためのEffectです。
 
 import Effectful
 import Effectful.Dispatch.Dynamic (interpret)

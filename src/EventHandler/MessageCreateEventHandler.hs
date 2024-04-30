@@ -1,14 +1,14 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE LambdaCase #-}
-{-|
- Module: EventHandler.MessageCreateEventHandler
- Description: Discordが送信してくるMessageCreateのイベントのハンドラです
- Maintainer: himanoa <matsunoappy@gmail.com>
 
- Discordが送信してくるMessageCreateイベントのイベントハンドラです。
-
- 主にサーバー上でメッセージが投稿された時に実行されます
--}
+-- |
+-- Module: EventHandler.MessageCreateEventHandler
+-- Description: Discordが送信してくるMessageCreateのイベントのハンドラです
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- Discordが送信してくるMessageCreateイベントのイベントハンドラです。
+--
+-- 主にサーバー上でメッセージが投稿された時に実行されます
 module EventHandler.MessageCreateEventHandler
   ( dispatchMessageEventHandlers,
   )

@@ -2,16 +2,14 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.BotUser.Effect
- Description: UziBotがログインしているDiscordアカウントの情報へアクセスするEffect
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- UziBotがログインしているDiscordアカウントの情報へアクセスするEffectです。
-
- Botがログインしているユーザーが確定するのはUziを起動してDiscordからReadyEventを受け取った後です。
--}
-
+-- |
+-- Module: Effectful.BotUser.Effect
+-- Description: UziBotがログインしているDiscordアカウントの情報へアクセスするEffect
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- UziBotがログインしているDiscordアカウントの情報へアクセスするEffectです。
+--
+-- Botがログインしているユーザーが確定するのはUziを起動してDiscordからReadyEventを受け取った後です。
 module Effectful.BotUser.Effect where
 
 import Data.Discord.User

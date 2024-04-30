@@ -3,13 +3,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.DiscordApiTokenReader.Effect
- Description: UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
--}
+-- |
+-- Module: Effectful.DiscordApiTokenReader.Effect
+-- Description: UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
 module Effectful.DiscordApiTokenReader.Interpreter where
 
 import Control.Exception

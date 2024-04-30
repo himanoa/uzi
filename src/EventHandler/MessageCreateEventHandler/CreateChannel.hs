@@ -2,15 +2,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: EventHandler.MessageCreateEventHandler.CreateChannel
- Description: Discordで'times channel'を作成するイベントハンドラー。
- Maintainer: himanoa <matsunoappy@gmail.com>
- 
- このモジュールには、Discordチャンネルの'message create'イベントに対応し、特定のコマンド('create-times')が
- 送信された際に新しいtimes channelを作成する処理が含まれています。さらに、作成後にそのチャンネルを整理する機能も提供します。
--}
-
+-- |
+-- Module: EventHandler.MessageCreateEventHandler.CreateChannel
+-- Description: Discordで'times channel'を作成するイベントハンドラー。
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- このモジュールには、Discordチャンネルの'message create'イベントに対応し、特定のコマンド('create-times')が
+-- 送信された際に新しいtimes channelを作成する処理が含まれています。さらに、作成後にそのチャンネルを整理する機能も提供します。
 module EventHandler.MessageCreateEventHandler.CreateChannel where
 
 import Control.Lens

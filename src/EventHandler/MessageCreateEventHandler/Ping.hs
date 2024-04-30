@@ -2,11 +2,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: EventHandler.MessageCreateEventHandler.Ping
- Description: Discordメッセージ作成イベントの"ping"に応答するハンドラです。
- Maintainer: himanoa <matsunoappy@gmail.com>
--}
+-- |
+-- Module: EventHandler.MessageCreateEventHandler.Ping
+-- Description: Discordメッセージ作成イベントの"ping"に応答するハンドラです。
+-- Maintainer: himanoa <matsunoappy@gmail.com>
 module EventHandler.MessageCreateEventHandler.Ping where
 
 import Control.Lens
@@ -20,7 +19,7 @@ import Effectful.DynamicLogger
 import Effectful.NonDet
 import RIO hiding ((^.))
 
--- | "ping"メッセージに応答して"pong"を返します。 
+-- | "ping"メッセージに応答して"pong"を返します。
 pingEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 pingEventHandler = \case
   MessageCreate event -> do

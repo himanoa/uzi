@@ -5,13 +5,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-{-|
- Module: Effectful.BotUser.Interpreter
- Description: UziBotがログインしているDiscordアカウントの情報へアクセスするEffectのインタプリタ
- Maintainer: himanoa <matsunoappy@gmail.com>
-
- UziBotがログインしているDiscordアカウントの情報へアクセスするEffectのインタプリタ
--}
+-- |
+-- Module: Effectful.BotUser.Interpreter
+-- Description: UziBotがログインしているDiscordアカウントの情報へアクセスするEffectのインタプリタ
+-- Maintainer: himanoa <matsunoappy@gmail.com>
+--
+-- UziBotがログインしているDiscordアカウントの情報へアクセスするEffectのインタプリタ
 module Effectful.BotUser.Interpreter where
 
 import Data.Discord.User (User)
