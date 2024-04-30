@@ -1,6 +1,14 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE LambdaCase #-}
+{-|
+ Module: EventHandler.MessageCreateEventHandler
+ Description: Discordが送信してくるMessageCreateのイベントのハンドラです
+ Maintainer: himanoa <matsunoappy@gmail.com>
 
+ Discordが送信してくるMessageCreateイベントのイベントハンドラです。
+
+ 主にサーバー上でメッセージが投稿された時に実行されます
+-}
 module EventHandler.MessageCreateEventHandler
   ( dispatchMessageEventHandlers,
   )
@@ -22,6 +30,10 @@ import EventHandler.MessageCreateEventHandler.OrganizeTimes
 import EventHandler.MessageCreateEventHandler.Ping
 import RIO hiding ((^.))
 
+-- | メッセージが投稿された時に実行されるイベントハンドラです
+--
+-- 内部で実行したいコマンドごとにハンドラを分けるためにNonDet Effectに依存しています
+-- また、BotUserの投稿に反応してしまうと、自分の発言に自分で発言してしまうためこの関数で止めています
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
   MessageCreate e ->
