@@ -34,6 +34,7 @@ jobs:
         stack build --haddock
     - name: Prepare to upload built htmls
       run: |
+        ls
         mkdir html
         find .stack-work/install/x86_64-linux/*/*/doc -exec cp -r {} html \;
         ls -R html
