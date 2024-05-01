@@ -35,8 +35,7 @@ jobs:
     - name: Prepare to upload built htmls
       run: |
         mkdir html
-        find dist-newstyle
-        find dist-newstyle/build/x86_64-linux/ghc-*/uzi-*/doc -exec cp -r {} html \;
+        find .stack-work/install/x86_64-linux/*/*/doc -exec cp -r {} html \;
         ls -R html
     - if: github.ref == 'refs/heads/master'
       name: Deploy haddock
