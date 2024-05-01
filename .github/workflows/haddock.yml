@@ -34,8 +34,8 @@ jobs:
         stack build --haddock
     - name: Prepare to upload built htmls
       run: |
-        find dist-newstyle -path '*/doc/html/Agda' -type d -exec cp -R {} html \;
-        find html -name '*.md' -delete
+        mkdir html
+        find dist-newstyle/build/x86_64-linux/ghc-*/uzi-*/doc -exec cp -r {} html \;
         ls -R html
     - if: github.ref == 'refs/heads/master'
       name: Deploy haddock
