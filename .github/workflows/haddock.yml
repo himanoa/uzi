@@ -32,9 +32,8 @@ jobs:
         ssh-add ~/.ssh/id_ed25519
         ssh-keyscan -H github.com >> ~/.ssh/known_hosts
         stack build --haddock
-        ls -al
         mkdir html
-        find .stack-work/install/x86_64-linux/*/*/doc -exec cp -r {} html \;
+        find .stack-work/install/x86_64-linux-*/*/*/doc -exec cp -r {} html \;
         ls -R html
     - if: github.ref == 'refs/heads/master'
       name: Deploy haddock
