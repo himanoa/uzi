@@ -42,10 +42,10 @@ jobs:
           cabal-version: "3.10.2.1"
           enable-stack: true
           stack-version: "2.15.1"
+      - name: install ormolu
+        run: |
+          stack install ormolu
       - name: format
-        env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_KEY_PUBLIC: ${{ secrets.SSH_KEY_PUBLIC }}
         run: |
           ./bin/format
     
