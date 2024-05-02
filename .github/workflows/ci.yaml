@@ -41,4 +41,5 @@ jobs:
       - name: format
         run: |
           ./bin/format
+          git diff --exit-code
     
