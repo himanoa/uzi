@@ -74,7 +74,7 @@ startUp = do
   pure ()
 
 onConnect ::
-  ( DynamicLogger :> es,  
+  ( DynamicLogger :> es,
     IOE :> es,
     Concurrent :> es,
     Environment :> es,
