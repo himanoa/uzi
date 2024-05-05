@@ -33,7 +33,6 @@ import RIO hiding ((^.))
 -- | メッセージが投稿された時に実行されるイベントハンドラです
 --
 -- 内部で実行したいコマンドごとにハンドラを分けるためにNonDet Effectに依存しています
--- また、BotUserの投稿に反応してしまうと、自分の発言に自分で発言してしまうためこの関数で止めています
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
   InteractionCreate e ->

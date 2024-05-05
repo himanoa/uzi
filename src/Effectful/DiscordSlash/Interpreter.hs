@@ -5,11 +5,11 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 -- |
--- Module: Effectful.DiscordChannel.Interpreter
--- Description: 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+-- Module: Effectful.DiscordSlash.Interpreter
+-- Description: 'Effectful.DiscordSlash.Effect' を実行するインタプリタです。
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
--- 'Effectful.DiscordChannel.Effect' を実行するインタプリタです。
+-- 'Effectful.DiscordSlash.Effect' を実行するインタプリタです。
 module Effectful.DiscordSlash.Interpreter where
 
 import Data.Aeson
@@ -33,7 +33,7 @@ host = "discord.com"
 version :: Text
 version = "v10"
 
--- | DiscordChannelAPIを実行します
+-- | スラッシュコマンド登録のAPIを呼び出します。
 runRegisterSlash :: (DiscordApiTokenReader :> es, Request :> es, DiscordApplication :> es, DynamicLogger :> es) => Eff (SlashCommand : es) a -> Eff es a
 runRegisterSlash = interpret $ \_ -> \case
   GlobalCommand name desc params -> do

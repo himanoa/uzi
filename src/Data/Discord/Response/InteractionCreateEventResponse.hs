@@ -3,8 +3,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-{-# OPTIONSGHC -Wno-missing-export-lists #-}
-
 module Data.Discord.Response.InteractionCreateEventResponse
   ( InteractionCreateEventResponse(..),
     channelId,

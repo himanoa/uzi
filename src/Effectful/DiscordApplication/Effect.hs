@@ -5,10 +5,10 @@
 
 -- |
 -- Module: Effectful.DiscordApplication.Effect
--- Description: UziBotが使うDiscordのアクセストークンを取得するEffect
+-- Description: UziBotのApplication Idを取得するEffect
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
--- UziBotが使うDiscordのアクセストークンを読み出すためのEffect Moduleです
+-- UziBotのApplication Idを読み出すためのEffect Moduleです
 module Effectful.DiscordApplication.Effect where
 
 import Effectful
@@ -18,7 +18,7 @@ import Data.Eq
 import GHC.Show
 import qualified Data.Text as DT
 
--- | UziBotが使うDiscordのアクセストークンを読み出すためのEffectの定義
+-- | UziBotのApplication Idを読み出すためのEffectの定義
 data DiscordApplication :: Effect where
   GetApplication :: DiscordApplication m ApplicationId
 
@@ -29,10 +29,6 @@ newtype ApplicationId = ApplicationId DT.Text
   deriving (FromJSON, ToJSON) via DT.Text
 
 
--- | DiscordAPIにアクセスするためのToken文字列を取得します。
---
--- このAPIはEventHandlerなどからは直接読み出さないでください。
---
--- DiscordのAPIを使いたい場合は 'Effectful.DiscordChannel' や 'Effectful.DiscordGateway' などのこれらをラップしたEffectを使用してください。
+-- | UziBotのApplicationを取得します。
 getApplication :: (DiscordApplication :> es) => Eff es ApplicationId
 getApplication = send GetApplication

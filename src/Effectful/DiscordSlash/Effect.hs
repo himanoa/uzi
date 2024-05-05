@@ -5,13 +5,13 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 -- |
--- Module: Effectful.DiscordChannel.Effect
--- Description: DiscordChannelのAPIを実行するためのEffectです
+-- Module: Effectful.スラッシュコマンド.Effect
+-- Description: スラッシュコマンドのAPIを実行するためのEffectです
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
--- DiscordChannelに関するAPIを実行するためのEffectです。
+-- スラッシュコマンドに関するAPIを実行するためのEffectです。
 --
--- Discord本家のChannelAPIの仕様はこちらです https://discord.com/developers/docs/resources/channel#channels-resource
+-- Discord本家のスラッシュコマンドの仕様はこちらです https://discord.com/developers/docs/interactions/application-commands#
 module Effectful.DiscordSlash.Effect where
 
 import Data.Discord.Request.SlashCommand (CommandOption, Description (Description), Name (Name))
@@ -23,6 +23,6 @@ data SlashCommand :: Effect where
 
 type instance DispatchOf SlashCommand = Dynamic
 
--- | 'Effectful.DiscordChannel.SendMessageParams' のスマートコンストラクタ
+-- | 'Effectful.DiscordSlash.SendMessageParams' のスマートコンストラクタ
 makeGlobalSlashCommand :: Text -> Text -> [CommandOption] -> SlashCommand m ()
 makeGlobalSlashCommand name desc = GlobalCommand (Name name) (Description desc)

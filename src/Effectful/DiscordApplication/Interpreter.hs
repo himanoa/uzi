@@ -7,10 +7,10 @@
 
 -- |
 -- Module: Effectful.DiscordApplication.Effect
--- Description: UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
+-- Description: Application Idを取得するEffectのインタプリタです
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
--- UziBotが使うDiscordのアクセストークンを取得するEffectのインタプリタです
+-- UziBot自身のApplication Idを取得するEffectのインタプリタです
 module Effectful.DiscordApplication.Interpreter where
 
 import Control.Exception
@@ -52,7 +52,7 @@ applicationId (Application {__id = app_id}) = app_id
 
 -- | 'Data.Effectful.DiscordApplication' Effectを実行します
 --
---  このインタプリタでは環境変数 UZI_DISCORD_API_TOKEN に入ったDiscordAPiTokenを取得します
+--  このインタプリタではAPIにアクセスして、自身のApplication Idを取得します
 runDiscordApplication :: (DiscordApiTokenReader :> es, Request :> es) => Eff (DiscordApplication : es) a -> Eff es a
 runDiscordApplication = interpret $ \_ -> \case
   GetApplication -> do
