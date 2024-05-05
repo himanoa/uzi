@@ -23,14 +23,14 @@ import Data.Discord.Member
 import Data.Map.Strict qualified as M
 import RIO
 
-newtype OptionPair = OptionPair (Text, Text)
+data OptionPair = OptionPair !Text !Text
   deriving (Eq, Show)
 
 instance FromJSON OptionPair where
   parseJSON = withObject "OptionPair" $ \x -> do
     String key <- x .: "name"
     String value <- x .: "value"
-    pure (OptionPair (key, value))
+    pure (OptionPair key value)
 
 data InteractionCreateEventResponse = InteractionCreateEventResponse
   { _channelId :: ChannelId,
@@ -60,7 +60,7 @@ instance FromJSON InteractionCreateEventResponse where
     _commandOptions <- do
       maybeOpts <- __data .:? "options"
       case maybeOpts of
-        Just opts -> parseJSON @[OptionPair] opts <&> M.fromList . map (\(OptionPair x) -> x)
+        Just opts -> parseJSON @[OptionPair] opts <&> M.fromList . map (\(OptionPair x y) -> (x, y))
         Nothing -> pure M.empty
 
     pure InteractionCreateEventResponse {..}

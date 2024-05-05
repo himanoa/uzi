@@ -11,7 +11,11 @@
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
 -- UziBot自身のApplication Idを取得するEffectのインタプリタです
-module Effectful.DiscordApplication.Interpreter where
+module Effectful.DiscordApplication.Interpreter
+  ( applicationId,
+    runDiscordApplication,
+  )
+where
 
 import Control.Exception
 import Data.Aeson
@@ -39,16 +43,16 @@ version :: Text
 version = "v10"
 
 newtype Application = Application
-  { __id :: ApplicationId
+  { _id :: ApplicationId
   }
   deriving (Show, Eq)
 
 instance FromJSON Application where
   parseJSON = withObject "Application" $ \obj ->
-    (obj .: "id") <&> (\parsed -> Application {__id = parsed})
+    (obj .: "id") <&> (\parsed -> Application {_id = parsed})
 
 applicationId :: Application -> ApplicationId
-applicationId (Application {__id = app_id}) = app_id
+applicationId (Application {_id = app_id}) = app_id
 
 -- | 'Data.Effectful.DiscordApplication' Effectを実行します
 --

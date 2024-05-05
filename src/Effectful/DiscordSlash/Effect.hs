@@ -12,7 +12,11 @@
 -- スラッシュコマンドに関するAPIを実行するためのEffectです。
 --
 -- Discord本家のスラッシュコマンドの仕様はこちらです https://discord.com/developers/docs/interactions/application-commands#
-module Effectful.DiscordSlash.Effect where
+module Effectful.DiscordSlash.Effect
+  ( SlashCommand (..),
+    makeGlobalSlashCommand,
+  )
+where
 
 import Data.Discord.Request.SlashCommand (CommandOption, Description (Description), Name (Name))
 import Effectful

@@ -10,7 +10,10 @@
 -- Maintainer: himanoa <matsunoappy@gmail.com>
 --
 -- 'Effectful.DiscordSlash.Effect' を実行するインタプリタです。
-module Effectful.DiscordSlash.Interpreter where
+module Effectful.DiscordSlash.Interpreter
+  ( runRegisterSlash,
+  )
+where
 
 import Data.Aeson
 import Effectful
