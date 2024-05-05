@@ -85,15 +85,15 @@ startUp = do
       $ makeGlobalSlashCommand
         "create-times"
         "#times-<あなたの名前> のtimesチャンネルが作成され、timesチャンネルがソートされます"
-        [StringOption (Name "name", Description "times-{name} という名前で作成します。", True)]
-  _ <- threadDelay $ (5000000 :: Int)
+        [StringOption (Name "name") (Description "times-{name} という名前で作成します。") True]
+  threadDelay 5000000
   _ <-
     send
       $ makeGlobalSlashCommand
         "organize-times"
         "timesチャンネルを times- prefixを除いた A-M N-Z のグループにグルーピングしてから、timesチャンネルの並び順をソートします"
         []
-  _ <- threadDelay $ (5000000 :: Int)
+  threadDelay 5000000
   _ <-
     send
       $ makeGlobalSlashCommand
