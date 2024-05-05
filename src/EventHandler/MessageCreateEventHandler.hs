@@ -14,13 +14,8 @@ module EventHandler.MessageCreateEventHandler
   )
 where
 
-import Control.Lens
 import Data.Discord
-import Data.Discord.Mention qualified as M
-import Data.Discord.Response.MessageCreateEventResponse (isBot, mentions)
-import Data.Discord.User qualified as U
 import Effectful
-import Effectful.BotUser
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.NonDet
@@ -28,16 +23,12 @@ import EventHandler.MessageCreateEventHandler.CreateChannel (createChannelEventH
 import EventHandler.MessageCreateEventHandler.Help
 import EventHandler.MessageCreateEventHandler.OrganizeTimes
 import EventHandler.MessageCreateEventHandler.Ping
-import RIO hiding ((^.))
 
 -- | メッセージが投稿された時に実行されるイベントハンドラです
 --
 -- 内部で実行したいコマンドごとにハンドラを分けるためにNonDet Effectに依存しています
-dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
+dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
-  InteractionCreate e ->
-    getBotUser >>= \case
-      Just _ -> do
-        pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res <|> helpEventHandler res
-      Nothing -> emptyEff
+  InteractionCreate _ ->
+    pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res <|> helpEventHandler res
   _ -> emptyEff
