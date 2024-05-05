@@ -35,15 +35,15 @@ instance FromJSON OptionPair where
 data InteractionCreateEventResponse = InteractionCreateEventResponse
   { _channelId :: ChannelId,
     _member :: Member,
-    _guildId :: GuildId,
     _slashCommandName :: Text,
-    _commandOptions :: Map Text Text
+    _commandOptions :: Map Text Text,
+    _guildId :: GuildId
   }
   deriving (Show, Eq)
 
 makeLenses ''InteractionCreateEventResponse
 
-makeInteractionCreateEventResponse :: ChannelId -> Member -> GuildId -> Text -> Map Text Text -> InteractionCreateEventResponse
+makeInteractionCreateEventResponse :: ChannelId -> Member -> Text -> Map Text Text -> GuildId -> InteractionCreateEventResponse
 makeInteractionCreateEventResponse = InteractionCreateEventResponse
 
 instance FromJSON InteractionCreateEventResponse where
