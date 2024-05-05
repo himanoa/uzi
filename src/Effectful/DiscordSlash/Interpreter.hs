@@ -16,14 +16,16 @@ import Data.Aeson
 import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordApplication.Effect
-    ( DiscordApplication, getApplication, ApplicationId (..) )
-
+  ( ApplicationId (..),
+    DiscordApplication,
+    getApplication,
+  )
 import Effectful.DiscordSlash.Effect (SlashCommand (..))
 import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.DynamicLogger.Effect
 import Effectful.Req (Request, request)
 import Network.HTTP.Req
 import RIO hiding ((^.))
-import Effectful.DynamicLogger.Effect
 
 -- | DiscordAPIのホスト部分を返す
 host :: Text
@@ -40,7 +42,7 @@ runRegisterSlash = interpret $ \_ -> \case
     token <- getToken
     ApplicationId app <- getApplication
 
-    let body = object [ "name" .= name, "type" .= (1 :: Integer), "description" .= desc, "options" .= params ]
+    let body = object ["name" .= name, "type" .= (1 :: Integer), "description" .= desc, "options" .= params]
 
     _ <- info "POST Register Slash"
     _ <-

@@ -13,9 +13,9 @@ import Data.Discord.EventName
 import Data.Discord.ReceiveEventOperationCode (ReceiveEventOperationCode)
 import Data.Discord.ReceiveEventOperationCode qualified as OC
 import Data.Discord.Response.HelloEventResponse
+import Data.Discord.Response.InteractionCreateEventResponse
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Discord.Response.ReadyEventResponse
-import Data.Discord.Response.InteractionCreateEventResponse
 import Data.Discord.User
 import RIO
 

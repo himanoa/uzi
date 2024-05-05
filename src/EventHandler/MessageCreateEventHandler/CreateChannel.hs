@@ -15,6 +15,7 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
+import Data.Map.Strict qualified as M
 import Data.Text
 import Data.Uzi.OrganizeTimes
 import Effectful
@@ -23,7 +24,6 @@ import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.NonDet
 import RIO hiding ((^.))
-import Data.Map.Strict qualified as M
 
 -- | 'MessageCreate'イベントに反応し、特定のメッセージ('create-times')を受け取った際に新しいtimes channelの作成を行います。
 -- 作成後、そのチャンネルを整理する処理も実施します。処理が成功すると、成功のメッセージを、失敗するとエラーメッセージを送信します。
@@ -52,4 +52,3 @@ createChannelEventHandler = \case
             pure ()
       _ -> emptyEff
   _ -> emptyEff
-

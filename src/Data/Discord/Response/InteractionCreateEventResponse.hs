@@ -4,7 +4,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Data.Discord.Response.InteractionCreateEventResponse
-  ( InteractionCreateEventResponse(..),
+  ( InteractionCreateEventResponse (..),
     channelId,
     member,
     guildId,
