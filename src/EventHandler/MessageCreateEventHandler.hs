@@ -36,12 +36,9 @@ import RIO hiding ((^.))
 -- また、BotUserの投稿に反応してしまうと、自分の発言に自分で発言してしまうためこの関数で止めています
 dispatchMessageEventHandlers :: (DiscordChannel :> es, NonDet :> es, BotUser :> es, DynamicLogger :> es) => Response -> Eff es ()
 dispatchMessageEventHandlers res = case res of
-  MessageCreate e ->
+  InteractionCreate e ->
     getBotUser >>= \case
-      Just botUser -> do
-        let mentionIds = map (^. M.id) (e ^. mentions)
-        if not (e ^. isBot) && any (\m -> m == (botUser ^. U.id)) mentionIds
-          then pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res <|> helpEventHandler res
-          else emptyEff
+      Just _ -> do
+        pingEventHandler res <|> organizeTimesHandler res <|> createChannelEventHandler res <|> helpEventHandler res
       Nothing -> emptyEff
   _ -> emptyEff
