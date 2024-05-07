@@ -2,7 +2,7 @@
 
 下記のような形になっています。
 
-詳細なドキュメントは https://himanoa.github.io/uzi/uzi-0.2.1.0 を参照してください
+詳細なドキュメントは https://himanoa.github.io/uzi/uzi-0.2.2.0 を参照してください
 
 ```bash
 $ tree -I dist-newstyle

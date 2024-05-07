@@ -26,4 +26,4 @@ docker:
   FROM alpine:3.19.1
   COPY +build/output .
   ENTRYPOINT ["./uzi-exe"]
-  SAVE IMAGE --push himanoa/uzi:0.2.1.0
+  SAVE IMAGE --push himanoa/uzi:0.2.2.0
