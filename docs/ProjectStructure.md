@@ -36,8 +36,10 @@ $ tree -I dist-newstyle
 │   ├── Effectful ログ出しやHTTPなど IO が絡んだり、純粋関数でどうしても書けないAPIを置いている場所です。
 │   │   ├── BotUser
 │   │   ├── DiscordApiTokenReader
+│   │   ├── DiscordApplication
 │   │   ├── DiscordChannel
 │   │   ├── DiscordGateway
+│   │   ├── DiscordSlash
 │   │   ├── DynamicLogger
 │   │   ├── Http
 │   ├── EventHandler Discordのイベントに対して発生する処理についてまとめたモジュールです

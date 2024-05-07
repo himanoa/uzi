@@ -8,7 +8,7 @@ import Data.Aeson
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import RIO
 
-data EventName = ReadyEventName | MessageCreateEventName | GuildCreateEventName
+data EventName = ReadyEventName | MessageCreateEventName | GuildCreateEventName | InteractionCreateEventName
   deriving (Show, Eq)
 
 instance FromJSON EventName where
@@ -16,4 +16,5 @@ instance FromJSON EventName where
     "READY" -> pure ReadyEventName
     "MESSAGE_CREATE" -> pure MessageCreateEventName
     "GUILD_CREATE" -> pure GuildCreateEventName
+    "INTERACTION_CREATE" -> pure InteractionCreateEventName
     t -> prependFailure ("Not supported op code " <> show t) (typeMismatch "Opcode" (String t))

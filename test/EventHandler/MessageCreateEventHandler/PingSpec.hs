@@ -9,8 +9,10 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.HelloEventResponse
+import Data.Discord.Response.InteractionCreateEventResponse (makeInteractionCreateEventResponse)
 import Data.Discord.Response.MessageCreateEventResponse hiding (content)
 import Data.Either
+import Data.Map qualified as M
 import Data.Maybe
 import Effectful
 import Effectful.DiscordChannel.Effect hiding (roles)
@@ -32,8 +34,8 @@ spec = describe "PingSpec" $ do
     context "when provide MessageCreateEvent" $ do
       context "when response message is ping" $ do
         it "should be return to pong response" $ do
-          let response = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "ping") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
-          let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel . pingEventHandler . MessageCreate $ response
+          let response = makeInteractionCreateEventResponse (ChannelId "xxx") Member {roles = [], nick = Just . Nickname $ "himanoa"} "ping" M.empty (GuildId "576648644942495744")
+          let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel . pingEventHandler . InteractionCreate $ response
           let (_, paramsMaybe) = fromRight ((), Nothing) actual
           let params = fromJust paramsMaybe
 
@@ -41,7 +43,7 @@ spec = describe "PingSpec" $ do
 
       context "when response message is not ping" $ do
         it "should be return to pong response" $ do
-          let response = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "dummy") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
-          let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel . pingEventHandler . MessageCreate $ response
+          let response = makeInteractionCreateEventResponse (ChannelId "xxx") Member {roles = [], nick = Just . Nickname $ "himanoa"} "dummy" M.empty (GuildId "576648644942495744")
+          let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe SendMessageParams) Nothing . runDummyDiscordChannel . pingEventHandler . InteractionCreate $ response
 
           isLeft actual `shouldBe` True

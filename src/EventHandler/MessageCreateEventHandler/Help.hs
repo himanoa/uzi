@@ -14,7 +14,7 @@ module EventHandler.MessageCreateEventHandler.Help where
 import Control.Lens
 import Data.Discord
 import Data.Discord.Content (body)
-import Data.Discord.Response.MessageCreateEventResponse qualified as MC
+import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Either.Validation
 import Effectful
 import Effectful.DiscordChannel
@@ -31,12 +31,12 @@ import RIO hiding ((^.))
 -- URLをコンテンツオブジェクトに変換できない場合は何もしません。
 helpEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 helpEventHandler = \case
-  MessageCreate event -> do
-    if body (event ^. MC.content) == Just "help"
+  InteractionCreate event -> do
+    if (event ^. IC.slashCommandName) == "help"
       then case makeContent "https://github.com/himanoa/uzi/blob/master/docs/HELP.md" of
         Success c -> do
           info "Dispatched Help Handler"
-          let params = makeSendMessageParams (event ^. MC.channelId) c Nothing False Nothing Nothing Nothing
+          let params = makeSendMessageParams (event ^. IC.channelId) c Nothing False Nothing Nothing Nothing
           sendMessage params
           pure ()
         Failure _ -> pure ()

@@ -14,7 +14,7 @@ module EventHandler.MessageCreateEventHandler.OrganizeTimes where
 import Control.Lens
 import Data.Discord
 import Data.Discord.Content
-import Data.Discord.Response.MessageCreateEventResponse qualified as MC
+import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Text (pack)
 import Data.Uzi.OrganizeTimes
 import Effectful
@@ -32,18 +32,18 @@ import RIO hiding ((^.))
 -- 整理プロセス中に発生したエラーは適切にハンドリングされ、エラーメッセージが送信されます。
 organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
 organizeTimesHandler = \case
-  MessageCreate event -> do
-    if body (event ^. MC.content) == Just "organize-times"
+  InteractionCreate event -> do
+    if (event ^. IC.slashCommandName) == "organize-times"
       then do
         info "organizeTimesHandler dispatched"
-        sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent "times channelの整理を開始したよ！"))
-        organizeTimesEither <- runError @OrganizeTimesError (organizeTimes (event ^. MC.guildId))
+        sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent "times channelの整理を開始したよ！"))
+        organizeTimesEither <- runError @OrganizeTimesError (organizeTimes (event ^. IC.guildId))
         case organizeTimesEither of
           Right _ -> do
             info "Organized times"
-            sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent "times channelを整理したよ！"))
+            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent "times channelを整理したよ！"))
           Left (_, e) -> do
             attention "Failed organize times"
-            sendMessage (makeMessage (event ^. MC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (pack . show $ e))))
+            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (pack . show $ e))))
       else emptyEff
   _ -> emptyEff

@@ -43,8 +43,10 @@ library
       Data.Discord.Request
       Data.Discord.Request.IdentifyRequest
       Data.Discord.Request.Internal
+      Data.Discord.Request.SlashCommand
       Data.Discord.Response
       Data.Discord.Response.HelloEventResponse
+      Data.Discord.Response.InteractionCreateEventResponse
       Data.Discord.Response.Internal
       Data.Discord.Response.MessageCreateEventResponse
       Data.Discord.Response.ReadyEventResponse
@@ -63,12 +65,18 @@ library
       Effectful.DiscordApiTokenReader
       Effectful.DiscordApiTokenReader.Effect
       Effectful.DiscordApiTokenReader.Interpreter
+      Effectful.DiscordApplication
+      Effectful.DiscordApplication.Effect
+      Effectful.DiscordApplication.Interpreter
       Effectful.DiscordChannel
       Effectful.DiscordChannel.Effect
       Effectful.DiscordChannel.Interpreter
       Effectful.DiscordGateway
       Effectful.DiscordGateway.Effect
       Effectful.DiscordGateway.Interpreter
+      Effectful.DiscordSlash
+      Effectful.DiscordSlash.Effect
+      Effectful.DiscordSlash.Interpreter
       Effectful.DynamicLogger
       Effectful.DynamicLogger.Effect
       Effectful.DynamicLogger.Interpreter
@@ -95,6 +103,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , data-default
     , effectful
     , effectful-core
@@ -128,6 +137,7 @@ executable uzi-exe
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , data-default
     , effectful
     , effectful-core
@@ -178,6 +188,7 @@ test-suite uzi-test
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , data-default
     , effectful
     , effectful-core

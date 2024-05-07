@@ -1,8 +1,10 @@
 ## Botの使い方
 
+メンションを @UziBot で送る方法ではなく、スラッシュコマンドを使うように変更しました。
+
 ### 新しいtimesを作る
 
-`@UziBot create-times <あなたの名前>`
+`/create-times <あなたの名前>`
 
 #times-<あなたの名前> のtimesチャンネルが作成され、timesチャンネルがソートされます
 
@@ -10,13 +12,13 @@
 
 ### チャンネル順番のソート
 
-`@UziBot organize-times`
+`/organize-times`
 
 timesチャンネルを `times-` prefixを除いた A-M N-Z のグループにグルーピングしてから、timesチャンネルの並び順をソートします
 
 ### Botの使い方
 
-`@UziBot help` 
+`/help` 
 
 helpの書かれたリンクが投稿されます
 

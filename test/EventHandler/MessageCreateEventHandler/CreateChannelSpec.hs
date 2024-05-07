@@ -11,8 +11,10 @@ where
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.HelloEventResponse
+import Data.Discord.Response.InteractionCreateEventResponse (makeInteractionCreateEventResponse)
 import Data.Discord.Response.MessageCreateEventResponse
 import Data.Either
+import Data.Map qualified as M
 import Effectful
 import Effectful.DiscordChannel.Effect hiding (roles)
 import Effectful.Dispatch.Dynamic
@@ -39,7 +41,7 @@ spec = describe "CreateChannel" $ do
         isLeft actual `shouldBe` True
     context "when MessageCreate event provided" $ do
       it "should be call create channel instruction" $ do
-        let msg = makeMessageCreateEventResponse (ChannelId "xxx") (makeUnsafeContent "create-times a") [] Member {roles = [], nick = Just . Nickname $ "himanoa"} True (GuildId "576648644942495744")
-        let response = MessageCreate msg
+        let msg = makeInteractionCreateEventResponse (ChannelId "xxx") Member {roles = [], nick = Just . Nickname $ "himanoa"} "create-times" (M.fromList [("name", "a")]) (GuildId "576648644942495744")
+        let response = InteractionCreate msg
         let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . execState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ createChannelEventHandler response
         isRight actual `shouldBe` True

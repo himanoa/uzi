@@ -11,6 +11,7 @@ where
 
 import Control.Exception.Safe
 import Data.Discord
+import Data.Discord.Request.SlashCommand
 import Data.Discord.User
 import Data.Uzi.HeartbeatInterval
 import Effectful (Eff, IOE, runEff, (:>))
@@ -19,8 +20,12 @@ import Effectful.Concurrent (Concurrent, threadDelay)
 import Effectful.Concurrent.Async (forConcurrently_, runConcurrent)
 import Effectful.Concurrent.STM (TQueue, atomically, newTQueue, readTQueue, writeTQueue)
 import Effectful.DiscordApiTokenReader
+import Effectful.DiscordApplication (runDiscordApplication)
 import Effectful.DiscordChannel
 import Effectful.DiscordGateway
+import Effectful.DiscordSlash
+import Effectful.DiscordSlash.Effect
+import Effectful.Dispatch.Dynamic
 import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
 import Effectful.Log.Static
@@ -50,7 +55,9 @@ runUzi = runEff $ do
     . runDynamicLogger
     . runDiscordApiTokenReader
     . runRequest
+    . runDiscordApplication
     . runDiscordChannel
+    . runRegisterSlash
     . evalState @(Maybe User) Nothing
     . runBotUser
     . evalState @(Maybe HeartbeatInterval) Nothing
@@ -64,11 +71,36 @@ startUp ::
     DiscordApiTokenReader :> es,
     DiscordChannel :> es,
     BotUser :> es,
+    SlashCommand :> es,
     State (Maybe HeartbeatInterval) :> es
   ) =>
   Eff es ()
 startUp = do
   _ <- info "Hello uzi"
+
+  _ <- info "Register Slash"
+
+  _ <-
+    send
+      $ makeGlobalSlashCommand
+        "create-times"
+        "#times-<あなたの名前> のtimesチャンネルが作成され、timesチャンネルがソートされます"
+        [StringOption (Name "name") (Description "times-{name} という名前で作成します。") True]
+  threadDelay 5000000
+  _ <-
+    send
+      $ makeGlobalSlashCommand
+        "organize-times"
+        "timesチャンネルを times- prefixを除いた A-M N-Z のグループにグルーピングしてから、timesチャンネルの並び順をソートします"
+        []
+  threadDelay 5000000
+  _ <-
+    send
+      $ makeGlobalSlashCommand
+        "help"
+        "helpの書かれたリンクが投稿されます"
+        []
+
   _ <- info "Load enviroments"
   withDiscordGatewayConnection onConnect
   pure ()
