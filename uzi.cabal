@@ -36,6 +36,7 @@ library
       Data.Discord.Internal
       Data.Discord.Member
       Data.Discord.Mention
+      Data.Discord.MessageFlags
       Data.Discord.MessageReferencesObject
       Data.Discord.Nickname
       Data.Discord.ReceiveEvent
@@ -80,12 +81,16 @@ library
       Effectful.DynamicLogger
       Effectful.DynamicLogger.Effect
       Effectful.DynamicLogger.Interpreter
+      Effectful.InteractionCallback
+      Effectful.InteractionCallback.Effect
+      Effectful.InteractionCallback.Interpreter
       Effectful.Req
       EventHandler
       EventHandler.HelloEventHandler
       EventHandler.MessageCreateEventHandler
       EventHandler.MessageCreateEventHandler.CreateChannel
       EventHandler.MessageCreateEventHandler.Help
+      EventHandler.MessageCreateEventHandler.InteractionCallback
       EventHandler.MessageCreateEventHandler.OrganizeTimes
       EventHandler.MessageCreateEventHandler.Ping
       EventHandler.ReadyEventHandler
@@ -178,6 +183,7 @@ test-suite uzi-test
       EventHandler.MessageCreateEventHandler.PingSpec
       Helper.DummyDiscordChannelInterpreter
       Helper.DummyDiscordGatewayInterpreter
+      Helper.DummyDiscordInteractionCallback
       Paths_uzi
   autogen-modules:
       Paths_uzi

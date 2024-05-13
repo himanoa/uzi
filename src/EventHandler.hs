@@ -11,6 +11,7 @@ import Effectful.DiscordApiTokenReader (DiscordApiTokenReader)
 import Effectful.DiscordChannel
 import Effectful.DiscordGateway
 import Effectful.DynamicLogger (DynamicLogger)
+import Effectful.InteractionCallback.Effect
 import Effectful.NonDet
 import Effectful.State.Static.Shared
 import EventHandler.HelloEventHandler
@@ -18,7 +19,7 @@ import EventHandler.MessageCreateEventHandler
 import EventHandler.ReadyEventHandler
 import RIO
 
-dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es) => Response -> Eff es ()
+dispatchEventHandlers :: (DiscordGateway :> es, DynamicLogger :> es, DiscordApiTokenReader :> es, DiscordChannel :> es, BotUser :> es, State (Maybe HeartbeatInterval) :> es, InteractionCallback :> es) => Response -> Eff es ()
 dispatchEventHandlers r = do
   _ <- runNonDet OnEmptyKeep (readyEventHandler r <|> helloEventHandler r <|> dispatchMessageEventHandlers r)
   pure ()

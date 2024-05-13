@@ -13,21 +13,20 @@ import Data.Discord
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Either.Validation
 import Effectful
-import Effectful.DiscordChannel
 import Effectful.DynamicLogger
+import Effectful.InteractionCallback
 import Effectful.NonDet
 import RIO hiding ((^.))
 
 -- | "ping"メッセージに応答して"pong"を返します。
-pingEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
+pingEventHandler :: (NonDet :> es, DynamicLogger :> es, InteractionCallback :> es) => Response -> Eff es ()
 pingEventHandler = \case
   InteractionCreate event -> do
     if (event ^. IC.slashCommandName) == "ping"
       then case makeContent "pong" of
         Success c -> do
           info "Dispatched Ping Handler"
-          let params = makeSendMessageParams (event ^. IC.channelId) c Nothing False Nothing Nothing Nothing
-          sendMessage params
+          channelMessageCallback event c
           pure ()
         Failure _ -> pure ()
       else emptyEff
