@@ -7,12 +7,11 @@ module Helper.DummyDiscordInteractionCallback
   )
 where
 
-import Effectful
-
-import Effectful.Dispatch.Dynamic (interpret)
-import Effectful.State.Static.Local
-import Effectful.InteractionCallback (InteractionCallback(..))
 import Data.Discord
+import Effectful
+import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.InteractionCallback (InteractionCallback (..))
+import Effectful.State.Static.Local
 
 runDummyInteractionCallback :: (State (Maybe Content) :> es) => Eff (InteractionCallback : es) a -> Eff es a
 runDummyInteractionCallback = interpret $ \_ -> \case

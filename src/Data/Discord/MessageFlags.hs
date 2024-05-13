@@ -11,19 +11,18 @@
 -- UziBotのApplication Idを読み出すためのEffect Moduleです
 module Data.Discord.MessageFlags
   ( MessageFlags (..),
-  flagEphemeral
+    flagEphemeral,
   )
 where
 
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Bits (Bits (shiftL))
 import RIO
-import Data.Aeson (ToJSON, FromJSON)
 
 newtype MessageFlags = MessageFlags Integer
   deriving (Show, Eq)
   deriving (Bits) via Integer
   deriving (ToJSON, FromJSON) via Integer
-  
 
 -- https://discord.com/developers/docs/resources/channel#message-object-message-flags
 flagEphemeral :: MessageFlags

@@ -12,7 +12,7 @@ import Effectful
 import Effectful.InteractionCallback
 import Effectful.NonDet
 
-interactionCallback :: ( NonDet :> es, InteractionCallback :> es) => Response -> Eff es ()
+interactionCallback :: (NonDet :> es, InteractionCallback :> es) => Response -> Eff es ()
 interactionCallback = \case
   InteractionCreate event -> do
     doLoadingCallback event

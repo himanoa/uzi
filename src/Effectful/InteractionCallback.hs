@@ -1,10 +1,9 @@
 module Effectful.InteractionCallback
-  (   
-    doLoadingCallback,
+  ( doLoadingCallback,
     channelMessageCallback,
     channelMessageCallbackWithFlags,
     runInteractionCallback,
-    InteractionCallback(..),
+    InteractionCallback (..),
   )
 where
 

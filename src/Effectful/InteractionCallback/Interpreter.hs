@@ -12,23 +12,22 @@
 --
 -- UziBot自身のApplication Idを取得するEffectのインタプリタです
 module Effectful.InteractionCallback.Interpreter
-  (
-    runInteractionCallback,
+  ( runInteractionCallback,
   )
 where
 
 import Control.Exception
 import Data.Aeson
+import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Text
 import Effectful
 import Effectful.DiscordApiTokenReader
-import Effectful.InteractionCallback.Effect
 import Effectful.Dispatch.Dynamic (interpret)
+import Effectful.DynamicLogger.Effect
+import Effectful.InteractionCallback.Effect
 import Effectful.Req
 import Network.HTTP.Req
 import RIO
-import Effectful.DynamicLogger.Effect
-import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -48,12 +47,11 @@ version = "v10"
 --  このインタプリタではAPIにアクセスして、自身のApplication Idを取得します
 runInteractionCallback :: (DiscordApiTokenReader :> es, Request :> es, DynamicLogger :> es) => Eff (InteractionCallback : es) a -> Eff es a
 runInteractionCallback = interpret $ \_ -> \case
-
   ChannelMessage event text flags -> do
     let IC.InteractionId _interactionId = event ^. IC.interactionId
     let IC.InteractionToken _interactionToken = event ^. IC.token
     token <- getToken
-    let body = object [ "type" .= (4 :: Integer), "data" .= object ["content" .= text, "flags" .= flags]]
+    let body = object ["type" .= (4 :: Integer), "data" .= object ["content" .= text, "flags" .= flags]]
 
     _ <- info "POST Callback"
     _ <-
@@ -65,11 +63,10 @@ runInteractionCallback = interpret $ \_ -> \case
     let IC.InteractionToken _interactionToken = event ^. IC.token
     token <- getToken
 
-    let body = object [ "type" .= (5 :: Integer), "data" .= object []]
+    let body = object ["type" .= (5 :: Integer), "data" .= object []]
 
     _ <- info "POST Callback"
     _ <-
       request POST (https host /: "api" /: version /: "interactions" /: _interactionId /: _interactionToken /: "callback") (ReqBodyJson . toJSON $ body) ignoreResponse
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()
-
