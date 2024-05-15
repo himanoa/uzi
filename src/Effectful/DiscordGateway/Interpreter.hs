@@ -14,7 +14,6 @@
 module Effectful.DiscordGateway.Interpreter where
 
 import Data.Aeson (eitherDecode, encode)
-import RIO.ByteString.Lazy qualified as BL
 import Data.Discord
 import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful
@@ -27,6 +26,7 @@ import Network.WebSockets (Connection)
 import Network.WebSockets qualified as WS
 import Network.WebSockets qualified as Wuss
 import RIO
+import RIO.ByteString.Lazy qualified as BL
 import RIO.Text qualified as T
 import Wuss qualified as WS
 
