@@ -4,9 +4,9 @@
 module Data.Discord.UserName where
 
 import Data.Aeson
-import RIO.Text qualified as DT
+import RIO.Text qualified as T
 import RIO
 
-newtype UserName = UserName DT.Text
+newtype UserName = UserName T.Text
   deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via DT.Text
+  deriving (FromJSON, ToJSON) via T.Text

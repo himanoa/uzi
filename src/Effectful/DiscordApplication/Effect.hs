@@ -18,7 +18,7 @@ where
 
 import Data.Aeson
 import Data.Eq
-import RIO.Text qualified as DT
+import RIO.Text qualified as T
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
 import GHC.Show
@@ -29,9 +29,9 @@ data DiscordApplication :: Effect where
 
 type instance DispatchOf DiscordApplication = Dynamic
 
-newtype ApplicationId = ApplicationId DT.Text
+newtype ApplicationId = ApplicationId T.Text
   deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via DT.Text
+  deriving (FromJSON, ToJSON) via T.Text
 
 -- | UziBotのApplicationを取得します。
 getApplication :: (DiscordApplication :> es) => Eff es ApplicationId
