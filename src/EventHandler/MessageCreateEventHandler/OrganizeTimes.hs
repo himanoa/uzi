@@ -15,7 +15,6 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
-import Data.Text (pack)
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
@@ -23,6 +22,7 @@ import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.NonDet
 import RIO hiding ((^.))
+import RIO.Text qualified as T
 
 -- | 'MessageCreate'イベントに反応し、特定のメッセージ('organize-times')を受け取った際にtimes channelの整理を行います。
 -- 成功すると成功のメッセージを、失敗するとエラーメッセージを送信します。
@@ -44,6 +44,6 @@ organizeTimesHandler = \case
             sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent "times channelを整理したよ！"))
           Left (_, e) -> do
             attention "Failed organize times"
-            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (pack . show $ e))))
+            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (T.pack . show $ e))))
       else emptyEff
   _ -> emptyEff

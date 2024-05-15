@@ -10,12 +10,12 @@ where
 
 import Data.Aeson
 import Data.Discord.Nickname
-import Data.Text qualified as DT
 import RIO
+import RIO.Text qualified as T
 
-newtype Role = Role DT.Text
+newtype Role = Role T.Text
   deriving (Show, Eq)
-  deriving (FromJSON) via DT.Text
+  deriving (FromJSON) via T.Text
 
 data Member = Member
   { roles :: [Role],

@@ -156,7 +156,6 @@ library
     , safe-exceptions
     , scientific
     , string-conversions
-    , text
     , unliftio
     , websockets
     , wuss
@@ -190,7 +189,6 @@ executable uzi-exe
     , safe-exceptions
     , scientific
     , string-conversions
-    , text
     , unliftio
     , uzi
     , websockets
@@ -242,7 +240,6 @@ test-suite uzi-test
     , safe-exceptions
     , scientific
     , string-conversions
-    , text
     , unliftio
     , uzi
     , websockets

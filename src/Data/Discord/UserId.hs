@@ -4,9 +4,9 @@
 module Data.Discord.UserId where
 
 import Data.Aeson
-import Data.Text qualified as DT
 import RIO
+import RIO.Text qualified as T
 
-newtype UserId = UserId DT.Text
+newtype UserId = UserId T.Text
   deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via DT.Text
+  deriving (FromJSON, ToJSON) via T.Text

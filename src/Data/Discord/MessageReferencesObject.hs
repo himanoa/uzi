@@ -6,13 +6,13 @@ module Data.Discord.MessageReferencesObject where
 
 import Data.Aeson
 import Data.Discord.ChannelId
-import Data.Text qualified as DT
 import RIO
+import RIO.Text qualified as T
 
 data MessageReferencesObject = MessageReferencesObject
-  { messageId :: DT.Text,
+  { messageId :: T.Text,
     channelId :: ChannelId,
-    guildId :: DT.Text,
+    guildId :: T.Text,
     failIfNotExist :: Bool
   }
   deriving (Show, Eq, Generic)

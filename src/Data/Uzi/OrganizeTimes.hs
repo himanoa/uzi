@@ -16,8 +16,6 @@ import Data.Aeson
 import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
-import Data.String.Conversions
-import Data.Text.Encoding qualified as RIO
 import Data.Uzi.TimesChannel
 import Data.Uzi.TimesChannelGroup
 import Effectful
@@ -61,7 +59,7 @@ organizeTimes guildId = do
   channels <- getChannels guildId
   let channelsVector = V.fromList channels :: VU.Vector C.Channel
 
-  RIO.void $ info $ RIO.displayShow $ RIO.decodeUtf8 . convertString $ ("channelsVector: " <> encode channelsVector)
+  RIO.void $ info $ RIO.displayShow $ ("channelsVector: " <> encode channelsVector)
 
   (aToM, nToZ) <- case findTimesCategories channelsVector of
     Right a -> pure a

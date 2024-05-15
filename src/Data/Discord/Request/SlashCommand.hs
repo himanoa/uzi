@@ -12,16 +12,16 @@ module Data.Discord.Request.SlashCommand
 where
 
 import Data.Aeson
-import Data.Text qualified as DT
 import RIO
+import RIO.Text qualified as T
 
-newtype Name = Name DT.Text
+newtype Name = Name T.Text
   deriving (Eq)
-  deriving (ToJSON, Show) via DT.Text
+  deriving (ToJSON, Show) via T.Text
 
-newtype Description = Description DT.Text
+newtype Description = Description T.Text
   deriving (Eq)
-  deriving (ToJSON, Show) via DT.Text
+  deriving (ToJSON, Show) via T.Text
 
 data CommandOption = StringOption !Name !Description !Bool | ChannelOption !Name !Description !Bool
   deriving (Eq)

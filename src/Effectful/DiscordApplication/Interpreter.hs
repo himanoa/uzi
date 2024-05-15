@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
@@ -19,7 +18,6 @@ where
 
 import Control.Exception
 import Data.Aeson
-import Data.Text
 import Effectful
 import Effectful.DiscordApiTokenReader
 import Effectful.DiscordApplication.Effect
@@ -28,6 +26,7 @@ import Effectful.Internal.Monad (unsafeEff_)
 import Effectful.Req
 import Network.HTTP.Req
 import RIO
+import RIO.Text qualified as T
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)
@@ -65,6 +64,6 @@ runDiscordApplication = interpret $ \_ -> \case
 
     response <-
       request GET (https host /: "api" /: version /: "applications/@me") NoReqBody pr
-        $ header "Authorization" ("Bot " <> encodeUtf8 token)
+        $ header "Authorization" ("Bot " <> T.encodeUtf8 token)
 
     fmap applicationId (unsafeEff_ . getResponseBodyAsJsonResponse $ response)

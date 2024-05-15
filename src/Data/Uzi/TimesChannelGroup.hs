@@ -27,11 +27,10 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.List (sort)
-import Data.Text (toUpper)
-import Data.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
 import RIO hiding ((^.))
 import RIO.Map qualified as Map
+import RIO.Text qualified as T
 import RIO.Vector qualified as RIOV
 
 -- | 宇治共和国に存在するTIMES(A-M) TIMES(N-Z) な名前のグループチャンネルのデータ定義
@@ -96,7 +95,7 @@ findTimesCategories cs =
           _ -> (aToM, nToZ)
         else (aToM, nToZ)
     upperedChannelName :: C.Channel -> ChannelName
-    upperedChannelName c = ChannelName . toUpper . coerceChannelName $ (c ^. C._name)
+    upperedChannelName c = ChannelName . T.toUpper . coerceChannelName $ (c ^. C._name)
 
 --
 
@@ -119,7 +118,7 @@ groupByFirstLetter channels aToM nToZ = do
   where
     getGroupTuple :: TimesChannelGroup -> TimesChannelGroup -> TC.TimesChannel -> Maybe (TimesChannelGroup, [TC.TimesChannel])
     getGroupTuple aToMG nToZG c = do
-      let prefix = Text.toLower . Text.take 1 . TC.coerceTimesName $ (c ^. TC.name)
+      let prefix = T.toLower . T.take 1 . TC.coerceTimesName $ (c ^. TC.name)
       case prefix of
         "a" -> Just (aToMG, [c])
         "b" -> Just (aToMG, [c])

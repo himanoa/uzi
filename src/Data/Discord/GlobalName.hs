@@ -4,9 +4,9 @@
 module Data.Discord.GlobalName where
 
 import Data.Aeson
-import Data.Text qualified as DT
 import RIO
+import RIO.Text qualified as T
 
-newtype GlobalName = GlobalName DT.Text
+newtype GlobalName = GlobalName T.Text
   deriving (Show, Eq)
-  deriving (FromJSON, ToJSON) via DT.Text
+  deriving (FromJSON, ToJSON) via T.Text
