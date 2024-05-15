@@ -19,7 +19,7 @@ where
 
 import Control.Exception
 import Data.Aeson
-import RIO.Text
+import RIO.Text qualified as T
 import Effectful
 import Effectful.DiscordApiTokenReader
 import Effectful.DiscordApplication.Effect
@@ -65,6 +65,6 @@ runDiscordApplication = interpret $ \_ -> \case
 
     response <-
       request GET (https host /: "api" /: version /: "applications/@me") NoReqBody pr
-        $ header "Authorization" ("Bot " <> encodeUtf8 token)
+        $ header "Authorization" ("Bot " <> T.encodeUtf8 token)
 
     fmap applicationId (unsafeEff_ . getResponseBodyAsJsonResponse $ response)

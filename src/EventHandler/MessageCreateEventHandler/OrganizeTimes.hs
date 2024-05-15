@@ -15,7 +15,7 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
-import RIO.Text (pack)
+import RIO.Text qualified as T
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
@@ -44,6 +44,6 @@ organizeTimesHandler = \case
             sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent "times channelを整理したよ！"))
           Left (_, e) -> do
             attention "Failed organize times"
-            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (pack . show $ e))))
+            sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent ("times channelの整理に失敗したよ！ " <> (T.pack . show $ e))))
       else emptyEff
   _ -> emptyEff

@@ -16,7 +16,6 @@ import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Map.Strict qualified as M
-import RIO.Text
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
