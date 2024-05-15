@@ -140,7 +140,6 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
-    , bytestring
     , containers
     , data-default
     , effectful
@@ -173,7 +172,6 @@ executable uzi-exe
   build-depends:
       aeson
     , base >=4.7 && <5
-    , bytestring
     , containers
     , data-default
     , effectful
@@ -223,7 +221,6 @@ test-suite uzi-test
   build-depends:
       aeson
     , base >=4.7 && <5
-    , bytestring
     , containers
     , data-default
     , effectful
