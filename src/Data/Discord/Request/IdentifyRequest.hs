@@ -6,8 +6,8 @@ module Data.Discord.Request.IdentifyRequest where
 
 import Data.Aeson (ToJSON)
 import Data.Bits
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 messageContentIntent :: Integer
 messageContentIntent = shift 1 15

@@ -4,8 +4,8 @@
 module Data.Discord.GlobalName where
 
 import Data.Aeson
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 newtype GlobalName = GlobalName T.Text
   deriving (Show, Eq)

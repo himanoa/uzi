@@ -4,8 +4,8 @@
 module Data.Discord.GuildId where
 
 import Data.Aeson
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 newtype GuildId = GuildId T.Text
   deriving (Eq)

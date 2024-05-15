@@ -4,8 +4,8 @@
 module Data.Discord.Nickname where
 
 import Data.Aeson
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 newtype Nickname = Nickname T.Text
   deriving (Show, Eq)

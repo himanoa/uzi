@@ -18,8 +18,8 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
-import RIO.Text
 import RIO hiding ((^.))
+import RIO.Text
 import RIO.Vector qualified as RIOV
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P

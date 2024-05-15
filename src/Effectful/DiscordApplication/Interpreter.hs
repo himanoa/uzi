@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
-
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
@@ -19,7 +18,6 @@ where
 
 import Control.Exception
 import Data.Aeson
-import RIO.Text qualified as T
 import Effectful
 import Effectful.DiscordApiTokenReader
 import Effectful.DiscordApplication.Effect
@@ -28,6 +26,7 @@ import Effectful.Internal.Monad (unsafeEff_)
 import Effectful.Req
 import Network.HTTP.Req
 import RIO
+import RIO.Text qualified as T
 
 data FromEnvironmentError = DiscordApiTokenIsUndefined
   deriving (Show)

@@ -15,7 +15,6 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
-import RIO.Text qualified as T
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel
@@ -23,6 +22,7 @@ import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
 import Effectful.NonDet
 import RIO hiding ((^.))
+import RIO.Text qualified as T
 
 -- | 'MessageCreate'イベントに反応し、特定のメッセージ('organize-times')を受け取った際にtimes channelの整理を行います。
 -- 成功すると成功のメッセージを、失敗するとエラーメッセージを送信します。

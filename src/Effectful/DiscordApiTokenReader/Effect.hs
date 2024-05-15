@@ -10,9 +10,9 @@
 -- UziBotが使うDiscordのアクセストークンを読み出すためのEffect Moduleです
 module Effectful.DiscordApiTokenReader.Effect where
 
-import RIO.Text qualified as T
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
+import RIO.Text qualified as T
 
 -- | UziBotが使うDiscordのアクセストークンを読み出すためのEffectの定義
 data DiscordApiTokenReader :: Effect where

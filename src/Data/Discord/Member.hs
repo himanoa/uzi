@@ -10,8 +10,8 @@ where
 
 import Data.Aeson
 import Data.Discord.Nickname
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 newtype Role = Role T.Text
   deriving (Show, Eq)

@@ -27,10 +27,10 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.List (sort)
-import RIO.Text qualified as T
 import Data.Uzi.TimesChannel qualified as TC
 import RIO hiding ((^.))
 import RIO.Map qualified as Map
+import RIO.Text qualified as T
 import RIO.Vector qualified as RIOV
 
 -- | 宇治共和国に存在するTIMES(A-M) TIMES(N-Z) な名前のグループチャンネルのデータ定義

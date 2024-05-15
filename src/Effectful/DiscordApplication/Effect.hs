@@ -18,10 +18,10 @@ where
 
 import Data.Aeson
 import Data.Eq
-import RIO.Text qualified as T
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
 import GHC.Show
+import RIO.Text qualified as T
 
 -- | UziBotのApplication Idを読み出すためのEffectの定義
 data DiscordApplication :: Effect where

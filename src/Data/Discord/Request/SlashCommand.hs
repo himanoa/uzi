@@ -12,8 +12,8 @@ module Data.Discord.Request.SlashCommand
 where
 
 import Data.Aeson
-import RIO.Text qualified as T
 import RIO
+import RIO.Text qualified as T
 
 newtype Name = Name T.Text
   deriving (Eq)
