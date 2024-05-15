@@ -10,7 +10,7 @@ where
 
 import Data.Aeson
 import Data.Discord.Nickname
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import RIO
 
 newtype Role = Role DT.Text

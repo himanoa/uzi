@@ -6,7 +6,7 @@ module Data.Discord.Request.IdentifyRequest where
 
 import Data.Aeson (ToJSON)
 import Data.Bits
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import RIO
 
 messageContentIntent :: Integer

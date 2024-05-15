@@ -19,7 +19,7 @@ where
 
 import Control.Exception
 import Data.Aeson
-import Data.Text
+import RIO.Text
 import Effectful
 import Effectful.DiscordApiTokenReader
 import Effectful.DiscordApplication.Effect

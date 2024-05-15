@@ -15,7 +15,7 @@ import Control.Lens
 import Data.Discord
 import Data.Discord.Content
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
-import Data.Text (pack)
+import RIO.Text (pack)
 import Data.Uzi.OrganizeTimes
 import Effectful
 import Effectful.DiscordChannel

@@ -5,7 +5,7 @@ module Data.Discord.ChannelId where
 
 import Data.Aeson
 import Data.Coerce
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import RIO
 
 newtype ChannelId = ChannelId DT.Text

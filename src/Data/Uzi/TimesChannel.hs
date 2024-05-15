@@ -18,7 +18,7 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId
 import Data.Discord.ChannelName
 import Data.Either.Combinators (rightToMaybe)
-import Data.Text
+import RIO.Text
 import RIO hiding ((^.))
 import RIO.Vector qualified as RIOV
 import Text.Parsec qualified as P

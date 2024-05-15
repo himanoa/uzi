@@ -18,7 +18,7 @@ where
 
 import Data.Aeson
 import Data.Eq
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
 import GHC.Show

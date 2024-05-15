@@ -27,8 +27,8 @@ import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId qualified as C
 import Data.Discord.ChannelName
 import Data.List (sort)
-import Data.Text (toUpper)
-import Data.Text qualified as Text
+import RIO.Text (toUpper)
+import RIO.Text qualified as Text
 import Data.Uzi.TimesChannel qualified as TC
 import RIO hiding ((^.))
 import RIO.Map qualified as Map

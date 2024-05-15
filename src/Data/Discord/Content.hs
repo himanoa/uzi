@@ -17,7 +17,7 @@ import Data.Aeson hiding (Success)
 import Data.Coerce
 import Data.Either.Combinators (rightToMaybe)
 import Data.Either.Validation
-import Data.Text hiding (concat)
+import RIO.Text hiding (concat)
 import Text.Parsec qualified as P
 import Text.Parsec.Text qualified as P
 import Prelude hiding (length)

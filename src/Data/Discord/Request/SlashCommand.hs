@@ -12,7 +12,7 @@ module Data.Discord.Request.SlashCommand
 where
 
 import Data.Aeson
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import RIO
 
 newtype Name = Name DT.Text

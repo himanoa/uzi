@@ -6,7 +6,7 @@ module Data.Discord.MessageReferencesObject where
 
 import Data.Aeson
 import Data.Discord.ChannelId
-import Data.Text qualified as DT
+import RIO.Text qualified as DT
 import RIO
 
 data MessageReferencesObject = MessageReferencesObject

@@ -10,7 +10,7 @@
 -- UziBotが使うDiscordのアクセストークンを読み出すためのEffect Moduleです
 module Effectful.DiscordApiTokenReader.Effect where
 
-import Data.Text
+import RIO.Text
 import Effectful
 import Effectful.Dispatch.Dynamic (send)
 
