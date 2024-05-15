@@ -14,7 +14,7 @@
 module Effectful.DiscordGateway.Interpreter where
 
 import Data.Aeson (eitherDecode, encode)
-import Data.ByteString.Lazy qualified as LB
+import RIO.ByteString.Lazy qualified as BL
 import Data.Discord
 import Data.String.Conversions (ConvertibleStrings (convertString))
 import Effectful
@@ -40,7 +40,7 @@ withPingThread conn interval after_sending inner =
   withRunInIO $ \runInIO ->
     WS.withPingThread conn interval after_sending (runInIO inner)
 
-handleEvent :: LB.LazyByteString -> Either String Response
+handleEvent :: BL.ByteString -> Either String Response
 handleEvent = eitherDecode @Response
 
 -- | DiscordGatewayAPIに接続します
@@ -51,7 +51,7 @@ withDiscordGatewayConnection = runClient "gateway.discord.gg" 443 "/?v=14&encodi
 runDiscordGateway :: (IOE :> es, Environment :> es, DynamicLogger :> es) => WS.Connection -> Eff (DiscordGateway : es) a -> Eff es a
 runDiscordGateway conn = interpret $ \_ -> \case
   ReceiveEvent -> do
-    d <- liftIO . Wuss.receiveData @LB.LazyByteString $ conn
+    d <- liftIO . Wuss.receiveData @BL.ByteString $ conn
     lookupEnv "UZI_IS_DEBUG" >>= \case
       Just _ -> info . RIO.displayBytesUtf8 . encodeUtf8 . convertString $ d
       Nothing -> pure ()
