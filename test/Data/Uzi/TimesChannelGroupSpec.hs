@@ -27,15 +27,14 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Left NtoZGroupMissing" $ do
         let cs =
               RIOV.fromList
-                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing]
+                [C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing]
         findTimesCategories cs `shouldBe` Left NtoZGroupMissing
 
     context "when vec include only nToZ group" $ do
       it "should be return to Left NtoZGroupMissing" $ do
         let cs =
               RIOV.fromList
-                [
-                 C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing
                 ]
         findTimesCategories cs `shouldBe` Left AtoMGroupMissing
 
@@ -43,9 +42,8 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Right" $ do
         let cs =
               RIOV.fromList
-                [
-                 C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing,
-                 C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing,
+                  C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing
                 ]
         RIO.isRight (findTimesCategories cs) `shouldBe` True
 
@@ -53,9 +51,8 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Right" $ do
         let cs =
               RIOV.fromList
-                [
-                 C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(n-z)") Nothing,
-                 C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(a-m)") Nothing
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(n-z)") Nothing,
+                  C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(a-m)") Nothing
                 ]
         RIO.isRight (findTimesCategories cs) `shouldBe` True
 

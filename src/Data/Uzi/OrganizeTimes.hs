@@ -13,13 +13,13 @@
 -- |
 module Data.Uzi.OrganizeTimes where
 
+import Control.Lens qualified as L
 import Data.Aeson
 import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
 import Data.Uzi.TimesChannel qualified as TC
 import Data.Uzi.TimesChannelGroup
-import Control.Lens
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DiscordChannel.Effect (getChannels)
@@ -80,9 +80,11 @@ organizeTimes guildId = do
     updateChannelPosition :: (DiscordChannel :> es, State Integer :> es, Error OrganizeTimesError :> es) => Vector Channel -> ChannelId -> TC.TimesChannel -> Eff es ()
     updateChannelPosition channels parentId tc = do
       count <- get
-      channel <- maybe (throwError . FindChannelError $ tc ^. TC.id) pure (V.find (\c -> (c ^. C._id) == (tc ^. TC.id)) channels)
-      RIO.void $ modifyChannel channel
+      channel <- maybe (throwError . FindChannelError $ tc L.^. TC.id) pure (V.find (\c -> (c L.^. C._id) == (tc L.^. TC.id)) channels)
+      RIO.void $ modifyChannel (changePosition channel parentId (ChannelPosition count))
       RIO.void $ put (count + 1)
-    changePosition :: Channel ->  ChannelId ->  ChannelPosition -> Channel
-    changePosition channel channelId position = undefined
-      -- let updatedParentId = set' (channel ^. C._)
+
+    changePosition :: Channel -> ChannelId -> ChannelPosition -> Channel
+    changePosition channel parentId position = do
+      let updatedParentId = L.set C._parentId (Just parentId) channel
+      L.set C._position position updatedParentId

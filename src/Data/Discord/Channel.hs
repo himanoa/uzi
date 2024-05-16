@@ -53,7 +53,7 @@ data Channel = Channel
   deriving (Show, Eq, Generic)
 
 instance FromJSON Channel where
-  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier =  drop 2 . Casing.snakeCase}
+  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 2 . Casing.snakeCase}
 
 instance ToJSON Channel where
   toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 2 . Casing.snakeCase}
@@ -61,4 +61,4 @@ instance ToJSON Channel where
 makeLenses ''Channel
 
 makeChannel :: ChannelId -> ChannelType -> ChannelPosition -> ChannelName -> Maybe ChannelId -> Channel
-makeChannel  = Channel
+makeChannel = Channel
