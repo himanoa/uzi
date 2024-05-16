@@ -15,10 +15,9 @@ module Effectful.DiscordChannel.Interpreter where
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Coerce (coerce)
-import Data.Discord.Channel
+import Data.Discord.Channel qualified as C
 import Data.Discord.ChannelId
 import Data.Discord.GuildId
-import Data.Uzi.TimesChannel qualified as TC
 import Effectful
 import Effectful.DiscordApiTokenReader (DiscordApiTokenReader, getToken)
 import Effectful.DiscordChannel.Effect
@@ -52,16 +51,16 @@ runDiscordChannel = interpret $ \_ -> \case
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()
   GetChannels guildId -> do
-    let pr = jsonResponse @[Channel]
+    let pr = jsonResponse @[C.Channel]
     token <- getToken
     response <-
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
-  ModifyChannel _ parentId times pos -> do
+  ModifyChannel _ parentId channel pos -> do
     token <- getToken
-    let payload = object ["type" .= (0 :: Integer), "position" .= coerceChannelPosition pos, "parent_id" .= coerceChannelId parentId]
+    let payload = object ["type" .= (0 :: Integer), "position" .= C.coerceChannelPosition pos, "parent_id" .= coerceChannelId parentId]
     _ <-
-      request PATCH (https host /: "api" /: version /: "channels" /: coerce (times ^. TC.id)) (ReqBodyJson payload) ignoreResponse
+      request PATCH (https host /: "api" /: version /: "channels" /: coerceChannelId (channel ^. C._id)) (ReqBodyJson payload) ignoreResponse
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()

@@ -1,6 +1,7 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 
 -- |
 -- Module: Data.Uzi.OrganizeTimes
@@ -16,7 +17,7 @@ import Data.Aeson
 import Data.Discord hiding (coerceChannelId)
 import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
-import Data.Uzi.TimesChannel
+import Data.Uzi.TimesChannel qualified as TC
 import Data.Uzi.TimesChannelGroup
 import Effectful
 import Effectful.DiscordChannel
@@ -36,7 +37,8 @@ import RIO.Vector.Boxed qualified as VU
 -- 発生しうるエラーとシチュエーションは次の通りです
 --
 -- 'Data.Uzi.OrganizeTimes.FindTimesError': TIMES(A-M) TIMES(N-Z) という名前のグループチャンネルがGuildIdが指すサーバーにどちらか片方でも存在しない場合に発生します
-newtype OrganizeTimesError = FindTimesError FindTimesChannelGroupsError
+-- 'Data.Uzi.OrganizeTimes.FindChannelError: ソートしたあとに実際にDiscordに変更を反映する過程でTimesChannelに記載されているChannelIdが存在しない場合に発生します
+data OrganizeTimesError = FindTimesError FindTimesChannelGroupsError | FindChannelError ChannelId
   deriving (Show, Eq)
 
 --
@@ -59,23 +61,24 @@ organizeTimes guildId = do
   channels <- getChannels guildId
   let channelsVector = V.fromList channels :: VU.Vector C.Channel
 
-  RIO.void $ info $ RIO.displayShow $ ("channelsVector: " <> encode channelsVector)
+  RIO.void $ info $ RIO.displayShow ("channelsVector: " <> encode channelsVector)
 
   (aToM, nToZ) <- case findTimesCategories channelsVector of
     Right a -> pure a
     Left e -> throwError . FindTimesError $ e
 
-  let channelsMap = groupByFirstLetter (fromChannels channelsVector) aToM nToZ
+  let channelsMap = groupByFirstLetter (TC.fromChannels channelsVector) aToM nToZ
   let sortedChannelsMap = sortTimesChannelGroupMap channelsMap
 
-  RIO.void $ M.traverseWithKey updateChannelPositions sortedChannelsMap
+  RIO.void $ M.traverseWithKey (updateChannelPositions channelsVector) sortedChannelsMap
   where
-    updateChannelPositions :: (DiscordChannel :> es) => TimesChannelGroup -> [TimesChannel] -> Eff es ()
-    updateChannelPositions group channels = do
-      RIO.void $ evalState @Integer 1 (traverse (updateChannelPosition (coerceChannelId group)) channels)
+    updateChannelPositions :: (DiscordChannel :> es, Error OrganizeTimesError :> es) => Vector Channel -> TimesChannelGroup -> [TC.TimesChannel] -> Eff es ()
+    updateChannelPositions channels group times = do
+      RIO.void $ evalState @Integer 1 (traverse (updateChannelPosition channels (coerceChannelId group)) times)
 
-    updateChannelPosition :: (DiscordChannel :> es, State Integer :> es) => ChannelId -> TimesChannel -> Eff es ()
-    updateChannelPosition parentId tc = do
+    updateChannelPosition :: (DiscordChannel :> es, State Integer :> es, Error OrganizeTimesError :> es) => Vector Channel -> ChannelId -> TC.TimesChannel -> Eff es ()
+    updateChannelPosition channels parentId tc = do
       count <- get
-      RIO.void $ modifyChannel guildId parentId tc (ChannelPosition count)
+      channel <- maybe (throwError . FindChannelError $ tc ^. TC.id) pure (V.find (\c -> (c ^. C._id) == (tc ^. TC.id)) channels)
+      RIO.void $ modifyChannel guildId parentId channel (ChannelPosition count)
       RIO.void $ put (count + 1)

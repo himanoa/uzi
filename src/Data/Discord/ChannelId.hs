@@ -14,3 +14,6 @@ newtype ChannelId = ChannelId T.Text
 
 coerceChannelId :: ChannelId -> T.Text
 coerceChannelId = coerce
+
+makeChannelId :: T.Text -> ChannelId
+makeChannelId = ChannelId
