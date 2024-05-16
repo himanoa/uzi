@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">RIO.Prelude.Exit</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="RIO.Prelude.Exit.html#exitFailure"><span class="hs-identifier">exitFailure</span></a></span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="RIO.Prelude.Exit.html#exitSuccess"><span class="hs-identifier">exitSuccess</span></a></span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="RIO.Prelude.Exit.html#exitWith"><span class="hs-identifier">exitWith</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">System.Exit.ExitCode</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">System.Exit</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">ExitCode</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">exitFailure</span></span><span>
+</span><span id="line-11"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">exitSuccess</span></span><span>
+</span><span id="line-12"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">exitWith</span></span><span>
+</span><span id="line-13"></span><span>                             </span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- | Lifted version of &quot;System.Exit.exitFailure&quot;.</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- @since 0.1.9.0.</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679096762"><span id="local-6989586621679096764"><span class="annot"><a href="RIO.Prelude.Exit.html#exitFailure"><span class="hs-identifier hs-type">exitFailure</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679096762"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679096762"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679096764"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-19"></span><span id="exitFailure"><span class="annot"><span class="annottext">exitFailure :: forall (m :: * -&gt; *) a. MonadIO m =&gt; m a
+</span><a href="RIO.Prelude.Exit.html#exitFailure"><span class="hs-identifier hs-var hs-var">exitFailure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; m a
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">IO a
+forall a. IO a
+</span><span class="hs-identifier hs-var">System.Exit.exitFailure</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- | Lifted version of &quot;System.Exit.exitSuccess&quot;.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- @since 0.1.9.0.</span><span>
+</span><span id="line-24"></span><span id="local-6989586621679096790"><span id="local-6989586621679096791"><span class="annot"><a href="RIO.Prelude.Exit.html#exitSuccess"><span class="hs-identifier hs-type">exitSuccess</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679096790"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679096790"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679096791"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-25"></span><span id="exitSuccess"><span class="annot"><span class="annottext">exitSuccess :: forall (m :: * -&gt; *) a. MonadIO m =&gt; m a
+</span><a href="RIO.Prelude.Exit.html#exitSuccess"><span class="hs-identifier hs-var hs-var">exitSuccess</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; m a
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">IO a
+forall a. IO a
+</span><span class="hs-identifier hs-var">System.Exit.exitSuccess</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | Lifted version of &quot;System.Exit.exitWith&quot;.</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- @since 0.1.9.0.</span><span>
+</span><span id="line-30"></span><span id="local-6989586621679096772"><span id="local-6989586621679096774"><span class="annot"><a href="RIO.Prelude.Exit.html#exitWith"><span class="hs-identifier hs-type">exitWith</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679096772"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">System.Exit.ExitCode</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679096772"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679096774"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-31"></span><span id="exitWith"><span class="annot"><span class="annottext">exitWith :: forall (m :: * -&gt; *) a. MonadIO m =&gt; ExitCode -&gt; m a
+</span><a href="RIO.Prelude.Exit.html#exitWith"><span class="hs-identifier hs-var hs-var">exitWith</span></a></span></span><span> </span><span id="local-6989586621679096796"><span class="annot"><span class="annottext">ExitCode
+</span><a href="#local-6989586621679096796"><span class="hs-identifier hs-var">code</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; m a
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; m a) -&gt; IO a -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ExitCode -&gt; IO a
+forall a. ExitCode -&gt; IO a
+</span><span class="hs-identifier hs-var">System.Exit.exitWith</span></span><span> </span><span class="annot"><span class="annottext">ExitCode
+</span><a href="#local-6989586621679096796"><span class="hs-identifier hs-var">code</span></a></span><span>
+</span><span id="line-32"></span></pre></body></html>

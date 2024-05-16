@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Concurrent.Effect</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-3"></span><span>    </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier">Concurrent</span></a></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#runConcurrent"><span class="hs-identifier">runConcurrent</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- | Provide the ability to run 'Eff' computations concurrently in multiple</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- threads and communicate between them.</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- /Warning:/ unless you stick to high level functions from the</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- 'Effectful.Concurrent.Async.withAsync' family, the 'Concurrent' effect makes</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- it possible to escape the scope of any scoped effect operation. Consider the</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- following:</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Effectful.Reader.Static as R</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- &gt;&gt;&gt; printAsk msg = liftIO . putStrLn . (msg ++) . (&quot;: &quot; ++) =&lt;&lt; R.ask</span><span>
+</span><span id="line-23"></span><span class="hs-comment">--</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--   runEff . R.runReader &quot;GLOBAL&quot; . runConcurrent $ do</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--     a &lt;- R.local (const &quot;LOCAL&quot;) $ do</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--       a &lt;- async $ do</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--         printAsk &quot;child (first)&quot;</span><span>
+</span><span id="line-29"></span><span class="hs-comment">--         threadDelay 20000</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--         printAsk &quot;child (second)&quot;</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--       threadDelay 10000</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--       printAsk &quot;parent (inside)&quot;</span><span>
+</span><span id="line-33"></span><span class="hs-comment">--       pure a</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--     printAsk &quot;parent (outside)&quot;</span><span>
+</span><span id="line-35"></span><span class="hs-comment">--     wait a</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- child (first): LOCAL</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- parent (inside): LOCAL</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- parent (outside): GLOBAL</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- child (second): LOCAL</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- Note that the asynchronous computation doesn't respect the scope of</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- 'Effectful.Reader.Static.local', i.e. the child thread still behaves like</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- it's inside the 'Effectful.Reader.Static.local' block, even though the parent</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- thread already got out of it.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- This is because the value provided by the t'Effectful.Reader.Static.Reader'</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- effect is thread local, i.e. each thread manages its own version of it. For</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- the t'Effectful.Reader.Static.Reader' it is the only reasonable behavior, it</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- wouldn't be very useful if its &quot;read only&quot; value was affected by calls to</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- 'Effectful.Reader.Static.local' from its parent or child threads.</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- However, the cut isn't so clear if it comes to effects that provide access to</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- a mutable state. That's why statically dispatched @State@ and @Writer@</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- effects come in two flavors, local and shared:</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Effectful.State.Static.Local as SL</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--   runEff . SL.execState &quot;Hi&quot; . runConcurrent $ do</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--     replicateConcurrently_ 3 $ SL.modify (++ &quot;!&quot;)</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- &quot;Hi&quot;</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Effectful.State.Static.Shared as SS</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--   runEff . SS.execState &quot;Hi&quot; . runConcurrent $ do</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--     replicateConcurrently_ 3 $ SS.modify (++ &quot;!&quot;)</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &quot;Hi!!!&quot;</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- In the first example state updates made concurrently are not reflected in the</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- parent thread because the value is thread local, but in the second example</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- they are, because the value is shared.</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span class="hs-keyword">data</span><span> </span><span id="Concurrent"><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-var">Concurrent</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Effect</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><span class="hs-identifier hs-var">DispatchOf</span></span></span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Static</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">WithSideEffects</span></span><span>
+</span><span id="line-78"></span><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><span class="hs-identifier hs-var">StaticRep</span></span></span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Concurrent"><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-var">Concurrent</span></a></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | Run the 'Concurrent' effect.</span></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679078795"><span id="local-6989586621679078798"><span class="annot"><a href="Effectful.Concurrent.Effect.html#runConcurrent"><span class="hs-identifier hs-type">runConcurrent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679078795"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078795"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078798"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679078795"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078798"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-82"></span><span id="runConcurrent"><span class="annot"><span class="annottext">runConcurrent :: forall (es :: [Effect]) a.
+(IOE :&gt; es) =&gt;
+Eff (Concurrent : es) a -&gt; Eff es a
+</span><a href="Effectful.Concurrent.Effect.html#runConcurrent"><span class="hs-identifier hs-var hs-var">runConcurrent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StaticRep Concurrent -&gt; Eff (Concurrent : es) a -&gt; Eff es a
+forall (e :: Effect) (sideEffects :: SideEffects) (es :: [Effect])
+       a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">evalStaticRep</span></span><span> </span><span class="annot"><span class="annottext">StaticRep Concurrent
+</span><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-var">Concurrent</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.Concurrent</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.Concurrent.Async</span><span>
+</span><span id="line-87"></span></pre></body></html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | The casing utilities allow you to specify how Aeson renders and parses</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- the field names in JSON messages. Snake, Camel, and Pascal case are all</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- supported. To include casing modifiers in Aeson, attach options to instances</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- of ToJSON and FromJSON.</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- &gt; data Person = Person</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- &gt;        { personFirstName :: Text</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- &gt;        , personLastName  :: Text</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- &gt;        } deriving (Generic)</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- &gt; instance ToJSON Person where</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &gt;    toJSON = genericToJSON $ aesonPrefix snakeCase</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- &gt; instance FromJSON Person where</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- &gt;    parseJSON = genericParseJSON $ aesonPrefix snakeCase</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- The above code will produce JSON messages like the following...</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- &gt; {</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt;    &quot;first_name&quot;: &quot;John&quot;,</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- &gt;    &quot;last_name&quot;: &quot;Doe&quot;</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- &gt; }</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Aeson.Casing</span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#aesonDrop"><span class="hs-identifier">aesonDrop</span></a></span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#aesonPrefix"><span class="hs-identifier">aesonPrefix</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#snakeCase"><span class="hs-identifier">snakeCase</span></a></span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#trainCase"><span class="hs-identifier">trainCase</span></a></span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#camelCase"><span class="hs-identifier">camelCase</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#pascalCase"><span class="hs-identifier">pascalCase</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html"><span class="hs-identifier">Data.Aeson.Casing.Internal</span></a></span><span>
+</span><span id="line-33"></span></pre></body></html>

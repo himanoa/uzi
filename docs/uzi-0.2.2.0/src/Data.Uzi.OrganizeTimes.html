@@ -1,0 +1,332 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BlockArguments #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-matches #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Module: Data.Uzi.OrganizeTimes</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Description: TimesChannel&#12398;&#25972;&#29702;&#12434;&#34892;&#12358;&#12514;&#12472;&#12517;&#12540;&#12523;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- &#23431;&#27835;&#20849;&#21644;&#22269;&#12391;&#12399; TIMES(A-M) TIMES(A-N) &#12392;&#12356;&#12387;&#12383;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#23384;&#22312;&#12375;&#12289;&#21508;times&#12398;&#38957;&#25991;&#23383;&#12395;&#12434;&#35442;&#24403;&#12377;&#12427;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12395;&#32016;&#20184;&#12369;&#12390;&#31649;&#29702;&#12375;&#12390;&#12356;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &#12371;&#12398;&#12514;&#12472;&#12517;&#12540;&#12523;&#12399;&#12381;&#12428;&#12425;&#12398;&#32016;&#20184;&#12369;&#12392;&#20006;&#12403;&#25563;&#12360;&#12434;&#33258;&#21205;&#21270;&#12377;&#12427;&#12383;&#12417;&#12398;&#23450;&#32681;&#12391;&#12377;</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Uzi.OrganizeTimes</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.html"><span class="hs-identifier">Data.Discord</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.ChannelId.html#coerceChannelId"><span class="hs-identifier">coerceChannelId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html"><span class="hs-identifier">Data.Discord.Channel</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html"><span class="hs-identifier">Data.Discord.Channel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html"><span class="hs-identifier">Data.Uzi.TimesChannel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TC</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html"><span class="hs-identifier">Data.Uzi.TimesChannelGroup</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordChannel.html"><span class="hs-identifier">Effectful.DiscordChannel</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html"><span class="hs-identifier">Effectful.DiscordChannel.Effect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#getChannels"><span class="hs-identifier">getChannels</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier">DynamicLogger</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html"><span class="hs-identifier">Effectful.DynamicLogger.Effect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier">info</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Error.Dynamic</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.State.Static.Local</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Map</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Vector</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Vector.Boxed</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">VU</span></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | 'Data.Uzi.OrganizeTimes.organizeTimes' &#12434;&#23455;&#34892;&#12375;&#12383;&#26178;&#12395;&#30330;&#29983;&#12375;&#12358;&#12427;&#12456;&#12521;&#12540;&#12434;&#12414;&#12392;&#12417;&#12383;&#12487;&#12540;&#12479;&#27083;&#36896;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- &#30330;&#29983;&#12375;&#12358;&#12427;&#12456;&#12521;&#12540;&#12392;&#12471;&#12481;&#12517;&#12456;&#12540;&#12471;&#12519;&#12531;&#12399;&#27425;&#12398;&#36890;&#12426;&#12391;&#12377;</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- 'Data.Uzi.OrganizeTimes.FindTimesError': TIMES(A-M) TIMES(N-Z) &#12392;&#12356;&#12358;&#21517;&#21069;&#12398;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;GuildId&#12364;&#25351;&#12377;&#12469;&#12540;&#12496;&#12540;&#12395;&#12393;&#12385;&#12425;&#12363;&#29255;&#26041;&#12391;&#12418;&#23384;&#22312;&#12375;&#12394;&#12356;&#22580;&#21512;&#12395;&#30330;&#29983;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- 'Data.Uzi.OrganizeTimes.FindChannelError: &#12477;&#12540;&#12488;&#12375;&#12383;&#12354;&#12392;&#12395;&#23455;&#38555;&#12395;Discord&#12395;&#22793;&#26356;&#12434;&#21453;&#26144;&#12377;&#12427;&#36942;&#31243;&#12391;TimesChannel&#12395;&#35352;&#36617;&#12373;&#12428;&#12390;&#12356;&#12427;ChannelId&#12364;&#23384;&#22312;&#12375;&#12394;&#12356;&#22580;&#21512;&#12395;&#30330;&#29983;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="OrganizeTimesError"><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier hs-var">OrganizeTimesError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FindTimesError"><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#FindTimesError"><span class="hs-identifier hs-var">FindTimesError</span></a></span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#FindTimesChannelGroupsError"><span class="hs-identifier hs-type">FindTimesChannelGroupsError</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="FindChannelError"><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#FindChannelError"><span class="hs-identifier hs-var">FindChannelError</span></a></span></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679308322"><span id="local-6989586621679308331"><span id="local-6989586621679308335"><span class="annot"><span class="annottext">Int -&gt; OrganizeTimesError -&gt; ShowS
+[OrganizeTimesError] -&gt; ShowS
+OrganizeTimesError -&gt; String
+(Int -&gt; OrganizeTimesError -&gt; ShowS)
+-&gt; (OrganizeTimesError -&gt; String)
+-&gt; ([OrganizeTimesError] -&gt; ShowS)
+-&gt; Show OrganizeTimesError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; OrganizeTimesError -&gt; ShowS
+showsPrec :: Int -&gt; OrganizeTimesError -&gt; ShowS
+$cshow :: OrganizeTimesError -&gt; String
+show :: OrganizeTimesError -&gt; String
+$cshowList :: [OrganizeTimesError] -&gt; ShowS
+showList :: [OrganizeTimesError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679308339"><span id="local-6989586621679308345"><span class="annot"><span class="annottext">OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool
+(OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool)
+-&gt; (OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool)
+-&gt; Eq OrganizeTimesError
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool
+== :: OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool
+$c/= :: OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool
+/= :: OrganizeTimesError -&gt; OrganizeTimesError -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | &#23455;&#38555;&#12395;TimesChannel&#12434;&#25972;&#29702;&#12377;&#12427;&#38306;&#25968;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &#25972;&#29702;&#12392;&#12399;&#27425;&#12398;&#34892;&#28858;&#12434;&#25351;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- * &#12469;&#12540;&#12496;&#12540;&#12395;&#23384;&#22312;&#12377;&#12427;&#20840;&#12390;&#12398;TimesChannel&#12434;&#12289;&#24341;&#25968;&#12395;&#28193;&#12373;&#12428;&#12383;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12395;&#36969;&#20999;&#12395;&#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12377;&#12427;&#34892;&#28858;&#12290;&#35443;&#32048;&#12399; 'Data.Uzi.TimesChannelGroup.groupByFirstLetter' &#12434;&#21442;&#29031;&#12375;&#12390;&#12367;&#12384;&#12373;&#12356;</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- * &#12464;&#12523;&#12540;&#12503;&#20869;&#12398;times&#12398;&#38957;&#25991;&#23383;&#12434;&#12450;&#12523;&#12501;&#12449;&#12505;&#12483;&#12488;&#12391;&#26119;&#38918;&#12477;&#12540;&#12488;&#12377;&#12427;&#34892;&#28858;</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679308227"><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#organizeTimes"><span class="hs-identifier hs-type">organizeTimes</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308227"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Error</span></span><span> </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier hs-type">OrganizeTimesError</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308227"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308227"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-comment">-- | TimesChannel&#12398;&#25972;&#29702;&#12434;&#34892;&#12358;Discord&#12469;&#12540;&#12496;&#12540;&#12398; 'Data.Discord.GuildId'</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-type">GuildId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679308227"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-61"></span><span id="organizeTimes"><span class="annot"><span class="annottext">organizeTimes :: forall (es :: [Effect]).
+(DiscordChannel :&gt; es, Error OrganizeTimesError :&gt; es,
+ DynamicLogger :&gt; es) =&gt;
+GuildId -&gt; Eff es ()
+</span><a href="Data.Uzi.OrganizeTimes.html#organizeTimes"><span class="hs-identifier hs-var hs-var">organizeTimes</span></a></span></span><span> </span><span id="local-6989586621679308390"><span class="annot"><span class="annottext">GuildId
+</span><a href="#local-6989586621679308390"><span class="hs-identifier hs-var">guildId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679308391"><span class="annot"><span class="annottext">[Channel]
+</span><a href="#local-6989586621679308391"><span class="hs-identifier hs-var">channels</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GuildId -&gt; Eff es [Channel]
+forall (es :: [Effect]).
+(HasCallStack, DiscordChannel :&gt; es) =&gt;
+GuildId -&gt; Eff es [Channel]
+</span><a href="Effectful.DiscordChannel.Effect.html#getChannels"><span class="hs-identifier hs-var">getChannels</span></a></span><span> </span><span class="annot"><span class="annottext">GuildId
+</span><a href="#local-6989586621679308390"><span class="hs-identifier hs-var">guildId</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308392"><span class="annot"><span class="annottext">channelsVector :: Vector Channel
+</span><a href="#local-6989586621679308392"><span class="hs-identifier hs-var hs-var">channelsVector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Channel] -&gt; Vector Channel
+forall (v :: * -&gt; *) a. Vector v a =&gt; [a] -&gt; v a
+</span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">[Channel]
+</span><a href="#local-6989586621679308391"><span class="hs-identifier hs-var">channels</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VU.Vector</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; Eff es () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">(Utf8Builder -&gt; Eff es ()) -&gt; Utf8Builder -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Utf8Builder
+forall a. Show a =&gt; a -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">RIO.displayShow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;channelsVector: &quot;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; ByteString
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Vector Channel -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308392"><span class="hs-identifier hs-var">channelsVector</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679308397"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308397"><span class="hs-identifier hs-var">aToM</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679308398"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308398"><span class="hs-identifier hs-var">nToZ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Vector Channel
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+</span><a href="Data.Uzi.TimesChannelGroup.html#findTimesCategories"><span class="hs-identifier hs-var">findTimesCategories</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308392"><span class="hs-identifier hs-var">channelsVector</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679308400"><span class="annot"><span class="annottext">(TimesChannelGroup, TimesChannelGroup)
+</span><a href="#local-6989586621679308400"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, TimesChannelGroup)
+-&gt; Eff es (TimesChannelGroup, TimesChannelGroup)
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, TimesChannelGroup)
+</span><a href="#local-6989586621679308400"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679308401"><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+</span><a href="#local-6989586621679308401"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OrganizeTimesError -&gt; Eff es (TimesChannelGroup, TimesChannelGroup)
+forall e (es :: [Effect]) a.
+(HasCallStack, Error e :&gt; es) =&gt;
+e -&gt; Eff es a
+</span><span class="hs-identifier hs-var">throwError</span></span><span> </span><span class="annot"><span class="annottext">(OrganizeTimesError
+ -&gt; Eff es (TimesChannelGroup, TimesChannelGroup))
+-&gt; (FindTimesChannelGroupsError -&gt; OrganizeTimesError)
+-&gt; FindTimesChannelGroupsError
+-&gt; Eff es (TimesChannelGroup, TimesChannelGroup)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError -&gt; OrganizeTimesError
+</span><a href="Data.Uzi.OrganizeTimes.html#FindTimesError"><span class="hs-identifier hs-var">FindTimesError</span></a></span><span> </span><span class="annot"><span class="annottext">(FindTimesChannelGroupsError
+ -&gt; Eff es (TimesChannelGroup, TimesChannelGroup))
+-&gt; FindTimesChannelGroupsError
+-&gt; Eff es (TimesChannelGroup, TimesChannelGroup)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+</span><a href="#local-6989586621679308401"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308404"><span class="annot"><span class="annottext">channelsMap :: Map TimesChannelGroup [TimesChannel]
+</span><a href="#local-6989586621679308404"><span class="hs-identifier hs-var hs-var">channelsMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector TimesChannel
+-&gt; TimesChannelGroup
+-&gt; TimesChannelGroup
+-&gt; Map TimesChannelGroup [TimesChannel]
+</span><a href="Data.Uzi.TimesChannelGroup.html#groupByFirstLetter"><span class="hs-identifier hs-var">groupByFirstLetter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector Channel -&gt; Vector TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#fromChannels"><span class="hs-identifier hs-var">TC.fromChannels</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308392"><span class="hs-identifier hs-var">channelsVector</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308397"><span class="hs-identifier hs-var">aToM</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308398"><span class="hs-identifier hs-var">nToZ</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308406"><span class="annot"><span class="annottext">sortedChannelsMap :: Map TimesChannelGroup [TimesChannel]
+</span><a href="#local-6989586621679308406"><span class="hs-identifier hs-var hs-var">sortedChannelsMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map TimesChannelGroup [TimesChannel]
+-&gt; Map TimesChannelGroup [TimesChannel]
+</span><a href="Data.Uzi.TimesChannelGroup.html#sortTimesChannelGroupMap"><span class="hs-identifier hs-var">sortTimesChannelGroupMap</span></a></span><span> </span><span class="annot"><span class="annottext">Map TimesChannelGroup [TimesChannel]
+</span><a href="#local-6989586621679308404"><span class="hs-identifier hs-var">channelsMap</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><span class="annottext">Eff es (Map TimesChannelGroup ()) -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es (Map TimesChannelGroup ()) -&gt; Eff es ())
+-&gt; Eff es (Map TimesChannelGroup ()) -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup -&gt; [TimesChannel] -&gt; Eff es ())
+-&gt; Map TimesChannelGroup [TimesChannel]
+-&gt; Eff es (Map TimesChannelGroup ())
+forall (t :: * -&gt; *) k a b.
+Applicative t =&gt;
+(k -&gt; a -&gt; t b) -&gt; Map k a -&gt; t (Map k b)
+</span><span class="hs-identifier hs-var">M.traverseWithKey</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector Channel -&gt; TimesChannelGroup -&gt; [TimesChannel] -&gt; Eff es ()
+forall (es :: [Effect]).
+(DiscordChannel :&gt; es, Error OrganizeTimesError :&gt; es) =&gt;
+Vector Channel -&gt; TimesChannelGroup -&gt; [TimesChannel] -&gt; Eff es ()
+</span><a href="#local-6989586621679308409"><span class="hs-identifier hs-var">updateChannelPositions</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308392"><span class="hs-identifier hs-var">channelsVector</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Map TimesChannelGroup [TimesChannel]
+</span><a href="#local-6989586621679308406"><span class="hs-identifier hs-var">sortedChannelsMap</span></a></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>    </span><span id="local-6989586621679308274"><span class="annot"><a href="#local-6989586621679308409"><span class="hs-identifier hs-type">updateChannelPositions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308274"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Error</span></span><span> </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier hs-type">OrganizeTimesError</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308274"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679308274"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679308409"><span class="annot"><span class="annottext">updateChannelPositions :: forall (es :: [Effect]).
+(DiscordChannel :&gt; es, Error OrganizeTimesError :&gt; es) =&gt;
+Vector Channel -&gt; TimesChannelGroup -&gt; [TimesChannel] -&gt; Eff es ()
+</span><a href="#local-6989586621679308409"><span class="hs-identifier hs-var hs-var">updateChannelPositions</span></a></span></span><span> </span><span id="local-6989586621679308421"><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308421"><span class="hs-identifier hs-var">channels</span></a></span></span><span> </span><span id="local-6989586621679308422"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308422"><span class="hs-identifier hs-var">group</span></a></span></span><span> </span><span id="local-6989586621679308423"><span class="annot"><span class="annottext">[TimesChannel]
+</span><a href="#local-6989586621679308423"><span class="hs-identifier hs-var">times</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-78"></span><span>      </span><span class="annot"><span class="annottext">Eff es [()] -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es [()] -&gt; Eff es ()) -&gt; Eff es [()] -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall s (es :: [Effect]) a. s -&gt; Eff (State s : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">evalState</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TimesChannel -&gt; Eff (State Integer : es) ())
+-&gt; [TimesChannel] -&gt; Eff (State Integer : es) [()]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; [a] -&gt; f [b]
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector Channel
+-&gt; ChannelId -&gt; TimesChannel -&gt; Eff (State Integer : es) ()
+forall (es :: [Effect]).
+(DiscordChannel :&gt; es, State Integer :&gt; es,
+ Error OrganizeTimesError :&gt; es) =&gt;
+Vector Channel -&gt; ChannelId -&gt; TimesChannel -&gt; Eff es ()
+</span><a href="#local-6989586621679308426"><span class="hs-identifier hs-var">updateChannelPosition</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308421"><span class="hs-identifier hs-var">channels</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup -&gt; ChannelId
+</span><a href="Data.Uzi.TimesChannelGroup.html#coerceChannelId"><span class="hs-identifier hs-var">coerceChannelId</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679308422"><span class="hs-identifier hs-var">group</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[TimesChannel]
+</span><a href="#local-6989586621679308423"><span class="hs-identifier hs-var">times</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679308289"><span class="annot"><a href="#local-6989586621679308426"><span class="hs-identifier hs-type">updateChannelPosition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308289"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308289"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Error</span></span><span> </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier hs-type">OrganizeTimesError</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308289"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679308289"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679308426"><span class="annot"><span class="annottext">updateChannelPosition :: forall (es :: [Effect]).
+(DiscordChannel :&gt; es, State Integer :&gt; es,
+ Error OrganizeTimesError :&gt; es) =&gt;
+Vector Channel -&gt; ChannelId -&gt; TimesChannel -&gt; Eff es ()
+</span><a href="#local-6989586621679308426"><span class="hs-identifier hs-var hs-var">updateChannelPosition</span></a></span></span><span> </span><span id="local-6989586621679308454"><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308454"><span class="hs-identifier hs-var">channels</span></a></span></span><span> </span><span id="local-6989586621679308455"><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679308455"><span class="hs-identifier hs-var">parentId</span></a></span></span><span> </span><span id="local-6989586621679308456"><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679308456"><span class="hs-identifier hs-var">tc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-82"></span><span>      </span><span id="local-6989586621679308457"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679308457"><span class="hs-identifier hs-var">count</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es Integer
+forall s (es :: [Effect]). (State s :&gt; es) =&gt; Eff es s
+</span><span class="hs-identifier hs-var">get</span></span><span>
+</span><span id="line-83"></span><span>      </span><span id="local-6989586621679308459"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308459"><span class="hs-identifier hs-var">channel</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es Channel
+-&gt; (Channel -&gt; Eff es Channel) -&gt; Maybe Channel -&gt; Eff es Channel
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OrganizeTimesError -&gt; Eff es Channel
+forall e (es :: [Effect]) a.
+(HasCallStack, Error e :&gt; es) =&gt;
+e -&gt; Eff es a
+</span><span class="hs-identifier hs-var">throwError</span></span><span> </span><span class="annot"><span class="annottext">(OrganizeTimesError -&gt; Eff es Channel)
+-&gt; (ChannelId -&gt; OrganizeTimesError) -&gt; ChannelId -&gt; Eff es Channel
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ChannelId -&gt; OrganizeTimesError
+</span><a href="Data.Uzi.OrganizeTimes.html#FindChannelError"><span class="hs-identifier hs-var">FindChannelError</span></a></span><span> </span><span class="annot"><span class="annottext">(ChannelId -&gt; Eff es Channel) -&gt; ChannelId -&gt; Eff es Channel
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679308456"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+-&gt; Getting ChannelId TimesChannel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">L.^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId TimesChannel ChannelId
+Lens' TimesChannel ChannelId
+</span><a href="Data.Uzi.TimesChannel.html#id"><span class="hs-identifier hs-var">TC.id</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Eff es Channel
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Channel -&gt; Bool) -&gt; Vector Channel -&gt; Maybe Channel
+forall (v :: * -&gt; *) a. Vector v a =&gt; (a -&gt; Bool) -&gt; v a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">V.find</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679308464"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308464"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308464"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelId Channel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">L.^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId Channel ChannelId
+Lens' Channel ChannelId
+</span><a href="Data.Discord.Channel.html#_id"><span class="hs-identifier hs-var">C._id</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ChannelId -&gt; ChannelId -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679308456"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+-&gt; Getting ChannelId TimesChannel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">L.^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId TimesChannel ChannelId
+Lens' TimesChannel ChannelId
+</span><a href="Data.Uzi.TimesChannel.html#id"><span class="hs-identifier hs-var">TC.id</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679308454"><span class="hs-identifier hs-var">channels</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>      </span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; Eff es () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DiscordChannel :&gt; es) =&gt;
+Channel -&gt; Eff es ()
+</span><a href="Effectful.DiscordChannel.Effect.html#modifyChannel"><span class="hs-identifier hs-var">modifyChannel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Channel -&gt; ChannelId -&gt; ChannelPosition -&gt; Channel
+</span><a href="#local-6989586621679308467"><span class="hs-identifier hs-var">changePosition</span></a></span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308459"><span class="hs-identifier hs-var">channel</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679308455"><span class="hs-identifier hs-var">parentId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; ChannelPosition
+</span><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-var">ChannelPosition</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679308457"><span class="hs-identifier hs-var">count</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>      </span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; Eff es () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Eff es ()
+forall s (es :: [Effect]). (State s :&gt; es) =&gt; s -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">put</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679308457"><span class="hs-identifier hs-var">count</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><a href="#local-6989586621679308467"><span class="hs-identifier hs-type">changePosition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-type">ChannelPosition</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679308467"><span class="annot"><span class="annottext">changePosition :: Channel -&gt; ChannelId -&gt; ChannelPosition -&gt; Channel
+</span><a href="#local-6989586621679308467"><span class="hs-identifier hs-var hs-var">changePosition</span></a></span></span><span> </span><span id="local-6989586621679308471"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308471"><span class="hs-identifier hs-var">channel</span></a></span></span><span> </span><span id="local-6989586621679308472"><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679308472"><span class="hs-identifier hs-var">parentId</span></a></span></span><span> </span><span id="local-6989586621679308473"><span class="annot"><span class="annottext">ChannelPosition
+</span><a href="#local-6989586621679308473"><span class="hs-identifier hs-var">position</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308474"><span class="annot"><span class="annottext">updatedParentId :: Channel
+</span><a href="#local-6989586621679308474"><span class="hs-identifier hs-var hs-var">updatedParentId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter Channel Channel (Maybe ChannelId) (Maybe ChannelId)
+-&gt; Maybe ChannelId -&gt; Channel -&gt; Channel
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-identifier hs-var">L.set</span></span><span> </span><span class="annot"><span class="annottext">ASetter Channel Channel (Maybe ChannelId) (Maybe ChannelId)
+Lens' Channel (Maybe ChannelId)
+</span><a href="Data.Discord.Channel.html#_parentId"><span class="hs-identifier hs-var">C._parentId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; Maybe ChannelId
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679308472"><span class="hs-identifier hs-var">parentId</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308471"><span class="hs-identifier hs-var">channel</span></a></span><span>
+</span><span id="line-90"></span><span>      </span><span class="annot"><span class="annottext">ASetter Channel Channel ChannelPosition ChannelPosition
+-&gt; ChannelPosition -&gt; Channel -&gt; Channel
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-identifier hs-var">L.set</span></span><span> </span><span class="annot"><span class="annottext">ASetter Channel Channel ChannelPosition ChannelPosition
+Lens' Channel ChannelPosition
+</span><a href="Data.Discord.Channel.html#_position"><span class="hs-identifier hs-var">C._position</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelPosition
+</span><a href="#local-6989586621679308473"><span class="hs-identifier hs-var">position</span></a></span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679308474"><span class="hs-identifier hs-var">updatedParentId</span></a></span><span>
+</span><span id="line-91"></span></pre></body></html>

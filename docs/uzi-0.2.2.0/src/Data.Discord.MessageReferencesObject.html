@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.MessageReferencesObject</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">data</span><span> </span><span id="MessageReferencesObject"><span class="annot"><a href="Data.Discord.MessageReferencesObject.html#MessageReferencesObject"><span class="hs-identifier hs-var">MessageReferencesObject</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MessageReferencesObject"><span class="annot"><a href="Data.Discord.MessageReferencesObject.html#MessageReferencesObject"><span class="hs-identifier hs-var">MessageReferencesObject</span></a></span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="messageId"><span class="annot"><span class="annottext">MessageReferencesObject -&gt; Text
+</span><a href="Data.Discord.MessageReferencesObject.html#messageId"><span class="hs-identifier hs-var hs-var">messageId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span id="channelId"><span class="annot"><span class="annottext">MessageReferencesObject -&gt; ChannelId
+</span><a href="Data.Discord.MessageReferencesObject.html#channelId"><span class="hs-identifier hs-var hs-var">channelId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span id="guildId"><span class="annot"><span class="annottext">MessageReferencesObject -&gt; Text
+</span><a href="Data.Discord.MessageReferencesObject.html#guildId"><span class="hs-identifier hs-var hs-var">guildId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span id="failIfNotExist"><span class="annot"><span class="annottext">MessageReferencesObject -&gt; Bool
+</span><a href="Data.Discord.MessageReferencesObject.html#failIfNotExist"><span class="hs-identifier hs-var hs-var">failIfNotExist</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679298440"><span id="local-6989586621679298451"><span id="local-6989586621679298455"><span class="annot"><span class="annottext">Int -&gt; MessageReferencesObject -&gt; ShowS
+[MessageReferencesObject] -&gt; ShowS
+MessageReferencesObject -&gt; String
+(Int -&gt; MessageReferencesObject -&gt; ShowS)
+-&gt; (MessageReferencesObject -&gt; String)
+-&gt; ([MessageReferencesObject] -&gt; ShowS)
+-&gt; Show MessageReferencesObject
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; MessageReferencesObject -&gt; ShowS
+showsPrec :: Int -&gt; MessageReferencesObject -&gt; ShowS
+$cshow :: MessageReferencesObject -&gt; String
+show :: MessageReferencesObject -&gt; String
+$cshowList :: [MessageReferencesObject] -&gt; ShowS
+showList :: [MessageReferencesObject] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679298459"><span id="local-6989586621679298468"><span class="annot"><span class="annottext">MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool
+(MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool)
+-&gt; (MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool)
+-&gt; Eq MessageReferencesObject
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool
+== :: MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool
+$c/= :: MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool
+/= :: MessageReferencesObject -&gt; MessageReferencesObject -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679298473"><span id="local-6989586621679298475"><span class="annot"><span class="annottext">(forall x.
+ MessageReferencesObject -&gt; Rep MessageReferencesObject x)
+-&gt; (forall x.
+    Rep MessageReferencesObject x -&gt; MessageReferencesObject)
+-&gt; Generic MessageReferencesObject
+forall x. Rep MessageReferencesObject x -&gt; MessageReferencesObject
+forall x. MessageReferencesObject -&gt; Rep MessageReferencesObject x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. MessageReferencesObject -&gt; Rep MessageReferencesObject x
+from :: forall x. MessageReferencesObject -&gt; Rep MessageReferencesObject x
+$cto :: forall x. Rep MessageReferencesObject x -&gt; MessageReferencesObject
+to :: forall x. Rep MessageReferencesObject x -&gt; MessageReferencesObject
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679298479"><span id="local-6989586621679298486"><span id="local-6989586621679298489"><span id="local-6989586621679298492"><span class="annot"><span class="annottext">[MessageReferencesObject] -&gt; Value
+[MessageReferencesObject] -&gt; Encoding
+MessageReferencesObject -&gt; Value
+MessageReferencesObject -&gt; Encoding
+(MessageReferencesObject -&gt; Value)
+-&gt; (MessageReferencesObject -&gt; Encoding)
+-&gt; ([MessageReferencesObject] -&gt; Value)
+-&gt; ([MessageReferencesObject] -&gt; Encoding)
+-&gt; ToJSON MessageReferencesObject
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: MessageReferencesObject -&gt; Value
+toJSON :: MessageReferencesObject -&gt; Value
+$ctoEncoding :: MessageReferencesObject -&gt; Encoding
+toEncoding :: MessageReferencesObject -&gt; Encoding
+$ctoJSONList :: [MessageReferencesObject] -&gt; Value
+toJSONList :: [MessageReferencesObject] -&gt; Value
+$ctoEncodingList :: [MessageReferencesObject] -&gt; Encoding
+toEncodingList :: [MessageReferencesObject] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span></pre></body></html>

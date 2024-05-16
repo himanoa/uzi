@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE RecordWildCards #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Mention</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.GlobalName.html"><span class="hs-identifier">Data.Discord.GlobalName</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.UserId.html"><span class="hs-identifier">Data.Discord.UserId</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.UserName.html"><span class="hs-identifier">Data.Discord.UserName</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">data</span><span> </span><span id="Mention"><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-var">Mention</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Mention"><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-var">Mention</span></a></span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_id"><span class="annot"><span class="annottext">Mention -&gt; UserId
+</span><a href="Data.Discord.Mention.html#_id"><span class="hs-identifier hs-var hs-var">_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.UserId.html#UserId"><span class="hs-identifier hs-type">UserId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span id="_username"><span class="annot"><span class="annottext">Mention -&gt; UserName
+</span><a href="Data.Discord.Mention.html#_username"><span class="hs-identifier hs-var hs-var">_username</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.UserName.html#UserName"><span class="hs-identifier hs-type">UserName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span id="_globalname"><span class="annot"><span class="annottext">Mention -&gt; Maybe GlobalName
+</span><a href="Data.Discord.Mention.html#_globalname"><span class="hs-identifier hs-var hs-var">_globalname</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.GlobalName.html#GlobalName"><span class="hs-identifier hs-type">GlobalName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span id="_bot"><span class="annot"><span class="annottext">Mention -&gt; Bool
+</span><a href="Data.Discord.Mention.html#_bot"><span class="hs-identifier hs-var hs-var">_bot</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679304639"><span id="local-6989586621679304652"><span id="local-6989586621679304656"><span class="annot"><span class="annottext">Int -&gt; Mention -&gt; ShowS
+[Mention] -&gt; ShowS
+Mention -&gt; String
+(Int -&gt; Mention -&gt; ShowS)
+-&gt; (Mention -&gt; String) -&gt; ([Mention] -&gt; ShowS) -&gt; Show Mention
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Mention -&gt; ShowS
+showsPrec :: Int -&gt; Mention -&gt; ShowS
+$cshow :: Mention -&gt; String
+show :: Mention -&gt; String
+$cshowList :: [Mention] -&gt; ShowS
+showList :: [Mention] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679304661"><span id="local-6989586621679304672"><span class="annot"><span class="annottext">Mention -&gt; Mention -&gt; Bool
+(Mention -&gt; Mention -&gt; Bool)
+-&gt; (Mention -&gt; Mention -&gt; Bool) -&gt; Eq Mention
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Mention -&gt; Mention -&gt; Bool
+== :: Mention -&gt; Mention -&gt; Bool
+$c/= :: Mention -&gt; Mention -&gt; Bool
+/= :: Mention -&gt; Mention -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span id="bot"><span id="globalname"><span id="id"><span id="username"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Mention</span></span></span></span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679304715"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679304746"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser Mention
+</span><a href="#local-6989586621679304746"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; (Object -&gt; Parser Mention) -&gt; Value -&gt; Parser Mention
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Mention&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser Mention) -&gt; Value -&gt; Parser Mention)
+-&gt; (Object -&gt; Parser Mention) -&gt; Value -&gt; Parser Mention
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679304749"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304749"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-28"></span><span>    </span><span id="local-6989586621679304750"><span class="annot"><span class="annottext">UserId
+</span><a href="#local-6989586621679304750"><span class="hs-identifier hs-var">_id</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.UserId.html#UserId"><span class="hs-identifier hs-type">UserId</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser UserId) -&gt; Parser Value -&gt; Parser UserId
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304749"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;id&quot;</span></span><span>
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679304753"><span class="annot"><span class="annottext">UserName
+</span><a href="#local-6989586621679304753"><span class="hs-identifier hs-var">_username</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.UserName.html#UserName"><span class="hs-identifier hs-type">UserName</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser UserName) -&gt; Parser Value -&gt; Parser UserName
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304749"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;username&quot;</span></span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679304754"><span class="annot"><span class="annottext">Maybe GlobalName
+</span><a href="#local-6989586621679304754"><span class="hs-identifier hs-var">_globalname</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304749"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser (Maybe GlobalName)
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser (Maybe a)
+</span><span class="hs-operator hs-var">.:?</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;globalname&quot;</span></span><span>
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679304756"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679304756"><span class="hs-identifier hs-var">_bot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe Bool -&gt; Bool
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Bool -&gt; Bool) -&gt; Parser (Maybe Bool) -&gt; Parser Bool
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304749"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser (Maybe Bool)
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser (Maybe a)
+</span><span class="hs-operator hs-var">.:?</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;bot&quot;</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="annottext">Mention -&gt; Parser Mention
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">Bool
+Maybe GlobalName
+UserId
+UserName
+_id :: UserId
+_username :: UserName
+_globalname :: Maybe GlobalName
+_bot :: Bool
+_id :: UserId
+_username :: UserName
+_globalname :: Maybe GlobalName
+_bot :: Bool
+</span><a href="Data.Discord.Mention.html#_id"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="annot"><a href="Data.Discord.Mention.html#makeMention"><span class="hs-identifier hs-type">makeMention</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.UserId.html#UserId"><span class="hs-identifier hs-type">UserId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.UserName.html#UserName"><span class="hs-identifier hs-type">UserName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.GlobalName.html#GlobalName"><span class="hs-identifier hs-type">GlobalName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span>
+</span><span id="line-35"></span><span id="makeMention"><span class="annot"><span class="annottext">makeMention :: UserId -&gt; UserName -&gt; Maybe GlobalName -&gt; Bool -&gt; Mention
+</span><a href="Data.Discord.Mention.html#makeMention"><span class="hs-identifier hs-var hs-var">makeMention</span></a></span></span><span> </span><span id="local-6989586621679304760"><span class="annot"><span class="annottext">UserId
+</span><a href="#local-6989586621679304760"><span class="hs-identifier hs-var">_id</span></a></span></span><span> </span><span id="local-6989586621679304761"><span class="annot"><span class="annottext">UserName
+</span><a href="#local-6989586621679304761"><span class="hs-identifier hs-var">_username</span></a></span></span><span> </span><span id="local-6989586621679304762"><span class="annot"><span class="annottext">Maybe GlobalName
+</span><a href="#local-6989586621679304762"><span class="hs-identifier hs-var">_globalname</span></a></span></span><span> </span><span id="local-6989586621679304763"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679304763"><span class="hs-identifier hs-var">_bot</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">Bool
+Maybe GlobalName
+UserId
+UserName
+_id :: UserId
+_username :: UserName
+_globalname :: Maybe GlobalName
+_bot :: Bool
+_id :: UserId
+_username :: UserName
+_globalname :: Maybe GlobalName
+_bot :: Bool
+</span><a href="Data.Discord.Mention.html#_id"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-36"></span></pre></body></html>

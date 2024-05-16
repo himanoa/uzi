@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Timeout</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-3"></span><span>    </span><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier">Timeout</span></a></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Timeout.html#runTimeout"><span class="hs-identifier">runTimeout</span></a></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Operations</span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Timeout.html#timeout"><span class="hs-identifier">timeout</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">System.Timeout</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="annot"><span class="hs-comment">-- | An effect for timing out computations.</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">data</span><span> </span><span id="Timeout"><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-var">Timeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Effect</span></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><span class="hs-identifier hs-var">DispatchOf</span></span></span><span> </span><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-type">Timeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Static</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">WithSideEffects</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><span class="hs-identifier hs-var">StaticRep</span></span></span><span> </span><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-type">Timeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Timeout"><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-var">Timeout</span></a></span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | Run the 'Timeout' effect.</span></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679082327"><span id="local-6989586621679082330"><span class="annot"><a href="Effectful.Timeout.html#runTimeout"><span class="hs-identifier hs-type">runTimeout</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679082327"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-type">Timeout</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679082327"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679082330"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679082327"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082330"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-25"></span><span id="runTimeout"><span class="annot"><span class="annottext">runTimeout :: forall (es :: [Effect]) a.
+(IOE :&gt; es) =&gt;
+Eff (Timeout : es) a -&gt; Eff es a
+</span><a href="Effectful.Timeout.html#runTimeout"><span class="hs-identifier hs-var hs-var">runTimeout</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StaticRep Timeout -&gt; Eff (Timeout : es) a -&gt; Eff es a
+forall (e :: Effect) (sideEffects :: SideEffects) (es :: [Effect])
+       a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">evalStaticRep</span></span><span> </span><span class="annot"><span class="annottext">StaticRep Timeout
+</span><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-var">Timeout</span></a></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | Lifted 'T.timeout'.</span></span><span>
+</span><span id="line-28"></span><span id="local-6989586621679082348"><span id="local-6989586621679082349"><span class="annot"><a href="Effectful.Timeout.html#timeout"><span class="hs-identifier hs-type">timeout</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Timeout.html#Timeout"><span class="hs-identifier hs-type">Timeout</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679082348"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The timeout in microseconds (1/10^6 seconds).</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679082348"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082349"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The computation the timeout applies to.</span></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679082348"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679082349"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-35"></span><span id="timeout"><span class="annot"><span class="annottext">timeout :: forall (es :: [Effect]) a.
+(Timeout :&gt; es) =&gt;
+Int -&gt; Eff es a -&gt; Eff es (Maybe a)
+</span><a href="Effectful.Timeout.html#timeout"><span class="hs-identifier hs-var hs-var">timeout</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; IO (Maybe a)) -&gt; Eff es a -&gt; Eff es (Maybe a)
+forall a b (es :: [Effect]).
+HasCallStack =&gt;
+(IO a -&gt; IO b) -&gt; Eff es a -&gt; Eff es b
+</span><span class="hs-identifier hs-var">unsafeLiftMapIO</span></span><span> </span><span class="annot"><span class="annottext">((IO a -&gt; IO (Maybe a)) -&gt; Eff es a -&gt; Eff es (Maybe a))
+-&gt; (Int -&gt; IO a -&gt; IO (Maybe a))
+-&gt; Int
+-&gt; Eff es a
+-&gt; Eff es (Maybe a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO a -&gt; IO (Maybe a)
+forall a. Int -&gt; IO a -&gt; IO (Maybe a)
+</span><span class="hs-identifier hs-var">T.timeout</span></span><span>
+</span><span id="line-36"></span></pre></body></html>

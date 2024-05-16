@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BlockArguments #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.DynamicLogger.Interpreter</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- \|</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module: Effectful.DynamicLogger.Effect</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Description: &#12525;&#12464;&#12434;&#20986;&#21147;&#12377;&#12427;&#12383;&#12417;&#12398;Effect&#12391;&#12377;</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Log&#12434;&#20986;&#21147;&#12377;&#12427;&#12383;&#12417;&#12398;Effect&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">interpret</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html"><span class="hs-identifier">Effectful.DynamicLogger.Effect</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Log.Static</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">logError</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">logInfo</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="annot"><span class="hs-comment">-- | &#26412;&#30058;&#12398;&#29872;&#22659;&#12391;&#23455;&#34892;&#12377;&#12427;&#12525;&#12460;&#12540;&#12391;&#12377;&#12290;RIO.Logger&#12395;&#21512;&#12431;&#12379;&#12390;&#20986;&#21147;&#32080;&#26524;&#12364;&#36984;&#25246;&#12373;&#12428;&#12414;&#12377;</span></span><span>
+</span><span id="line-23"></span><span id="local-6989586621679307382"><span id="local-6989586621679307385"><span class="annot"><a href="Effectful.DynamicLogger.Interpreter.html#runDynamicLogger"><span class="hs-identifier hs-type">runDynamicLogger</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Log</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307382"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679307382"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679307385"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307382"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307385"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-24"></span><span id="runDynamicLogger"><span class="annot"><span class="annottext">runDynamicLogger :: forall (es :: [Effect]) a.
+(Log :&gt; es) =&gt;
+Eff (DynamicLogger : es) a -&gt; Eff es a
+</span><a href="Effectful.DynamicLogger.Interpreter.html#runDynamicLogger"><span class="hs-identifier hs-var hs-var">runDynamicLogger</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler DynamicLogger es
+-&gt; Eff (DynamicLogger : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler DynamicLogger es
+ -&gt; Eff (DynamicLogger : es) a -&gt; Eff es a)
+-&gt; EffectHandler DynamicLogger es
+-&gt; Eff (DynamicLogger : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Info"><span class="hs-identifier hs-type">Info</span></a></span><span> </span><span id="local-6989586621679307431"><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307431"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(Log :&gt; es, HasCallStack) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">logInfo</span></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307431"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Attention"><span class="hs-identifier hs-type">Attention</span></a></span><span> </span><span id="local-6989586621679307438"><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307438"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(Log :&gt; es, HasCallStack) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">logError</span></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307438"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="annot"><span class="hs-comment">-- | &#12486;&#12473;&#12488;&#29872;&#22659;&#12391;&#23455;&#34892;&#12373;&#12428;&#12427;&#12525;&#12460;&#12540;&#12391;&#12377;&#12290;&#20309;&#12418;&#34920;&#31034;&#12375;&#12414;&#12379;&#12435;</span></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679307408"><span id="local-6989586621679307409"><span class="annot"><a href="Effectful.DynamicLogger.Interpreter.html#runSilentDynamicLogger"><span class="hs-identifier hs-type">runSilentDynamicLogger</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679307408"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679307409"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307408"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307409"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-30"></span><span id="runSilentDynamicLogger"><span class="annot"><span class="annottext">runSilentDynamicLogger :: forall (es :: [Effect]) a. Eff (DynamicLogger : es) a -&gt; Eff es a
+</span><a href="Effectful.DynamicLogger.Interpreter.html#runSilentDynamicLogger"><span class="hs-identifier hs-var hs-var">runSilentDynamicLogger</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler DynamicLogger es
+-&gt; Eff (DynamicLogger : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler DynamicLogger es
+ -&gt; Eff (DynamicLogger : es) a -&gt; Eff es a)
+-&gt; EffectHandler DynamicLogger es
+-&gt; Eff (DynamicLogger : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Info"><span class="hs-identifier hs-type">Info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Attention"><span class="hs-identifier hs-type">Attention</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span></pre></body></html>

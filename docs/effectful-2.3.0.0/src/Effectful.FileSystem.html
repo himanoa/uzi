@@ -1,0 +1,831 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.FileSystem</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-3"></span><span>    </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier">FileSystem</span></a></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#runFileSystem"><span class="hs-identifier">runFileSystem</span></a></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Actions on directories</span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#createDirectory"><span class="hs-identifier">createDirectory</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#createDirectoryIfMissing"><span class="hs-identifier">createDirectoryIfMissing</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#removeDirectory"><span class="hs-identifier">removeDirectory</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#removeDirectoryRecursive"><span class="hs-identifier">removeDirectoryRecursive</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#removePathForcibly"><span class="hs-identifier">removePathForcibly</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#renameDirectory"><span class="hs-identifier">renameDirectory</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#listDirectory"><span class="hs-identifier">listDirectory</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getDirectoryContents"><span class="hs-identifier">getDirectoryContents</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Current working directory</span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getCurrentDirectory"><span class="hs-identifier">getCurrentDirectory</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#setCurrentDirectory"><span class="hs-identifier">setCurrentDirectory</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#withCurrentDirectory"><span class="hs-identifier">withCurrentDirectory</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Pre-defined directories</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getHomeDirectory"><span class="hs-identifier">getHomeDirectory</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getXdgDirectory"><span class="hs-identifier">getXdgDirectory</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getXdgDirectoryList"><span class="hs-identifier">getXdgDirectoryList</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getAppUserDataDirectory"><span class="hs-identifier">getAppUserDataDirectory</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getUserDocumentsDirectory"><span class="hs-identifier">getUserDocumentsDirectory</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getTemporaryDirectory"><span class="hs-identifier">getTemporaryDirectory</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Actions on files</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#removeFile"><span class="hs-identifier">removeFile</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#renameFile"><span class="hs-identifier">renameFile</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#renamePath"><span class="hs-identifier">renamePath</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#copyFile"><span class="hs-identifier">copyFile</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#copyFileWithMetadata"><span class="hs-identifier">copyFileWithMetadata</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getFileSize"><span class="hs-identifier">getFileSize</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#canonicalizePath"><span class="hs-identifier">canonicalizePath</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#makeAbsolute"><span class="hs-identifier">makeAbsolute</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#makeRelativeToCurrentDirectory"><span class="hs-identifier">makeRelativeToCurrentDirectory</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Existence tests</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#doesPathExist"><span class="hs-identifier">doesPathExist</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#doesFileExist"><span class="hs-identifier">doesFileExist</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#doesDirectoryExist"><span class="hs-identifier">doesDirectoryExist</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findExecutable"><span class="hs-identifier">findExecutable</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findExecutables"><span class="hs-identifier">findExecutables</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findExecutablesInDirectories"><span class="hs-identifier">findExecutablesInDirectories</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findFile"><span class="hs-identifier">findFile</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findFiles"><span class="hs-identifier">findFiles</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findFileWith"><span class="hs-identifier">findFileWith</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#findFilesWith"><span class="hs-identifier">findFilesWith</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Symbolic links</span></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#createFileLink"><span class="hs-identifier">createFileLink</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#createDirectoryLink"><span class="hs-identifier">createDirectoryLink</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#removeDirectoryLink"><span class="hs-identifier">removeDirectoryLink</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#pathIsSymbolicLink"><span class="hs-identifier">pathIsSymbolicLink</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getSymbolicLinkTarget"><span class="hs-identifier">getSymbolicLinkTarget</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Permissions</span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getPermissions"><span class="hs-identifier">getPermissions</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#setPermissions"><span class="hs-identifier">setPermissions</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#copyPermissions"><span class="hs-identifier">copyPermissions</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Timestamps</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getAccessTime"><span class="hs-identifier">getAccessTime</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#getModificationTime"><span class="hs-identifier">getModificationTime</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#setAccessTime"><span class="hs-identifier">setAccessTime</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html#setModificationTime"><span class="hs-identifier">setModificationTime</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Re-exports</span></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Pre-defined directories</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.XdgDirectory</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.XdgDirectoryList</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Existence tests</span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.exeExtension</span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Permissions</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.Permissions</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.emptyPermissions</span></span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.readable</span></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.writable</span></span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.executable</span></span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.searchable</span></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.setOwnerReadable</span></span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.setOwnerWritable</span></span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.setOwnerExecutable</span></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">D.setOwnerSearchable</span></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">UTCTime</span></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">System.Directory</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">D</span></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html"><span class="hs-identifier">Effectful.FileSystem.Effect</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- Actions on directories</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.createDirectory'.</span></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679081206"><span class="annot"><a href="Effectful.FileSystem.html#createDirectory"><span class="hs-identifier hs-type">createDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081206"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081206"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-106"></span><span id="createDirectory"><span class="annot"><span class="annottext">createDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#createDirectory"><span class="hs-identifier hs-var hs-var">createDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.createDirectory</span></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.createDirectoryIfMissing'.</span></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679081216"><span class="annot"><a href="Effectful.FileSystem.html#createDirectoryIfMissing"><span class="hs-identifier hs-type">createDirectoryIfMissing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081216"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081216"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-110"></span><span id="createDirectoryIfMissing"><span class="annot"><span class="annottext">createDirectoryIfMissing :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Bool -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#createDirectoryIfMissing"><span class="hs-identifier hs-var hs-var">createDirectoryIfMissing</span></a></span></span><span> </span><span id="local-6989586621679081364"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679081364"><span class="hs-identifier hs-var">doCreateParents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.createDirectoryIfMissing</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679081364"><span class="hs-identifier hs-var">doCreateParents</span></a></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.removeDirectory'.</span></span><span>
+</span><span id="line-114"></span><span id="local-6989586621679081366"><span class="annot"><a href="Effectful.FileSystem.html#removeDirectory"><span class="hs-identifier hs-type">removeDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081366"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081366"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-115"></span><span id="removeDirectory"><span class="annot"><span class="annottext">removeDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#removeDirectory"><span class="hs-identifier hs-var hs-var">removeDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.removeDirectory</span></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.removeDirectoryRecursive'.</span></span><span>
+</span><span id="line-118"></span><span id="local-6989586621679081369"><span class="annot"><a href="Effectful.FileSystem.html#removeDirectoryRecursive"><span class="hs-identifier hs-type">removeDirectoryRecursive</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081369"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081369"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-119"></span><span id="removeDirectoryRecursive"><span class="annot"><span class="annottext">removeDirectoryRecursive :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#removeDirectoryRecursive"><span class="hs-identifier hs-var hs-var">removeDirectoryRecursive</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.removeDirectoryRecursive</span></span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.removePathForcibly'.</span></span><span>
+</span><span id="line-122"></span><span id="local-6989586621679081372"><span class="annot"><a href="Effectful.FileSystem.html#removePathForcibly"><span class="hs-identifier hs-type">removePathForcibly</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081372"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081372"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-123"></span><span id="removePathForcibly"><span class="annot"><span class="annottext">removePathForcibly :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#removePathForcibly"><span class="hs-identifier hs-var hs-var">removePathForcibly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.removePathForcibly</span></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.renameDirectory'.</span></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679081221"><span class="annot"><a href="Effectful.FileSystem.html#renameDirectory"><span class="hs-identifier hs-type">renameDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081221"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081221"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-127"></span><span id="renameDirectory"><span class="annot"><span class="annottext">renameDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#renameDirectory"><span class="hs-identifier hs-var hs-var">renameDirectory</span></a></span></span><span> </span><span id="local-6989586621679081376"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081376"><span class="hs-identifier hs-var">old</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.renameDirectory</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081376"><span class="hs-identifier hs-var">old</span></a></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.listDirectory'.</span></span><span>
+</span><span id="line-130"></span><span id="local-6989586621679081223"><span class="annot"><a href="Effectful.FileSystem.html#listDirectory"><span class="hs-identifier hs-type">listDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081223"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081223"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-131"></span><span id="listDirectory"><span class="annot"><span class="annottext">listDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#listDirectory"><span class="hs-identifier hs-var hs-var">listDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (FilePath -&gt; IO [FilePath]) -&gt; FilePath -&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.listDirectory</span></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getDirectoryContents'.</span></span><span>
+</span><span id="line-134"></span><span id="local-6989586621679081380"><span class="annot"><a href="Effectful.FileSystem.html#getDirectoryContents"><span class="hs-identifier hs-type">getDirectoryContents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081380"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081380"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-135"></span><span id="getDirectoryContents"><span class="annot"><span class="annottext">getDirectoryContents :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#getDirectoryContents"><span class="hs-identifier hs-var hs-var">getDirectoryContents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (FilePath -&gt; IO [FilePath]) -&gt; FilePath -&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.getDirectoryContents</span></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- Current working directory</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getCurrentDirectory'.</span></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679081226"><span class="annot"><a href="Effectful.FileSystem.html#getCurrentDirectory"><span class="hs-identifier hs-type">getCurrentDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081226"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081226"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-142"></span><span id="getCurrentDirectory"><span class="annot"><span class="annottext">getCurrentDirectory :: forall (es :: [Effect]). (FileSystem :&gt; es) =&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getCurrentDirectory"><span class="hs-identifier hs-var hs-var">getCurrentDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">IO FilePath
+</span><span class="hs-identifier hs-var">D.getCurrentDirectory</span></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.setCurrentDirectory'.</span></span><span>
+</span><span id="line-145"></span><span id="local-6989586621679081385"><span class="annot"><a href="Effectful.FileSystem.html#setCurrentDirectory"><span class="hs-identifier hs-type">setCurrentDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081385"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081385"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-146"></span><span id="setCurrentDirectory"><span class="annot"><span class="annottext">setCurrentDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#setCurrentDirectory"><span class="hs-identifier hs-var hs-var">setCurrentDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.setCurrentDirectory</span></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.withCurrentDirectory'.</span></span><span>
+</span><span id="line-149"></span><span id="local-6989586621679081229"><span id="local-6989586621679081230"><span class="annot"><a href="Effectful.FileSystem.html#withCurrentDirectory"><span class="hs-identifier hs-type">withCurrentDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081229"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081229"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081230"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081229"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081230"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-150"></span><span id="withCurrentDirectory"><span class="annot"><span class="annottext">withCurrentDirectory :: forall (es :: [Effect]) a.
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es a -&gt; Eff es a
+</span><a href="Effectful.FileSystem.html#withCurrentDirectory"><span class="hs-identifier hs-var hs-var">withCurrentDirectory</span></a></span></span><span> </span><span id="local-6989586621679081391"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081391"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; IO a) -&gt; Eff es a -&gt; Eff es a
+forall a b (es :: [Effect]).
+HasCallStack =&gt;
+(IO a -&gt; IO b) -&gt; Eff es a -&gt; Eff es b
+</span><span class="hs-identifier hs-var">unsafeLiftMapIO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; IO a -&gt; IO a
+forall a. FilePath -&gt; IO a -&gt; IO a
+</span><span class="hs-identifier hs-var">D.withCurrentDirectory</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081391"><span class="hs-identifier hs-var">path</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- Pre-defined directories</span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getHomeDirectory'.</span></span><span>
+</span><span id="line-156"></span><span id="local-6989586621679081394"><span class="annot"><a href="Effectful.FileSystem.html#getHomeDirectory"><span class="hs-identifier hs-type">getHomeDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081394"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081394"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-157"></span><span id="getHomeDirectory"><span class="annot"><span class="annottext">getHomeDirectory :: forall (es :: [Effect]). (FileSystem :&gt; es) =&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getHomeDirectory"><span class="hs-identifier hs-var hs-var">getHomeDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">IO FilePath
+</span><span class="hs-identifier hs-var">D.getHomeDirectory</span></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getXdgDirectory'.</span></span><span>
+</span><span id="line-160"></span><span id="local-6989586621679081239"><span class="annot"><a href="Effectful.FileSystem.html#getXdgDirectory"><span class="hs-identifier hs-type">getXdgDirectory</span></a></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081239"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-162"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">D.XdgDirectory</span></span><span>
+</span><span id="line-163"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-164"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081239"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-165"></span><span id="getXdgDirectory"><span class="annot"><span class="annottext">getXdgDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+XdgDirectory -&gt; FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getXdgDirectory"><span class="hs-identifier hs-var hs-var">getXdgDirectory</span></a></span></span><span> </span><span id="local-6989586621679081398"><span class="annot"><span class="annottext">XdgDirectory
+</span><a href="#local-6989586621679081398"><span class="hs-identifier hs-var">xdgDir</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">XdgDirectory -&gt; FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.getXdgDirectory</span></span><span> </span><span class="annot"><span class="annottext">XdgDirectory
+</span><a href="#local-6989586621679081398"><span class="hs-identifier hs-var">xdgDir</span></a></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getXdgDirectoryList'.</span></span><span>
+</span><span id="line-168"></span><span id="local-6989586621679081242"><span class="annot"><a href="Effectful.FileSystem.html#getXdgDirectoryList"><span class="hs-identifier hs-type">getXdgDirectoryList</span></a></span><span>
+</span><span id="line-169"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081242"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">D.XdgDirectoryList</span></span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081242"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-172"></span><span id="getXdgDirectoryList"><span class="annot"><span class="annottext">getXdgDirectoryList :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+XdgDirectoryList -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#getXdgDirectoryList"><span class="hs-identifier hs-var hs-var">getXdgDirectoryList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (XdgDirectoryList -&gt; IO [FilePath])
+-&gt; XdgDirectoryList
+-&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">XdgDirectoryList -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.getXdgDirectoryList</span></span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getAppUserDataDirectory'.</span></span><span>
+</span><span id="line-175"></span><span id="local-6989586621679081245"><span class="annot"><a href="Effectful.FileSystem.html#getAppUserDataDirectory"><span class="hs-identifier hs-type">getAppUserDataDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081245"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081245"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-176"></span><span id="getAppUserDataDirectory"><span class="annot"><span class="annottext">getAppUserDataDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getAppUserDataDirectory"><span class="hs-identifier hs-var hs-var">getAppUserDataDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.getAppUserDataDirectory</span></span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getUserDocumentsDirectory'.</span></span><span>
+</span><span id="line-179"></span><span id="local-6989586621679081404"><span class="annot"><a href="Effectful.FileSystem.html#getUserDocumentsDirectory"><span class="hs-identifier hs-type">getUserDocumentsDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081404"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081404"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-180"></span><span id="getUserDocumentsDirectory"><span class="annot"><span class="annottext">getUserDocumentsDirectory :: forall (es :: [Effect]). (FileSystem :&gt; es) =&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getUserDocumentsDirectory"><span class="hs-identifier hs-var hs-var">getUserDocumentsDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">IO FilePath
+</span><span class="hs-identifier hs-var">D.getUserDocumentsDirectory</span></span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getTemporaryDirectory'.</span></span><span>
+</span><span id="line-183"></span><span id="local-6989586621679081407"><span class="annot"><a href="Effectful.FileSystem.html#getTemporaryDirectory"><span class="hs-identifier hs-type">getTemporaryDirectory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081407"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081407"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-184"></span><span id="getTemporaryDirectory"><span class="annot"><span class="annottext">getTemporaryDirectory :: forall (es :: [Effect]). (FileSystem :&gt; es) =&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getTemporaryDirectory"><span class="hs-identifier hs-var hs-var">getTemporaryDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">IO FilePath
+</span><span class="hs-identifier hs-var">D.getTemporaryDirectory</span></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- Actions on files</span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.removeFile'.</span></span><span>
+</span><span id="line-190"></span><span id="local-6989586621679081410"><span class="annot"><a href="Effectful.FileSystem.html#removeFile"><span class="hs-identifier hs-type">removeFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081410"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081410"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-191"></span><span id="removeFile"><span class="annot"><span class="annottext">removeFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#removeFile"><span class="hs-identifier hs-var hs-var">removeFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.removeFile</span></span><span>
+</span><span id="line-192"></span><span>
+</span><span id="line-193"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.renameFile'.</span></span><span>
+</span><span id="line-194"></span><span id="local-6989586621679081413"><span class="annot"><a href="Effectful.FileSystem.html#renameFile"><span class="hs-identifier hs-type">renameFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081413"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081413"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-195"></span><span id="renameFile"><span class="annot"><span class="annottext">renameFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#renameFile"><span class="hs-identifier hs-var hs-var">renameFile</span></a></span></span><span> </span><span id="local-6989586621679081415"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081415"><span class="hs-identifier hs-var">old</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.renameFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081415"><span class="hs-identifier hs-var">old</span></a></span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.renamePath'.</span></span><span>
+</span><span id="line-198"></span><span id="local-6989586621679081417"><span class="annot"><a href="Effectful.FileSystem.html#renamePath"><span class="hs-identifier hs-type">renamePath</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081417"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081417"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-199"></span><span id="renamePath"><span class="annot"><span class="annottext">renamePath :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#renamePath"><span class="hs-identifier hs-var hs-var">renamePath</span></a></span></span><span> </span><span id="local-6989586621679081419"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081419"><span class="hs-identifier hs-var">old</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.renamePath</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081419"><span class="hs-identifier hs-var">old</span></a></span><span>
+</span><span id="line-200"></span><span>
+</span><span id="line-201"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.copyFile'.</span></span><span>
+</span><span id="line-202"></span><span id="local-6989586621679081421"><span class="annot"><a href="Effectful.FileSystem.html#copyFile"><span class="hs-identifier hs-type">copyFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081421"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081421"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-203"></span><span id="copyFile"><span class="annot"><span class="annottext">copyFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#copyFile"><span class="hs-identifier hs-var hs-var">copyFile</span></a></span></span><span> </span><span id="local-6989586621679081423"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081423"><span class="hs-identifier hs-var">src</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.copyFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081423"><span class="hs-identifier hs-var">src</span></a></span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.copyFileWithMetadata'.</span></span><span>
+</span><span id="line-206"></span><span id="local-6989586621679081425"><span class="annot"><a href="Effectful.FileSystem.html#copyFileWithMetadata"><span class="hs-identifier hs-type">copyFileWithMetadata</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081425"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081425"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-207"></span><span id="copyFileWithMetadata"><span class="annot"><span class="annottext">copyFileWithMetadata :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#copyFileWithMetadata"><span class="hs-identifier hs-var hs-var">copyFileWithMetadata</span></a></span></span><span> </span><span id="local-6989586621679081427"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081427"><span class="hs-identifier hs-var">src</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.copyFileWithMetadata</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081427"><span class="hs-identifier hs-var">src</span></a></span><span>
+</span><span id="line-208"></span><span>
+</span><span id="line-209"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getFileSize'.</span></span><span>
+</span><span id="line-210"></span><span id="local-6989586621679081254"><span class="annot"><a href="Effectful.FileSystem.html#getFileSize"><span class="hs-identifier hs-type">getFileSize</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081254"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081254"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span></span><span>
+</span><span id="line-211"></span><span id="getFileSize"><span class="annot"><span class="annottext">getFileSize :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Integer
+</span><a href="Effectful.FileSystem.html#getFileSize"><span class="hs-identifier hs-var hs-var">getFileSize</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Integer -&gt; Eff es Integer
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Integer -&gt; Eff es Integer)
+-&gt; (FilePath -&gt; IO Integer) -&gt; FilePath -&gt; Eff es Integer
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Integer
+</span><span class="hs-identifier hs-var">D.getFileSize</span></span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.canonicalizePath'.</span></span><span>
+</span><span id="line-214"></span><span id="local-6989586621679081431"><span class="annot"><a href="Effectful.FileSystem.html#canonicalizePath"><span class="hs-identifier hs-type">canonicalizePath</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081431"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081431"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-215"></span><span id="canonicalizePath"><span class="annot"><span class="annottext">canonicalizePath :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#canonicalizePath"><span class="hs-identifier hs-var hs-var">canonicalizePath</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.canonicalizePath</span></span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.makeAbsolute'.</span></span><span>
+</span><span id="line-218"></span><span id="local-6989586621679081434"><span class="annot"><a href="Effectful.FileSystem.html#makeAbsolute"><span class="hs-identifier hs-type">makeAbsolute</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081434"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081434"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-219"></span><span id="makeAbsolute"><span class="annot"><span class="annottext">makeAbsolute :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#makeAbsolute"><span class="hs-identifier hs-var hs-var">makeAbsolute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.makeAbsolute</span></span><span>
+</span><span id="line-220"></span><span>
+</span><span id="line-221"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.makeRelativeToCurrentDirectory'.</span></span><span>
+</span><span id="line-222"></span><span id="local-6989586621679081437"><span class="annot"><a href="Effectful.FileSystem.html#makeRelativeToCurrentDirectory"><span class="hs-identifier hs-type">makeRelativeToCurrentDirectory</span></a></span><span>
+</span><span id="line-223"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081437"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-224"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-225"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081437"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-226"></span><span id="makeRelativeToCurrentDirectory"><span class="annot"><span class="annottext">makeRelativeToCurrentDirectory :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#makeRelativeToCurrentDirectory"><span class="hs-identifier hs-var hs-var">makeRelativeToCurrentDirectory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.makeRelativeToCurrentDirectory</span></span><span>
+</span><span id="line-227"></span><span>
+</span><span id="line-228"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-229"></span><span class="hs-comment">-- Existence tests</span><span>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.doesPathExist'.</span></span><span>
+</span><span id="line-232"></span><span id="local-6989586621679081259"><span class="annot"><a href="Effectful.FileSystem.html#doesPathExist"><span class="hs-identifier hs-type">doesPathExist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081259"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081259"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-233"></span><span id="doesPathExist"><span class="annot"><span class="annottext">doesPathExist :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Bool
+</span><a href="Effectful.FileSystem.html#doesPathExist"><span class="hs-identifier hs-var hs-var">doesPathExist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool)
+-&gt; (FilePath -&gt; IO Bool) -&gt; FilePath -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Bool
+</span><span class="hs-identifier hs-var">D.doesPathExist</span></span><span>
+</span><span id="line-234"></span><span>
+</span><span id="line-235"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.doesFileExist'.</span></span><span>
+</span><span id="line-236"></span><span id="local-6989586621679081442"><span class="annot"><a href="Effectful.FileSystem.html#doesFileExist"><span class="hs-identifier hs-type">doesFileExist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081442"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081442"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-237"></span><span id="doesFileExist"><span class="annot"><span class="annottext">doesFileExist :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Bool
+</span><a href="Effectful.FileSystem.html#doesFileExist"><span class="hs-identifier hs-var hs-var">doesFileExist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool)
+-&gt; (FilePath -&gt; IO Bool) -&gt; FilePath -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Bool
+</span><span class="hs-identifier hs-var">D.doesFileExist</span></span><span>
+</span><span id="line-238"></span><span>
+</span><span id="line-239"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.doesDirectoryExist'.</span></span><span>
+</span><span id="line-240"></span><span id="local-6989586621679081445"><span class="annot"><a href="Effectful.FileSystem.html#doesDirectoryExist"><span class="hs-identifier hs-type">doesDirectoryExist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081445"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081445"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-241"></span><span id="doesDirectoryExist"><span class="annot"><span class="annottext">doesDirectoryExist :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Bool
+</span><a href="Effectful.FileSystem.html#doesDirectoryExist"><span class="hs-identifier hs-var hs-var">doesDirectoryExist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool)
+-&gt; (FilePath -&gt; IO Bool) -&gt; FilePath -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Bool
+</span><span class="hs-identifier hs-var">D.doesDirectoryExist</span></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findExecutable'.</span></span><span>
+</span><span id="line-244"></span><span id="local-6989586621679081263"><span class="annot"><a href="Effectful.FileSystem.html#findExecutable"><span class="hs-identifier hs-type">findExecutable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081263"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081263"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-245"></span><span id="findExecutable"><span class="annot"><span class="annottext">findExecutable :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es (Maybe FilePath)
+</span><a href="Effectful.FileSystem.html#findExecutable"><span class="hs-identifier hs-var hs-var">findExecutable</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Maybe FilePath) -&gt; Eff es (Maybe FilePath)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO (Maybe FilePath) -&gt; Eff es (Maybe FilePath))
+-&gt; (FilePath -&gt; IO (Maybe FilePath))
+-&gt; FilePath
+-&gt; Eff es (Maybe FilePath)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO (Maybe FilePath)
+</span><span class="hs-identifier hs-var">D.findExecutable</span></span><span>
+</span><span id="line-246"></span><span>
+</span><span id="line-247"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findExecutables'.</span></span><span>
+</span><span id="line-248"></span><span id="local-6989586621679081450"><span class="annot"><a href="Effectful.FileSystem.html#findExecutables"><span class="hs-identifier hs-type">findExecutables</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081450"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081450"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-249"></span><span id="findExecutables"><span class="annot"><span class="annottext">findExecutables :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#findExecutables"><span class="hs-identifier hs-var hs-var">findExecutables</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (FilePath -&gt; IO [FilePath]) -&gt; FilePath -&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.findExecutables</span></span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findExecutablesInDirectories'.</span></span><span>
+</span><span id="line-252"></span><span id="local-6989586621679081266"><span class="annot"><a href="Effectful.FileSystem.html#findExecutablesInDirectories"><span class="hs-identifier hs-type">findExecutablesInDirectories</span></a></span><span>
+</span><span id="line-253"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081266"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-254"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span>
+</span><span id="line-255"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-256"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081266"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-257"></span><span id="findExecutablesInDirectories"><span class="annot"><span class="annottext">findExecutablesInDirectories :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+[FilePath] -&gt; FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#findExecutablesInDirectories"><span class="hs-identifier hs-var hs-var">findExecutablesInDirectories</span></a></span></span><span> </span><span id="local-6989586621679081454"><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081454"><span class="hs-identifier hs-var">dirs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-258"></span><span>  </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (FilePath -&gt; IO [FilePath]) -&gt; FilePath -&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.findExecutablesInDirectories</span></span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081454"><span class="hs-identifier hs-var">dirs</span></a></span><span>
+</span><span id="line-259"></span><span>
+</span><span id="line-260"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findFile'.</span></span><span>
+</span><span id="line-261"></span><span id="local-6989586621679081268"><span class="annot"><a href="Effectful.FileSystem.html#findFile"><span class="hs-identifier hs-type">findFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081268"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081268"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-262"></span><span id="findFile"><span class="annot"><span class="annottext">findFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+[FilePath] -&gt; FilePath -&gt; Eff es (Maybe FilePath)
+</span><a href="Effectful.FileSystem.html#findFile"><span class="hs-identifier hs-var hs-var">findFile</span></a></span></span><span> </span><span id="local-6989586621679081457"><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081457"><span class="hs-identifier hs-var">dirs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Maybe FilePath) -&gt; Eff es (Maybe FilePath)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO (Maybe FilePath) -&gt; Eff es (Maybe FilePath))
+-&gt; (FilePath -&gt; IO (Maybe FilePath))
+-&gt; FilePath
+-&gt; Eff es (Maybe FilePath)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; FilePath -&gt; IO (Maybe FilePath)
+</span><span class="hs-identifier hs-var">D.findFile</span></span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081457"><span class="hs-identifier hs-var">dirs</span></a></span><span>
+</span><span id="line-263"></span><span>
+</span><span id="line-264"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findFiles'.</span></span><span>
+</span><span id="line-265"></span><span id="local-6989586621679081459"><span class="annot"><a href="Effectful.FileSystem.html#findFiles"><span class="hs-identifier hs-type">findFiles</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081459"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081459"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-266"></span><span id="findFiles"><span class="annot"><span class="annottext">findFiles :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+[FilePath] -&gt; FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#findFiles"><span class="hs-identifier hs-var hs-var">findFiles</span></a></span></span><span> </span><span id="local-6989586621679081461"><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081461"><span class="hs-identifier hs-var">dirs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [FilePath] -&gt; Eff es [FilePath]
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO [FilePath] -&gt; Eff es [FilePath])
+-&gt; (FilePath -&gt; IO [FilePath]) -&gt; FilePath -&gt; Eff es [FilePath]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.findFiles</span></span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081461"><span class="hs-identifier hs-var">dirs</span></a></span><span>
+</span><span id="line-267"></span><span>
+</span><span id="line-268"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findFileWith'.</span></span><span>
+</span><span id="line-269"></span><span id="local-6989586621679081271"><span class="annot"><a href="Effectful.FileSystem.html#findFileWith"><span class="hs-identifier hs-type">findFileWith</span></a></span><span>
+</span><span id="line-270"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081271"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-271"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081271"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-272"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span>
+</span><span id="line-273"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-274"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081271"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-275"></span><span id="findFileWith"><span class="annot"><span class="annottext">findFileWith :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+(FilePath -&gt; Eff es Bool)
+-&gt; [FilePath] -&gt; FilePath -&gt; Eff es (Maybe FilePath)
+</span><a href="Effectful.FileSystem.html#findFileWith"><span class="hs-identifier hs-var hs-var">findFileWith</span></a></span></span><span> </span><span id="local-6989586621679081466"><span class="annot"><span class="annottext">FilePath -&gt; Eff es Bool
+</span><a href="#local-6989586621679081466"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679081467"><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081467"><span class="hs-identifier hs-var">dirs</span></a></span></span><span> </span><span id="local-6989586621679081468"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081468"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO (Maybe FilePath))
+-&gt; Eff es (Maybe FilePath)
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO (Maybe FilePath))
+ -&gt; Eff es (Maybe FilePath))
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO (Maybe FilePath))
+-&gt; Eff es (Maybe FilePath)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679081470"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081470"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-276"></span><span>  </span><span class="annot"><span class="annottext">(FilePath -&gt; IO Bool)
+-&gt; [FilePath] -&gt; FilePath -&gt; IO (Maybe FilePath)
+</span><span class="hs-identifier hs-var">D.findFileWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es Bool -&gt; IO Bool
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081470"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es Bool -&gt; IO Bool)
+-&gt; (FilePath -&gt; Eff es Bool) -&gt; FilePath -&gt; IO Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Eff es Bool
+</span><a href="#local-6989586621679081466"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081467"><span class="hs-identifier hs-var">dirs</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081468"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-277"></span><span>
+</span><span id="line-278"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.findFilesWith'.</span></span><span>
+</span><span id="line-279"></span><span id="local-6989586621679081279"><span class="annot"><a href="Effectful.FileSystem.html#findFilesWith"><span class="hs-identifier hs-type">findFilesWith</span></a></span><span>
+</span><span id="line-280"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081279"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-281"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081279"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-282"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span>
+</span><span id="line-283"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-284"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081279"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-285"></span><span id="findFilesWith"><span class="annot"><span class="annottext">findFilesWith :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+(FilePath -&gt; Eff es Bool)
+-&gt; [FilePath] -&gt; FilePath -&gt; Eff es [FilePath]
+</span><a href="Effectful.FileSystem.html#findFilesWith"><span class="hs-identifier hs-var hs-var">findFilesWith</span></a></span></span><span> </span><span id="local-6989586621679081475"><span class="annot"><span class="annottext">FilePath -&gt; Eff es Bool
+</span><a href="#local-6989586621679081475"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679081476"><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081476"><span class="hs-identifier hs-var">dirs</span></a></span></span><span> </span><span id="local-6989586621679081477"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081477"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO [FilePath])
+-&gt; Eff es [FilePath]
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO [FilePath])
+ -&gt; Eff es [FilePath])
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO [FilePath])
+-&gt; Eff es [FilePath]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679081478"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081478"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-286"></span><span>  </span><span class="annot"><span class="annottext">(FilePath -&gt; IO Bool) -&gt; [FilePath] -&gt; FilePath -&gt; IO [FilePath]
+</span><span class="hs-identifier hs-var">D.findFilesWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es Bool -&gt; IO Bool
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081478"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es Bool -&gt; IO Bool)
+-&gt; (FilePath -&gt; Eff es Bool) -&gt; FilePath -&gt; IO Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Eff es Bool
+</span><a href="#local-6989586621679081475"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><a href="#local-6989586621679081476"><span class="hs-identifier hs-var">dirs</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081477"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><span id="line-287"></span><span>
+</span><span id="line-288"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-289"></span><span class="hs-comment">-- Symbolic links</span><span>
+</span><span id="line-290"></span><span>
+</span><span id="line-291"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.createFileLink'.</span></span><span>
+</span><span id="line-292"></span><span id="local-6989586621679081480"><span class="annot"><a href="Effectful.FileSystem.html#createFileLink"><span class="hs-identifier hs-type">createFileLink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081480"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081480"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-293"></span><span id="createFileLink"><span class="annot"><span class="annottext">createFileLink :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#createFileLink"><span class="hs-identifier hs-var hs-var">createFileLink</span></a></span></span><span> </span><span id="local-6989586621679081482"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081482"><span class="hs-identifier hs-var">target</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.createFileLink</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081482"><span class="hs-identifier hs-var">target</span></a></span><span>
+</span><span id="line-294"></span><span>
+</span><span id="line-295"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.createDirectoryLink'.</span></span><span>
+</span><span id="line-296"></span><span id="local-6989586621679081484"><span class="annot"><a href="Effectful.FileSystem.html#createDirectoryLink"><span class="hs-identifier hs-type">createDirectoryLink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081484"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081484"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-297"></span><span id="createDirectoryLink"><span class="annot"><span class="annottext">createDirectoryLink :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#createDirectoryLink"><span class="hs-identifier hs-var hs-var">createDirectoryLink</span></a></span></span><span> </span><span id="local-6989586621679081486"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081486"><span class="hs-identifier hs-var">target</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.createDirectoryLink</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081486"><span class="hs-identifier hs-var">target</span></a></span><span>
+</span><span id="line-298"></span><span>
+</span><span id="line-299"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.removeDirectoryLink'.</span></span><span>
+</span><span id="line-300"></span><span id="local-6989586621679081488"><span class="annot"><a href="Effectful.FileSystem.html#removeDirectoryLink"><span class="hs-identifier hs-type">removeDirectoryLink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081488"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081488"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-301"></span><span id="removeDirectoryLink"><span class="annot"><span class="annottext">removeDirectoryLink :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#removeDirectoryLink"><span class="hs-identifier hs-var hs-var">removeDirectoryLink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.removeDirectoryLink</span></span><span>
+</span><span id="line-302"></span><span>
+</span><span id="line-303"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.pathIsSymbolicLink'.</span></span><span>
+</span><span id="line-304"></span><span id="local-6989586621679081491"><span class="annot"><a href="Effectful.FileSystem.html#pathIsSymbolicLink"><span class="hs-identifier hs-type">pathIsSymbolicLink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081491"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081491"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-305"></span><span id="pathIsSymbolicLink"><span class="annot"><span class="annottext">pathIsSymbolicLink :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Bool
+</span><a href="Effectful.FileSystem.html#pathIsSymbolicLink"><span class="hs-identifier hs-var hs-var">pathIsSymbolicLink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool)
+-&gt; (FilePath -&gt; IO Bool) -&gt; FilePath -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Bool
+</span><span class="hs-identifier hs-var">D.pathIsSymbolicLink</span></span><span>
+</span><span id="line-306"></span><span>
+</span><span id="line-307"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getSymbolicLinkTarget'.</span></span><span>
+</span><span id="line-308"></span><span id="local-6989586621679081494"><span class="annot"><a href="Effectful.FileSystem.html#getSymbolicLinkTarget"><span class="hs-identifier hs-type">getSymbolicLinkTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081494"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081494"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span></span><span>
+</span><span id="line-309"></span><span id="getSymbolicLinkTarget"><span class="annot"><span class="annottext">getSymbolicLinkTarget :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es FilePath
+</span><a href="Effectful.FileSystem.html#getSymbolicLinkTarget"><span class="hs-identifier hs-var hs-var">getSymbolicLinkTarget</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; Eff es FilePath
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; Eff es FilePath)
+-&gt; (FilePath -&gt; IO FilePath) -&gt; FilePath -&gt; Eff es FilePath
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">D.getSymbolicLinkTarget</span></span><span>
+</span><span id="line-310"></span><span>
+</span><span id="line-311"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-312"></span><span class="hs-comment">-- Permissions</span><span>
+</span><span id="line-313"></span><span>
+</span><span id="line-314"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getPermissions'.</span></span><span>
+</span><span id="line-315"></span><span id="local-6989586621679081286"><span class="annot"><a href="Effectful.FileSystem.html#getPermissions"><span class="hs-identifier hs-type">getPermissions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081286"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081286"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">D.Permissions</span></span></span><span>
+</span><span id="line-316"></span><span id="getPermissions"><span class="annot"><span class="annottext">getPermissions :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es Permissions
+</span><a href="Effectful.FileSystem.html#getPermissions"><span class="hs-identifier hs-var hs-var">getPermissions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Permissions -&gt; Eff es Permissions
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Permissions -&gt; Eff es Permissions)
+-&gt; (FilePath -&gt; IO Permissions) -&gt; FilePath -&gt; Eff es Permissions
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO Permissions
+</span><span class="hs-identifier hs-var">D.getPermissions</span></span><span>
+</span><span id="line-317"></span><span>
+</span><span id="line-318"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.setPermissions'.</span></span><span>
+</span><span id="line-319"></span><span id="local-6989586621679081289"><span class="annot"><a href="Effectful.FileSystem.html#setPermissions"><span class="hs-identifier hs-type">setPermissions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081289"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">D.Permissions</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081289"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-320"></span><span id="setPermissions"><span class="annot"><span class="annottext">setPermissions :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Permissions -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#setPermissions"><span class="hs-identifier hs-var hs-var">setPermissions</span></a></span></span><span> </span><span id="local-6989586621679081500"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081500"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (Permissions -&gt; IO ()) -&gt; Permissions -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Permissions -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.setPermissions</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081500"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-321"></span><span>
+</span><span id="line-322"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.copyPermissions'.</span></span><span>
+</span><span id="line-323"></span><span id="local-6989586621679081502"><span class="annot"><a href="Effectful.FileSystem.html#copyPermissions"><span class="hs-identifier hs-type">copyPermissions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081502"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081502"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-324"></span><span id="copyPermissions"><span class="annot"><span class="annottext">copyPermissions :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#copyPermissions"><span class="hs-identifier hs-var hs-var">copyPermissions</span></a></span></span><span> </span><span id="local-6989586621679081504"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081504"><span class="hs-identifier hs-var">src</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.copyPermissions</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081504"><span class="hs-identifier hs-var">src</span></a></span><span>
+</span><span id="line-325"></span><span>
+</span><span id="line-326"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-327"></span><span class="hs-comment">-- Timestamps</span><span>
+</span><span id="line-328"></span><span>
+</span><span id="line-329"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getAccessTime'.</span></span><span>
+</span><span id="line-330"></span><span id="local-6989586621679081292"><span class="annot"><a href="Effectful.FileSystem.html#getAccessTime"><span class="hs-identifier hs-type">getAccessTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081292"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081292"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span></span><span>
+</span><span id="line-331"></span><span id="getAccessTime"><span class="annot"><span class="annottext">getAccessTime :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es UTCTime
+</span><a href="Effectful.FileSystem.html#getAccessTime"><span class="hs-identifier hs-var hs-var">getAccessTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO UTCTime -&gt; Eff es UTCTime
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO UTCTime -&gt; Eff es UTCTime)
+-&gt; (FilePath -&gt; IO UTCTime) -&gt; FilePath -&gt; Eff es UTCTime
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO UTCTime
+</span><span class="hs-identifier hs-var">D.getAccessTime</span></span><span>
+</span><span id="line-332"></span><span>
+</span><span id="line-333"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.getModificationTime'.</span></span><span>
+</span><span id="line-334"></span><span id="local-6989586621679081508"><span class="annot"><a href="Effectful.FileSystem.html#getModificationTime"><span class="hs-identifier hs-type">getModificationTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081508"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081508"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span></span><span>
+</span><span id="line-335"></span><span id="getModificationTime"><span class="annot"><span class="annottext">getModificationTime :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es UTCTime
+</span><a href="Effectful.FileSystem.html#getModificationTime"><span class="hs-identifier hs-var hs-var">getModificationTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO UTCTime -&gt; Eff es UTCTime
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO UTCTime -&gt; Eff es UTCTime)
+-&gt; (FilePath -&gt; IO UTCTime) -&gt; FilePath -&gt; Eff es UTCTime
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO UTCTime
+</span><span class="hs-identifier hs-var">D.getModificationTime</span></span><span>
+</span><span id="line-336"></span><span>
+</span><span id="line-337"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.setAccessTime'.</span></span><span>
+</span><span id="line-338"></span><span id="local-6989586621679081296"><span class="annot"><a href="Effectful.FileSystem.html#setAccessTime"><span class="hs-identifier hs-type">setAccessTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081296"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081296"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-339"></span><span id="setAccessTime"><span class="annot"><span class="annottext">setAccessTime :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; UTCTime -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#setAccessTime"><span class="hs-identifier hs-var hs-var">setAccessTime</span></a></span></span><span> </span><span id="local-6989586621679081512"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081512"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ()) -&gt; (UTCTime -&gt; IO ()) -&gt; UTCTime -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; UTCTime -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.setAccessTime</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081512"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-340"></span><span>
+</span><span id="line-341"></span><span class="annot"><span class="hs-comment">-- | Lifted 'D.setModificationTime'.</span></span><span>
+</span><span id="line-342"></span><span id="local-6989586621679081514"><span class="annot"><a href="Effectful.FileSystem.html#setModificationTime"><span class="hs-identifier hs-type">setModificationTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081514"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081514"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-343"></span><span id="setModificationTime"><span class="annot"><span class="annottext">setModificationTime :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; UTCTime -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.html#setModificationTime"><span class="hs-identifier hs-var hs-var">setModificationTime</span></a></span></span><span> </span><span id="local-6989586621679081516"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081516"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ()) -&gt; (UTCTime -&gt; IO ()) -&gt; UTCTime -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; UTCTime -&gt; IO ()
+</span><span class="hs-identifier hs-var">D.setModificationTime</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081516"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-344"></span></pre></body></html>

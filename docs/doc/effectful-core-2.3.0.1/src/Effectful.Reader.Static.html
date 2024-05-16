@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Support for access to a read only value of a particular type.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Reader.Static</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier">Reader</span></a></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#runReader"><span class="hs-identifier">runReader</span></a></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#withReader"><span class="hs-identifier">withReader</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Operations</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#ask"><span class="hs-identifier">ask</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#asks"><span class="hs-identifier">asks</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#local"><span class="hs-identifier">local</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html"><span class="hs-identifier">Effectful.Dispatch.Static</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- | Provide access to a strict (WHNF), thread local, read only value of type</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- @r@.</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">data</span><span> </span><span id="Reader"><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-var">Reader</span></a></span></span><span> </span><span id="local-6989586621679078336"><span class="annot"><a href="#local-6989586621679078336"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><a href="Effectful.Internal.Env.html#DispatchOf"><span class="hs-identifier hs-var">DispatchOf</span></a></span></span><span> </span><span id="local-6989586621679078338"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078338"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Static"><span class="hs-identifier hs-type">Static</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#NoSideEffects"><span class="hs-identifier hs-type">NoSideEffects</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">newtype</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-var">StaticRep</span></a></span></span><span> </span><span id="local-6989586621679078281"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Reader"><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-var">Reader</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679078281"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><span class="hs-comment">-- | Run a 'Reader' effect with the given initial environment.</span></span><span>
+</span><span id="line-27"></span><span id="local-6989586621679078259"><span id="local-6989586621679078261"><span id="local-6989586621679078262"><span class="annot"><a href="Effectful.Reader.Static.html#runReader"><span class="hs-identifier hs-type">runReader</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679078259"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ The initial environment.</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078259"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078261"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078262"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078261"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078262"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-31"></span><span id="runReader"><span class="annot"><span class="annottext">runReader :: forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+r -&gt; Eff (Reader r : es) a -&gt; Eff es a
+</span><a href="Effectful.Reader.Static.html#runReader"><span class="hs-identifier hs-var hs-var">runReader</span></a></span></span><span> </span><span id="local-6989586621679078344"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078344"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StaticRep (Reader r) -&gt; Eff (Reader r : es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#evalStaticRep"><span class="hs-identifier hs-var">evalStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; StaticRep (Reader r)
+forall r. r -&gt; StaticRep (Reader r)
+</span><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-var">Reader</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078344"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Execute a computation in a modified environment.</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- @since 1.1.0.0</span><span>
+</span><span id="line-36"></span><span id="local-6989586621679078282"><span id="local-6989586621679078283"><span id="local-6989586621679078284"><span id="local-6989586621679078285"><span class="annot"><a href="Effectful.Reader.Static.html#withReader"><span class="hs-identifier hs-type">withReader</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078282"><span class="hs-identifier hs-type">r1</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078283"><span class="hs-identifier hs-type">r2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The function to modify the environment.</span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078283"><span class="hs-identifier hs-type">r2</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078284"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078285"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Computation to run in the modified environment.</span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078282"><span class="hs-identifier hs-type">r1</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078284"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078285"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
+</span><span id="line-42"></span><span id="withReader"><span class="annot"><span class="annottext">withReader :: forall r1 r2 (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(r1 -&gt; r2) -&gt; Eff (Reader r2 : es) a -&gt; Eff (Reader r1 : es) a
+</span><a href="Effectful.Reader.Static.html#withReader"><span class="hs-identifier hs-var hs-var">withReader</span></a></span></span><span> </span><span id="local-6989586621679078350"><span class="annot"><span class="annottext">r1 -&gt; r2
+</span><a href="#local-6989586621679078350"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679078351"><span class="annot"><span class="annottext">Eff (Reader r2 : es) a
+</span><a href="#local-6989586621679078351"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679078352"><span class="annot"><span class="annottext">r1
+</span><a href="#local-6989586621679078352"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff (Reader r1 : es) r1
+forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(Reader r :&gt; es) =&gt;
+Eff es r
+</span><a href="Effectful.Reader.Static.html#ask"><span class="hs-identifier hs-var">ask</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">Eff es a -&gt; Eff (Reader r1 : es) a
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a
+       (e :: (Type -&gt; Type) -&gt; Type -&gt; Type).
+Eff es a -&gt; Eff (e : es) a
+</span><a href="Effectful.Internal.Monad.html#raise"><span class="hs-identifier hs-var">raise</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; Eff (Reader r1 : es) a)
+-&gt; Eff es a -&gt; Eff (Reader r1 : es) a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r2 -&gt; Eff (Reader r2 : es) a -&gt; Eff es a
+forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+r -&gt; Eff (Reader r : es) a -&gt; Eff es a
+</span><a href="Effectful.Reader.Static.html#runReader"><span class="hs-identifier hs-var">runReader</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r1 -&gt; r2
+</span><a href="#local-6989586621679078350"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r1
+</span><a href="#local-6989586621679078352"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (Reader r2 : es) a
+</span><a href="#local-6989586621679078351"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Fetch the value of the environment.</span></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679078294"><span id="local-6989586621679078295"><span class="annot"><a href="Effectful.Reader.Static.html#ask"><span class="hs-identifier hs-type">ask</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078294"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078295"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078295"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078294"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-48"></span><span id="ask"><span class="annot"><span class="annottext">ask :: forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(Reader r :&gt; es) =&gt;
+Eff es r
+</span><a href="Effectful.Reader.Static.html#ask"><span class="hs-identifier hs-var hs-var">ask</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span id="local-6989586621679078361"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078361"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es (StaticRep (Reader r))
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+Eff es (StaticRep e)
+</span><a href="Effectful.Internal.Monad.html#getStaticRep"><span class="hs-identifier hs-var">getStaticRep</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">r -&gt; Eff es r
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078361"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | Retrieve a function of the current environment.</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- @'asks' f &#8801; f '&lt;$&gt;' 'ask'@</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679078311"><span id="local-6989586621679078312"><span id="local-6989586621679078313"><span class="annot"><a href="Effectful.Reader.Static.html#asks"><span class="hs-identifier hs-type">asks</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078311"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078312"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078311"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078313"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to apply to the environment.</span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078312"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078313"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-59"></span><span id="asks"><span class="annot"><span class="annottext">asks :: forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Reader r :&gt; es) =&gt;
+(r -&gt; a) -&gt; Eff es a
+</span><a href="Effectful.Reader.Static.html#asks"><span class="hs-identifier hs-var hs-var">asks</span></a></span></span><span> </span><span id="local-6989586621679078368"><span class="annot"><span class="annottext">r -&gt; a
+</span><a href="#local-6989586621679078368"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; a
+</span><a href="#local-6989586621679078368"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; a) -&gt; Eff es r -&gt; Eff es a
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Eff es r
+forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(Reader r :&gt; es) =&gt;
+Eff es r
+</span><a href="Effectful.Reader.Static.html#ask"><span class="hs-identifier hs-var">ask</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Execute a computation in a modified environment.</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- @'runReader' r ('local' f m) &#8801; 'runReader' (f r) m@</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span id="local-6989586621679078321"><span id="local-6989586621679078322"><span id="local-6989586621679078323"><span class="annot"><a href="Effectful.Reader.Static.html#local"><span class="hs-identifier hs-type">local</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078321"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078322"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078321"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078321"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to modify the environment.</span></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078322"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078323"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078322"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078323"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-70"></span><span id="local"><span class="annot"><span class="annottext">local :: forall r (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Reader r :&gt; es) =&gt;
+(r -&gt; r) -&gt; Eff es a -&gt; Eff es a
+</span><a href="Effectful.Reader.Static.html#local"><span class="hs-identifier hs-var hs-var">local</span></a></span></span><span> </span><span id="local-6989586621679078373"><span class="annot"><span class="annottext">r -&gt; r
+</span><a href="#local-6989586621679078373"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(StaticRep (Reader r) -&gt; StaticRep (Reader r))
+-&gt; Eff es a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+(StaticRep e -&gt; StaticRep e) -&gt; Eff es a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#localStaticRep"><span class="hs-identifier hs-var">localStaticRep</span></a></span><span> </span><span class="annot"><span class="annottext">((StaticRep (Reader r) -&gt; StaticRep (Reader r))
+ -&gt; Eff es a -&gt; Eff es a)
+-&gt; (StaticRep (Reader r) -&gt; StaticRep (Reader r))
+-&gt; Eff es a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-type">Reader</span></a></span><span> </span><span id="local-6989586621679078375"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078375"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; StaticRep (Reader r)
+forall r. r -&gt; StaticRep (Reader r)
+</span><a href="Effectful.Reader.Static.html#Reader"><span class="hs-identifier hs-var">Reader</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+</span><a href="#local-6989586621679078373"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679078375"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span></pre></body></html>

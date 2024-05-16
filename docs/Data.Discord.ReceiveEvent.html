@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679299135"><span id="local-6989586621679299136"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE OverloadedRecordDot #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.ReceiveEvent</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">makeLenses</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">data</span><span> </span><span id="ReceiveEvent"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ReceiveEvent"><span class="hs-identifier hs-var">ReceiveEvent</span></a></span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Hello"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#Hello"><span class="hs-identifier hs-var">Hello</span></a></span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Ready"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#Ready"><span class="hs-identifier hs-var">Ready</span></a></span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Resumed"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#Resumed"><span class="hs-identifier hs-var">Resumed</span></a></span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Reconnected"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#Reconnected"><span class="hs-identifier hs-var">Reconnected</span></a></span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="InvalidSession"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#InvalidSession"><span class="hs-identifier hs-var">InvalidSession</span></a></span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ApplicationCommandPermissionsUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ApplicationCommandPermissionsUpdate"><span class="hs-identifier hs-var">ApplicationCommandPermissionsUpdate</span></a></span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AutoModerationRuleCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#AutoModerationRuleCreate"><span class="hs-identifier hs-var">AutoModerationRuleCreate</span></a></span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AutoModerationRuleUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#AutoModerationRuleUpdate"><span class="hs-identifier hs-var">AutoModerationRuleUpdate</span></a></span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AutoModerationRuleDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#AutoModerationRuleDelete"><span class="hs-identifier hs-var">AutoModerationRuleDelete</span></a></span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AutoModerationActionExecution"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#AutoModerationActionExecution"><span class="hs-identifier hs-var">AutoModerationActionExecution</span></a></span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ChannelCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ChannelCreate"><span class="hs-identifier hs-var">ChannelCreate</span></a></span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ChannelUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ChannelUpdate"><span class="hs-identifier hs-var">ChannelUpdate</span></a></span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ChannelDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ChannelDelete"><span class="hs-identifier hs-var">ChannelDelete</span></a></span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ChannelPinsUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ChannelPinsUpdate"><span class="hs-identifier hs-var">ChannelPinsUpdate</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadCreate"><span class="hs-identifier hs-var">ThreadCreate</span></a></span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadUpdate"><span class="hs-identifier hs-var">ThreadUpdate</span></a></span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadDelete"><span class="hs-identifier hs-var">ThreadDelete</span></a></span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadListSync"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadListSync"><span class="hs-identifier hs-var">ThreadListSync</span></a></span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadMemberUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadMemberUpdate"><span class="hs-identifier hs-var">ThreadMemberUpdate</span></a></span></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ThreadMembersUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#ThreadMembersUpdate"><span class="hs-identifier hs-var">ThreadMembersUpdate</span></a></span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="EntitlementCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#EntitlementCreate"><span class="hs-identifier hs-var">EntitlementCreate</span></a></span></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="EntitlementUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#EntitlementUpdate"><span class="hs-identifier hs-var">EntitlementUpdate</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="EntitlementDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#EntitlementDelete"><span class="hs-identifier hs-var">EntitlementDelete</span></a></span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildCreate"><span class="hs-identifier hs-var">GuildCreate</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildUpdate"><span class="hs-identifier hs-var">GuildUpdate</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildDelete"><span class="hs-identifier hs-var">GuildDelete</span></a></span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildAuditLogEntryCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildAuditLogEntryCreate"><span class="hs-identifier hs-var">GuildAuditLogEntryCreate</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildBanAdd"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildBanAdd"><span class="hs-identifier hs-var">GuildBanAdd</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildBanRemove"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildBanRemove"><span class="hs-identifier hs-var">GuildBanRemove</span></a></span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildEmojisUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildEmojisUpdate"><span class="hs-identifier hs-var">GuildEmojisUpdate</span></a></span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildStickersUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildStickersUpdate"><span class="hs-identifier hs-var">GuildStickersUpdate</span></a></span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildIntegrationsUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildIntegrationsUpdate"><span class="hs-identifier hs-var">GuildIntegrationsUpdate</span></a></span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildMemberAdd"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildMemberAdd"><span class="hs-identifier hs-var">GuildMemberAdd</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildMemberRemove"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildMemberRemove"><span class="hs-identifier hs-var">GuildMemberRemove</span></a></span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildMemberUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildMemberUpdate"><span class="hs-identifier hs-var">GuildMemberUpdate</span></a></span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildRoleCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildRoleCreate"><span class="hs-identifier hs-var">GuildRoleCreate</span></a></span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildRoleUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildRoleUpdate"><span class="hs-identifier hs-var">GuildRoleUpdate</span></a></span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildRoleDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildRoleDelete"><span class="hs-identifier hs-var">GuildRoleDelete</span></a></span></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildScheduledEventCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildScheduledEventCreate"><span class="hs-identifier hs-var">GuildScheduledEventCreate</span></a></span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildScheduledEventUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildScheduledEventUpdate"><span class="hs-identifier hs-var">GuildScheduledEventUpdate</span></a></span></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildScheduledEventDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildScheduledEventDelete"><span class="hs-identifier hs-var">GuildScheduledEventDelete</span></a></span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildScheduledEventUserAdd"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildScheduledEventUserAdd"><span class="hs-identifier hs-var">GuildScheduledEventUserAdd</span></a></span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GuildScheduledEventUserRemove"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#GuildScheduledEventUserRemove"><span class="hs-identifier hs-var">GuildScheduledEventUserRemove</span></a></span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="IntegrationCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#IntegrationCreate"><span class="hs-identifier hs-var">IntegrationCreate</span></a></span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="IntegrationUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#IntegrationUpdate"><span class="hs-identifier hs-var">IntegrationUpdate</span></a></span></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="IntegrationDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#IntegrationDelete"><span class="hs-identifier hs-var">IntegrationDelete</span></a></span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="InteractionCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#InteractionCreate"><span class="hs-identifier hs-var">InteractionCreate</span></a></span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="InviteCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#InviteCreate"><span class="hs-identifier hs-var">InviteCreate</span></a></span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="InviteDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#InviteDelete"><span class="hs-identifier hs-var">InviteDelete</span></a></span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageCreate"><span class="hs-identifier hs-var">MessageCreate</span></a></span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageUpdate"><span class="hs-identifier hs-var">MessageUpdate</span></a></span></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageDelete"><span class="hs-identifier hs-var">MessageDelete</span></a></span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageDeleteBulk"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageDeleteBulk"><span class="hs-identifier hs-var">MessageDeleteBulk</span></a></span></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageReactionAdd"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageReactionAdd"><span class="hs-identifier hs-var">MessageReactionAdd</span></a></span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageReactionRemove"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageReactionRemove"><span class="hs-identifier hs-var">MessageReactionRemove</span></a></span></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageReactionRemoveAll"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageReactionRemoveAll"><span class="hs-identifier hs-var">MessageReactionRemoveAll</span></a></span></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MessageReactionRemoveEmoji"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#MessageReactionRemoveEmoji"><span class="hs-identifier hs-var">MessageReactionRemoveEmoji</span></a></span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="PresenceUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#PresenceUpdate"><span class="hs-identifier hs-var">PresenceUpdate</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="StageInstanceCreate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#StageInstanceCreate"><span class="hs-identifier hs-var">StageInstanceCreate</span></a></span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="StageInstanceUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#StageInstanceUpdate"><span class="hs-identifier hs-var">StageInstanceUpdate</span></a></span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="StageInstanceDelete"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#StageInstanceDelete"><span class="hs-identifier hs-var">StageInstanceDelete</span></a></span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="TypingStart"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#TypingStart"><span class="hs-identifier hs-var">TypingStart</span></a></span></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UserUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#UserUpdate"><span class="hs-identifier hs-var">UserUpdate</span></a></span></span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="VoiceStateUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#VoiceStateUpdate"><span class="hs-identifier hs-var">VoiceStateUpdate</span></a></span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="VoiceServerUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#VoiceServerUpdate"><span class="hs-identifier hs-var">VoiceServerUpdate</span></a></span></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="WebhooksUpdate"><span class="annot"><a href="Data.Discord.ReceiveEvent.html#WebhooksUpdate"><span class="hs-identifier hs-var">WebhooksUpdate</span></a></span></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679299205"><span id="local-6989586621679299207"><span id="local-6989586621679299211"><span class="annot"><span class="annottext">Int -&gt; ReceiveEvent -&gt; ShowS
+[ReceiveEvent] -&gt; ShowS
+ReceiveEvent -&gt; String
+(Int -&gt; ReceiveEvent -&gt; ShowS)
+-&gt; (ReceiveEvent -&gt; String)
+-&gt; ([ReceiveEvent] -&gt; ShowS)
+-&gt; Show ReceiveEvent
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReceiveEvent -&gt; ShowS
+showsPrec :: Int -&gt; ReceiveEvent -&gt; ShowS
+$cshow :: ReceiveEvent -&gt; String
+show :: ReceiveEvent -&gt; String
+$cshowList :: [ReceiveEvent] -&gt; ShowS
+showList :: [ReceiveEvent] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679299215"><span id="local-6989586621679299223"><span id="local-6989586621679299229"><span id="local-6989586621679299243"><span id="local-6989586621679299245"><span id="local-6989586621679299249"><span id="local-6989586621679299253"><span id="local-6989586621679299257"><span class="annot"><span class="annottext">Int -&gt; ReceiveEvent
+ReceiveEvent -&gt; Int
+ReceiveEvent -&gt; [ReceiveEvent]
+ReceiveEvent -&gt; ReceiveEvent
+ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+ReceiveEvent -&gt; ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+(ReceiveEvent -&gt; ReceiveEvent)
+-&gt; (ReceiveEvent -&gt; ReceiveEvent)
+-&gt; (Int -&gt; ReceiveEvent)
+-&gt; (ReceiveEvent -&gt; Int)
+-&gt; (ReceiveEvent -&gt; [ReceiveEvent])
+-&gt; (ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent])
+-&gt; (ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent])
+-&gt; (ReceiveEvent -&gt; ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent])
+-&gt; Enum ReceiveEvent
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+$csucc :: ReceiveEvent -&gt; ReceiveEvent
+succ :: ReceiveEvent -&gt; ReceiveEvent
+$cpred :: ReceiveEvent -&gt; ReceiveEvent
+pred :: ReceiveEvent -&gt; ReceiveEvent
+$ctoEnum :: Int -&gt; ReceiveEvent
+toEnum :: Int -&gt; ReceiveEvent
+$cfromEnum :: ReceiveEvent -&gt; Int
+fromEnum :: ReceiveEvent -&gt; Int
+$cenumFrom :: ReceiveEvent -&gt; [ReceiveEvent]
+enumFrom :: ReceiveEvent -&gt; [ReceiveEvent]
+$cenumFromThen :: ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+enumFromThen :: ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+$cenumFromTo :: ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+enumFromTo :: ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+$cenumFromThenTo :: ReceiveEvent -&gt; ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+enumFromThenTo :: ReceiveEvent -&gt; ReceiveEvent -&gt; ReceiveEvent -&gt; [ReceiveEvent]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679299261"><span id="local-6989586621679299263"><span class="annot"><span class="annottext">(forall x. ReceiveEvent -&gt; Rep ReceiveEvent x)
+-&gt; (forall x. Rep ReceiveEvent x -&gt; ReceiveEvent)
+-&gt; Generic ReceiveEvent
+forall x. Rep ReceiveEvent x -&gt; ReceiveEvent
+forall x. ReceiveEvent -&gt; Rep ReceiveEvent x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. ReceiveEvent -&gt; Rep ReceiveEvent x
+from :: forall x. ReceiveEvent -&gt; Rep ReceiveEvent x
+$cto :: forall x. Rep ReceiveEvent x -&gt; ReceiveEvent
+to :: forall x. Rep ReceiveEvent x -&gt; ReceiveEvent
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679299267"><span id="local-6989586621679299274"><span id="local-6989586621679299277"><span id="local-6989586621679299280"><span class="annot"><span class="annottext">[ReceiveEvent] -&gt; Value
+[ReceiveEvent] -&gt; Encoding
+ReceiveEvent -&gt; Value
+ReceiveEvent -&gt; Encoding
+(ReceiveEvent -&gt; Value)
+-&gt; (ReceiveEvent -&gt; Encoding)
+-&gt; ([ReceiveEvent] -&gt; Value)
+-&gt; ([ReceiveEvent] -&gt; Encoding)
+-&gt; ToJSON ReceiveEvent
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: ReceiveEvent -&gt; Value
+toJSON :: ReceiveEvent -&gt; Value
+$ctoEncoding :: ReceiveEvent -&gt; Encoding
+toEncoding :: ReceiveEvent -&gt; Encoding
+$ctoJSONList :: [ReceiveEvent] -&gt; Value
+toJSONList :: [ReceiveEvent] -&gt; Value
+$ctoEncodingList :: [ReceiveEvent] -&gt; Encoding
+toEncodingList :: [ReceiveEvent] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679300832"><span id="local-6989586621679300839"><span class="annot"><span class="annottext">Value -&gt; Parser [ReceiveEvent]
+Value -&gt; Parser ReceiveEvent
+(Value -&gt; Parser ReceiveEvent)
+-&gt; (Value -&gt; Parser [ReceiveEvent]) -&gt; FromJSON ReceiveEvent
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser ReceiveEvent
+parseJSON :: Value -&gt; Parser ReceiveEvent
+$cparseJSONList :: Value -&gt; Parser [ReceiveEvent]
+parseJSONList :: Value -&gt; Parser [ReceiveEvent]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">ReceiveEvent</span><span>
+</span><span id="line-85"></span></pre></body></html>

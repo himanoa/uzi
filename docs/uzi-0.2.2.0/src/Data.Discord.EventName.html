@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.EventName</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">prependFailure</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">typeMismatch</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">data</span><span> </span><span id="EventName"><span class="annot"><a href="Data.Discord.EventName.html#EventName"><span class="hs-identifier hs-var">EventName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReadyEventName"><span class="annot"><a href="Data.Discord.EventName.html#ReadyEventName"><span class="hs-identifier hs-var">ReadyEventName</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="MessageCreateEventName"><span class="annot"><a href="Data.Discord.EventName.html#MessageCreateEventName"><span class="hs-identifier hs-var">MessageCreateEventName</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="GuildCreateEventName"><span class="annot"><a href="Data.Discord.EventName.html#GuildCreateEventName"><span class="hs-identifier hs-var">GuildCreateEventName</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="InteractionCreateEventName"><span class="annot"><a href="Data.Discord.EventName.html#InteractionCreateEventName"><span class="hs-identifier hs-var">InteractionCreateEventName</span></a></span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679297600"><span id="local-6989586621679297602"><span id="local-6989586621679297606"><span class="annot"><span class="annottext">Int -&gt; EventName -&gt; ShowS
+[EventName] -&gt; ShowS
+EventName -&gt; String
+(Int -&gt; EventName -&gt; ShowS)
+-&gt; (EventName -&gt; String)
+-&gt; ([EventName] -&gt; ShowS)
+-&gt; Show EventName
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; EventName -&gt; ShowS
+showsPrec :: Int -&gt; EventName -&gt; ShowS
+$cshow :: EventName -&gt; String
+show :: EventName -&gt; String
+$cshowList :: [EventName] -&gt; ShowS
+showList :: [EventName] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297610"><span id="local-6989586621679297612"><span class="annot"><span class="annottext">EventName -&gt; EventName -&gt; Bool
+(EventName -&gt; EventName -&gt; Bool)
+-&gt; (EventName -&gt; EventName -&gt; Bool) -&gt; Eq EventName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: EventName -&gt; EventName -&gt; Bool
+== :: EventName -&gt; EventName -&gt; Bool
+$c/= :: EventName -&gt; EventName -&gt; Bool
+/= :: EventName -&gt; EventName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679297618"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.EventName.html#EventName"><span class="hs-identifier hs-type">EventName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>  </span><span id="local-6989586621679297644"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser EventName
+</span><a href="#local-6989586621679297644"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; (Text -&gt; Parser EventName) -&gt; Value -&gt; Parser EventName
+forall a. String -&gt; (Text -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withText</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;EventName&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Text -&gt; Parser EventName) -&gt; Value -&gt; Parser EventName)
+-&gt; (Text -&gt; Parser EventName) -&gt; Value -&gt; Parser EventName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;READY&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EventName -&gt; Parser EventName
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">EventName
+</span><a href="Data.Discord.EventName.html#ReadyEventName"><span class="hs-identifier hs-var">ReadyEventName</span></a></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;MESSAGE_CREATE&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EventName -&gt; Parser EventName
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">EventName
+</span><a href="Data.Discord.EventName.html#MessageCreateEventName"><span class="hs-identifier hs-var">MessageCreateEventName</span></a></span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;GUILD_CREATE&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EventName -&gt; Parser EventName
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">EventName
+</span><a href="Data.Discord.EventName.html#GuildCreateEventName"><span class="hs-identifier hs-var">GuildCreateEventName</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;INTERACTION_CREATE&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EventName -&gt; Parser EventName
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">EventName
+</span><a href="Data.Discord.EventName.html#InteractionCreateEventName"><span class="hs-identifier hs-var">InteractionCreateEventName</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span id="local-6989586621679297647"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679297647"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser EventName -&gt; Parser EventName
+forall a. String -&gt; Parser a -&gt; Parser a
+</span><span class="hs-identifier hs-var">prependFailure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Not supported op code &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679297647"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Value -&gt; Parser EventName
+forall a. String -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">typeMismatch</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Opcode&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><span class="hs-identifier hs-var">String</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679297647"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span></pre></body></html>

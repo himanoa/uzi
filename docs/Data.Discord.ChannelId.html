@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.ChannelId</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">newtype</span><span> </span><span id="ChannelId"><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-var">ChannelId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ChannelId"><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-var">ChannelId</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296458"><span id="local-6989586621679296464"><span id="local-6989586621679296468"><span class="annot"><span class="annottext">Int -&gt; ChannelId -&gt; ShowS
+[ChannelId] -&gt; ShowS
+ChannelId -&gt; String
+(Int -&gt; ChannelId -&gt; ShowS)
+-&gt; (ChannelId -&gt; String)
+-&gt; ([ChannelId] -&gt; ShowS)
+-&gt; Show ChannelId
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ChannelId -&gt; ShowS
+showsPrec :: Int -&gt; ChannelId -&gt; ShowS
+$cshow :: ChannelId -&gt; String
+show :: ChannelId -&gt; String
+$cshowList :: [ChannelId] -&gt; ShowS
+showList :: [ChannelId] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296472"><span id="local-6989586621679296477"><span class="annot"><span class="annottext">ChannelId -&gt; ChannelId -&gt; Bool
+(ChannelId -&gt; ChannelId -&gt; Bool)
+-&gt; (ChannelId -&gt; ChannelId -&gt; Bool) -&gt; Eq ChannelId
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ChannelId -&gt; ChannelId -&gt; Bool
+== :: ChannelId -&gt; ChannelId -&gt; Bool
+$c/= :: ChannelId -&gt; ChannelId -&gt; Bool
+/= :: ChannelId -&gt; ChannelId -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296483"><span id="local-6989586621679296488"><span class="annot"><span class="annottext">Value -&gt; Parser [ChannelId]
+Value -&gt; Parser ChannelId
+(Value -&gt; Parser ChannelId)
+-&gt; (Value -&gt; Parser [ChannelId]) -&gt; FromJSON ChannelId
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser ChannelId
+parseJSON :: Value -&gt; Parser ChannelId
+$cparseJSONList :: Value -&gt; Parser [ChannelId]
+parseJSONList :: Value -&gt; Parser [ChannelId]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296494"><span id="local-6989586621679296499"><span id="local-6989586621679296503"><span id="local-6989586621679296507"><span class="annot"><span class="annottext">[ChannelId] -&gt; Value
+[ChannelId] -&gt; Encoding
+ChannelId -&gt; Value
+ChannelId -&gt; Encoding
+(ChannelId -&gt; Value)
+-&gt; (ChannelId -&gt; Encoding)
+-&gt; ([ChannelId] -&gt; Value)
+-&gt; ([ChannelId] -&gt; Encoding)
+-&gt; ToJSON ChannelId
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: ChannelId -&gt; Value
+toJSON :: ChannelId -&gt; Value
+$ctoEncoding :: ChannelId -&gt; Encoding
+toEncoding :: ChannelId -&gt; Encoding
+$ctoJSONList :: [ChannelId] -&gt; Value
+toJSONList :: [ChannelId] -&gt; Value
+$ctoEncodingList :: [ChannelId] -&gt; Encoding
+toEncodingList :: [ChannelId] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="annot"><a href="Data.Discord.ChannelId.html#coerceChannelId"><span class="hs-identifier hs-type">coerceChannelId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-16"></span><span id="coerceChannelId"><span class="annot"><span class="annottext">coerceChannelId :: ChannelId -&gt; Text
+</span><a href="Data.Discord.ChannelId.html#coerceChannelId"><span class="hs-identifier hs-var hs-var">coerceChannelId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelId -&gt; Text
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="annot"><a href="Data.Discord.ChannelId.html#makeChannelId"><span class="hs-identifier hs-type">makeChannelId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span>
+</span><span id="line-19"></span><span id="makeChannelId"><span class="annot"><span class="annottext">makeChannelId :: Text -&gt; ChannelId
+</span><a href="Data.Discord.ChannelId.html#makeChannelId"><span class="hs-identifier hs-var hs-var">makeChannelId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; ChannelId
+</span><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-var">ChannelId</span></a></span><span>
+</span><span id="line-20"></span></pre></body></html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BlockArguments #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Module: Effectful.DiscordGateway.Interpreter</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Description: 'Effectful.DiscortdGateway.Effect' &#12434;&#23455;&#34892;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- 'Effectful.DiscordGateway.Effect' &#12434;&#23455;&#34892;&#12377;&#12427;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.DiscordGateway.Interpreter</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">eitherDecode</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">encode</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.html"><span class="hs-identifier">Data.Discord</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String.Conversions</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ConvertibleStrings</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">convertString</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html"><span class="hs-identifier">Effectful.DiscordGateway.Effect</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">interpret</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Environment</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.Socket</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.WebSockets</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Connection</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.WebSockets</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">WS</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.WebSockets</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Wuss</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.ByteString.Lazy</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BL</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Wuss</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">WS</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679307457"><span id="local-6989586621679307463"><span class="annot"><a href="Effectful.DiscordGateway.Interpreter.html#runClient"><span class="hs-identifier hs-type">runClient</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679307457"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PortNumber</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">WS.ConnectionOptions</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">WS.Headers</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WS.Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307457"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307463"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307457"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307463"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-34"></span><span id="runClient"><span class="annot"><span class="annottext">runClient :: forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+String
+-&gt; PortNumber
+-&gt; String
+-&gt; ConnectionOptions
+-&gt; Headers
+-&gt; (Connection -&gt; m a)
+-&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#runClient"><span class="hs-identifier hs-var hs-var">runClient</span></a></span></span><span> </span><span id="local-6989586621679307554"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307554"><span class="hs-identifier hs-var">host</span></a></span></span><span> </span><span id="local-6989586621679307555"><span class="annot"><span class="annottext">PortNumber
+</span><a href="#local-6989586621679307555"><span class="hs-identifier hs-var">port</span></a></span></span><span> </span><span id="local-6989586621679307556"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307556"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span id="local-6989586621679307557"><span class="annot"><span class="annottext">ConnectionOptions
+</span><a href="#local-6989586621679307557"><span class="hs-identifier hs-var">opt</span></a></span></span><span> </span><span id="local-6989586621679307558"><span class="annot"><span class="annottext">Headers
+</span><a href="#local-6989586621679307558"><span class="hs-identifier hs-var">headers</span></a></span></span><span> </span><span id="local-6989586621679307559"><span class="annot"><span class="annottext">Connection -&gt; m a
+</span><a href="#local-6989586621679307559"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="annottext">((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+forall (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+</span><span class="hs-identifier hs-var">withRunInIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a)
+-&gt; ((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679307561"><span class="annot"><span class="annottext">forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679307561"><span class="hs-identifier hs-var">runInIO</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="annottext">String
+-&gt; PortNumber
+-&gt; String
+-&gt; ConnectionOptions
+-&gt; Headers
+-&gt; ClientApp a
+-&gt; IO a
+forall (m :: * -&gt; *) a.
+(MonadIO m, MonadMask m) =&gt;
+String
+-&gt; PortNumber
+-&gt; String
+-&gt; ConnectionOptions
+-&gt; Headers
+-&gt; ClientApp a
+-&gt; m a
+</span><span class="hs-identifier hs-var">WS.runSecureClientWith</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307554"><span class="hs-identifier hs-var">host</span></a></span><span> </span><span class="annot"><span class="annottext">PortNumber
+</span><a href="#local-6989586621679307555"><span class="hs-identifier hs-var">port</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307556"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="annot"><span class="annottext">ConnectionOptions
+</span><a href="#local-6989586621679307557"><span class="hs-identifier hs-var">opt</span></a></span><span> </span><span class="annot"><span class="annottext">Headers
+</span><a href="#local-6989586621679307558"><span class="hs-identifier hs-var">headers</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m a -&gt; IO a
+forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679307561"><span class="hs-identifier hs-var">runInIO</span></a></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; IO a) -&gt; (Connection -&gt; m a) -&gt; ClientApp a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; m a
+</span><a href="#local-6989586621679307559"><span class="hs-identifier hs-var">inner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679307480"><span id="local-6989586621679307481"><span class="annot"><a href="Effectful.DiscordGateway.Interpreter.html#withPingThread"><span class="hs-identifier hs-type">withPingThread</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679307480"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307480"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307481"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307480"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307481"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-39"></span><span id="withPingThread"><span class="annot"><span class="annottext">withPingThread :: forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+Connection -&gt; Int -&gt; IO () -&gt; m a -&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#withPingThread"><span class="hs-identifier hs-var hs-var">withPingThread</span></a></span></span><span> </span><span id="local-6989586621679307567"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679307567"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span id="local-6989586621679307568"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679307568"><span class="hs-identifier hs-var">interval</span></a></span></span><span> </span><span id="local-6989586621679307569"><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679307569"><span class="hs-identifier hs-var">after_sending</span></a></span></span><span> </span><span id="local-6989586621679307570"><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679307570"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+forall (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+</span><span class="hs-identifier hs-var">withRunInIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a)
+-&gt; ((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679307571"><span class="annot"><span class="annottext">forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679307571"><span class="hs-identifier hs-var">runInIO</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; Int -&gt; IO () -&gt; IO a -&gt; IO a
+forall a. Connection -&gt; Int -&gt; IO () -&gt; IO a -&gt; IO a
+</span><span class="hs-identifier hs-var">WS.withPingThread</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679307567"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679307568"><span class="hs-identifier hs-var">interval</span></a></span><span> </span><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679307569"><span class="hs-identifier hs-var">after_sending</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m a -&gt; IO a
+forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679307571"><span class="hs-identifier hs-var">runInIO</span></a></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679307570"><span class="hs-identifier hs-var">inner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Effectful.DiscordGateway.Interpreter.html#handleEvent"><span class="hs-identifier hs-type">handleEvent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BL.ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span>
+</span><span id="line-44"></span><span id="handleEvent"><span class="annot"><span class="annottext">handleEvent :: ByteString -&gt; Either String Response
+</span><a href="Effectful.DiscordGateway.Interpreter.html#handleEvent"><span class="hs-identifier hs-var hs-var">handleEvent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; ByteString -&gt; Either String a
+</span><span class="hs-identifier hs-var">eitherDecode</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | DiscordGatewayAPI&#12395;&#25509;&#32154;&#12375;&#12414;&#12377;</span></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679307487"><span id="local-6989586621679307488"><span class="annot"><a href="Effectful.DiscordGateway.Interpreter.html#withDiscordGatewayConnection"><span class="hs-identifier hs-type">withDiscordGatewayConnection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679307487"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WS.Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307487"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307488"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679307487"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307488"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-48"></span><span id="withDiscordGatewayConnection"><span class="annot"><span class="annottext">withDiscordGatewayConnection :: forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+(Connection -&gt; m a) -&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#withDiscordGatewayConnection"><span class="hs-identifier hs-var hs-var">withDiscordGatewayConnection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; PortNumber
+-&gt; String
+-&gt; ConnectionOptions
+-&gt; Headers
+-&gt; (Connection -&gt; m a)
+-&gt; m a
+forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+String
+-&gt; PortNumber
+-&gt; String
+-&gt; ConnectionOptions
+-&gt; Headers
+-&gt; (Connection -&gt; m a)
+-&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#runClient"><span class="hs-identifier hs-var">runClient</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;gateway.discord.gg&quot;</span></span><span> </span><span class="annot"><span class="annottext">PortNumber
+</span><span class="hs-number">443</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;/?v=14&amp;encoding-json&quot;</span></span><span> </span><span class="annot"><span class="annottext">ConnectionOptions
+</span><span class="hs-identifier hs-var">WS.defaultConnectionOptions</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | DiscordGateway&#12398;Effect&#12434;&#23455;&#34892;&#12375;&#12414;&#12377;&#12290;</span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679307494"><span id="local-6989586621679307499"><span class="annot"><a href="Effectful.DiscordGateway.Interpreter.html#runDiscordGateway"><span class="hs-identifier hs-type">runDiscordGateway</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IOE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307494"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Environment</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307494"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307494"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">WS.Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier hs-type">DiscordGateway</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679307494"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679307499"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307494"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307499"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-52"></span><span id="runDiscordGateway"><span class="annot"><span class="annottext">runDiscordGateway :: forall (es :: [Effect]) a.
+(IOE :&gt; es, Environment :&gt; es, DynamicLogger :&gt; es) =&gt;
+Connection -&gt; Eff (DiscordGateway : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#runDiscordGateway"><span class="hs-identifier hs-var hs-var">runDiscordGateway</span></a></span></span><span> </span><span id="local-6989586621679307586"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679307586"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler DiscordGateway es
+-&gt; Eff (DiscordGateway : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler DiscordGateway es
+ -&gt; Eff (DiscordGateway : es) a -&gt; Eff es a)
+-&gt; EffectHandler DiscordGateway es
+-&gt; Eff (DiscordGateway : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">DiscordGateway (Eff localEs) a
+</span><a href="Effectful.DiscordGateway.Effect.html#ReceiveEvent"><span class="hs-identifier hs-var">ReceiveEvent</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679307613"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679307613"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a. IO a -&gt; Eff es a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (Connection -&gt; IO ByteString) -&gt; Connection -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a. WebSocketsData a =&gt; Connection -&gt; IO a
+</span><span class="hs-identifier hs-var">Wuss.receiveData</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">BL.ByteString</span></span><span> </span><span class="annot"><span class="annottext">(Connection -&gt; Eff es ByteString)
+-&gt; Connection -&gt; Eff es ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679307586"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; Eff es (Maybe String)
+forall (es :: [Effect]).
+(Environment :&gt; es) =&gt;
+String -&gt; Eff es (Maybe String)
+</span><span class="hs-identifier hs-var">lookupEnv</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UZI_IS_DEBUG&quot;</span></span><span> </span><span class="annot"><span class="annottext">Eff es (Maybe String) -&gt; (Maybe String -&gt; Eff es ()) -&gt; Eff es ()
+forall a b. Eff es a -&gt; (a -&gt; Eff es b) -&gt; Eff es b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-56"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">(Utf8Builder -&gt; Eff es ())
+-&gt; (ByteString -&gt; Utf8Builder) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">RIO.displayBytesUtf8</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Utf8Builder)
+-&gt; (ByteString -&gt; ByteString) -&gt; ByteString -&gt; Utf8Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; ByteString
+</span><span class="hs-identifier hs-var">encodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; ByteString)
+-&gt; (ByteString -&gt; Text) -&gt; ByteString -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Text
+forall a b. ConvertibleStrings a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">convertString</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Eff es ()) -&gt; ByteString -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679307613"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-57"></span><span>      </span><span class="annot"><span class="annottext">Maybe String
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff es ()
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either String Response
+</span><a href="Effectful.DiscordGateway.Interpreter.html#handleEvent"><span class="hs-identifier hs-var">handleEvent</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679307613"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-59"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679307620"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307620"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-60"></span><span>        </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#attention"><span class="hs-identifier hs-var">attention</span></a></span><span> </span><span class="annot"><span class="annottext">(Utf8Builder -&gt; Eff es ())
+-&gt; (String -&gt; Utf8Builder) -&gt; String -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">RIO.displayBytesUtf8</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Utf8Builder)
+-&gt; (String -&gt; ByteString) -&gt; String -&gt; Utf8Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; ByteString
+</span><span class="hs-identifier hs-var">encodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; ByteString) -&gt; (String -&gt; Text) -&gt; String -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Eff es ()) -&gt; String -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679307620"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-61"></span><span>        </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+Maybe Response
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-62"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679307623"><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679307623"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>        </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Eff es a) -&gt; (Response -&gt; a) -&gt; Response -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Response -&gt; a
+Response -&gt; Maybe Response
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Response -&gt; Eff es a) -&gt; Response -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679307623"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#SendEvent"><span class="hs-identifier hs-type">SendEvent</span></a></span><span> </span><span id="local-6989586621679307639"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679307639"><span class="hs-identifier hs-var">request</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679307640"><span class="annot"><span class="annottext">text :: ByteString
+</span><a href="#local-6989586621679307640"><span class="hs-identifier hs-var hs-var">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679307639"><span class="hs-identifier hs-var">request</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; Eff es (Maybe String)
+forall (es :: [Effect]).
+(Environment :&gt; es) =&gt;
+String -&gt; Eff es (Maybe String)
+</span><span class="hs-identifier hs-var">lookupEnv</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UZI_IS_DEBUG&quot;</span></span><span> </span><span class="annot"><span class="annottext">Eff es (Maybe String) -&gt; (Maybe String -&gt; Eff es ()) -&gt; Eff es ()
+forall a b. Eff es a -&gt; (a -&gt; Eff es b) -&gt; Eff es b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-67"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">(Utf8Builder -&gt; Eff es ())
+-&gt; (ByteString -&gt; Utf8Builder) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Utf8Builder
+forall a. Show a =&gt; a -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">RIO.displayShow</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Eff es ()) -&gt; ByteString -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679307640"><span class="hs-identifier hs-var">text</span></a></span><span>
+</span><span id="line-68"></span><span>      </span><span class="annot"><span class="annottext">Maybe String
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff es ()
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a. IO a -&gt; Eff es a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a)
+-&gt; (ByteString -&gt; IO a) -&gt; ByteString -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; ByteString -&gt; IO ()
+forall a. WebSocketsData a =&gt; Connection -&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">Wuss.sendTextData</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679307586"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Eff es a) -&gt; ByteString -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679307640"><span class="hs-identifier hs-var">text</span></a></span><span>
+</span><span id="line-70"></span></pre></body></html>

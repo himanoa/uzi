@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Lifted &quot;Control.Concurrent.MVar&quot;.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Concurrent.MVar</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier">Concurrent</span></a></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#runConcurrent"><span class="hs-identifier">runConcurrent</span></a></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- * MVar</span></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">MVar</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#newEmptyMVar"><span class="hs-identifier">newEmptyMVar</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#newMVar"><span class="hs-identifier">newMVar</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#takeMVar"><span class="hs-identifier">takeMVar</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#putMVar"><span class="hs-identifier">putMVar</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#readMVar"><span class="hs-identifier">readMVar</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#swapMVar"><span class="hs-identifier">swapMVar</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryTakeMVar"><span class="hs-identifier">tryTakeMVar</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryPutMVar"><span class="hs-identifier">tryPutMVar</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#isEmptyMVar"><span class="hs-identifier">isEmptyMVar</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#withMVar"><span class="hs-identifier">withMVar</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#withMVarMasked"><span class="hs-identifier">withMVarMasked</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVar"><span class="hs-identifier">modifyMVar</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVar_"><span class="hs-identifier">modifyMVar_</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked"><span class="hs-identifier">modifyMVarMasked</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked_"><span class="hs-identifier">modifyMVarMasked_</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryReadMVar"><span class="hs-identifier">tryReadMVar</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Concurrent.MVar.html#mkWeakMVar"><span class="hs-identifier">mkWeakMVar</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Mem.Weak</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Weak</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Concurrent.MVar</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MVar</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Control.Concurrent.MVar</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html"><span class="hs-identifier">Effectful.Concurrent.Effect</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static.Primitive</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static.Unsafe</span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.newEmptyMVar'.</span></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679080287"><span id="local-6989586621679080289"><span class="annot"><a href="Effectful.Concurrent.MVar.html#newEmptyMVar"><span class="hs-identifier hs-type">newEmptyMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080287"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080287"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080289"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-42"></span><span id="newEmptyMVar"><span class="annot"><span class="annottext">newEmptyMVar :: forall (es :: [Effect]) a. (Concurrent :&gt; es) =&gt; Eff es (MVar a)
+</span><a href="Effectful.Concurrent.MVar.html#newEmptyMVar"><span class="hs-identifier hs-var hs-var">newEmptyMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (MVar a) -&gt; Eff es (MVar a)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">IO (MVar a)
+forall a. IO (MVar a)
+</span><span class="hs-identifier hs-var">M.newEmptyMVar</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.newMVar'.</span></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679080297"><span id="local-6989586621679080298"><span class="annot"><a href="Effectful.Concurrent.MVar.html#newMVar"><span class="hs-identifier hs-type">newMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080297"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679080298"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080297"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080298"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-46"></span><span id="newMVar"><span class="annot"><span class="annottext">newMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+a -&gt; Eff es (MVar a)
+</span><a href="Effectful.Concurrent.MVar.html#newMVar"><span class="hs-identifier hs-var hs-var">newMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (MVar a) -&gt; Eff es (MVar a)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO (MVar a) -&gt; Eff es (MVar a))
+-&gt; (a -&gt; IO (MVar a)) -&gt; a -&gt; Eff es (MVar a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (MVar a)
+forall a. a -&gt; IO (MVar a)
+</span><span class="hs-identifier hs-var">M.newMVar</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.takeMVar'.</span></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679080305"><span id="local-6989586621679080306"><span class="annot"><a href="Effectful.Concurrent.MVar.html#takeMVar"><span class="hs-identifier hs-type">takeMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080305"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080306"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080305"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080306"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-50"></span><span id="takeMVar"><span class="annot"><span class="annottext">takeMVar :: forall (es :: [Effect]) a. (Concurrent :&gt; es) =&gt; MVar a -&gt; Eff es a
+</span><a href="Effectful.Concurrent.MVar.html#takeMVar"><span class="hs-identifier hs-var hs-var">takeMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a) -&gt; (MVar a -&gt; IO a) -&gt; MVar a -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO a
+forall a. MVar a -&gt; IO a
+</span><span class="hs-identifier hs-var">M.takeMVar</span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.putMVar'.</span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679080310"><span id="local-6989586621679080311"><span class="annot"><a href="Effectful.Concurrent.MVar.html#putMVar"><span class="hs-identifier hs-type">putMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080310"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080311"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679080311"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080310"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-54"></span><span id="putMVar"><span class="annot"><span class="annottext">putMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; a -&gt; Eff es ()
+</span><a href="Effectful.Concurrent.MVar.html#putMVar"><span class="hs-identifier hs-var hs-var">putMVar</span></a></span></span><span> </span><span id="local-6989586621679080417"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080417"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ()) -&gt; (a -&gt; IO ()) -&gt; a -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; a -&gt; IO ()
+forall a. MVar a -&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">M.putMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080417"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.readMVar'.</span></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679080419"><span id="local-6989586621679080420"><span class="annot"><a href="Effectful.Concurrent.MVar.html#readMVar"><span class="hs-identifier hs-type">readMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080419"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080420"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080419"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080420"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-58"></span><span id="readMVar"><span class="annot"><span class="annottext">readMVar :: forall (es :: [Effect]) a. (Concurrent :&gt; es) =&gt; MVar a -&gt; Eff es a
+</span><a href="Effectful.Concurrent.MVar.html#readMVar"><span class="hs-identifier hs-var hs-var">readMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a) -&gt; (MVar a -&gt; IO a) -&gt; MVar a -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO a
+forall a. MVar a -&gt; IO a
+</span><span class="hs-identifier hs-var">M.readMVar</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.swapMVar'.</span></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679080317"><span id="local-6989586621679080318"><span class="annot"><a href="Effectful.Concurrent.MVar.html#swapMVar"><span class="hs-identifier hs-type">swapMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080317"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080318"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679080318"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080317"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080318"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-62"></span><span id="swapMVar"><span class="annot"><span class="annottext">swapMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; a -&gt; Eff es a
+</span><a href="Effectful.Concurrent.MVar.html#swapMVar"><span class="hs-identifier hs-var hs-var">swapMVar</span></a></span></span><span> </span><span id="local-6989586621679080424"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080424"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a) -&gt; (a -&gt; IO a) -&gt; a -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; a -&gt; IO a
+forall a. MVar a -&gt; a -&gt; IO a
+</span><span class="hs-identifier hs-var">M.swapMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080424"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.tryTakeMVar'.</span></span><span>
+</span><span id="line-65"></span><span id="local-6989586621679080322"><span id="local-6989586621679080323"><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryTakeMVar"><span class="hs-identifier hs-type">tryTakeMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080322"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080323"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080322"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679080323"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-66"></span><span id="tryTakeMVar"><span class="annot"><span class="annottext">tryTakeMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; Eff es (Maybe a)
+</span><a href="Effectful.Concurrent.MVar.html#tryTakeMVar"><span class="hs-identifier hs-var hs-var">tryTakeMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Maybe a) -&gt; Eff es (Maybe a)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO (Maybe a) -&gt; Eff es (Maybe a))
+-&gt; (MVar a -&gt; IO (Maybe a)) -&gt; MVar a -&gt; Eff es (Maybe a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO (Maybe a)
+forall a. MVar a -&gt; IO (Maybe a)
+</span><span class="hs-identifier hs-var">M.tryTakeMVar</span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.tryPutMVar'.</span></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679080327"><span id="local-6989586621679080328"><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryPutMVar"><span class="hs-identifier hs-type">tryPutMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080327"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080328"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679080328"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080327"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-70"></span><span id="tryPutMVar"><span class="annot"><span class="annottext">tryPutMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; a -&gt; Eff es Bool
+</span><a href="Effectful.Concurrent.MVar.html#tryPutMVar"><span class="hs-identifier hs-var hs-var">tryPutMVar</span></a></span></span><span> </span><span id="local-6989586621679080429"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080429"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool) -&gt; (a -&gt; IO Bool) -&gt; a -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; a -&gt; IO Bool
+forall a. MVar a -&gt; a -&gt; IO Bool
+</span><span class="hs-identifier hs-var">M.tryPutMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080429"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.isEmptyMVar'.</span></span><span>
+</span><span id="line-73"></span><span id="local-6989586621679080332"><span id="local-6989586621679080333"><span class="annot"><a href="Effectful.Concurrent.MVar.html#isEmptyMVar"><span class="hs-identifier hs-type">isEmptyMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080332"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080333"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080332"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-74"></span><span id="isEmptyMVar"><span class="annot"><span class="annottext">isEmptyMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; Eff es Bool
+</span><a href="Effectful.Concurrent.MVar.html#isEmptyMVar"><span class="hs-identifier hs-var hs-var">isEmptyMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Eff es Bool
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Bool -&gt; Eff es Bool)
+-&gt; (MVar a -&gt; IO Bool) -&gt; MVar a -&gt; Eff es Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO Bool
+forall a. MVar a -&gt; IO Bool
+</span><span class="hs-identifier hs-var">M.isEmptyMVar</span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.tryReadMVar'.</span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679080433"><span id="local-6989586621679080434"><span class="annot"><a href="Effectful.Concurrent.MVar.html#tryReadMVar"><span class="hs-identifier hs-type">tryReadMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080433"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080433"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679080434"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-78"></span><span id="tryReadMVar"><span class="annot"><span class="annottext">tryReadMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; Eff es (Maybe a)
+</span><a href="Effectful.Concurrent.MVar.html#tryReadMVar"><span class="hs-identifier hs-var hs-var">tryReadMVar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Maybe a) -&gt; Eff es (Maybe a)
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO (Maybe a) -&gt; Eff es (Maybe a))
+-&gt; (MVar a -&gt; IO (Maybe a)) -&gt; MVar a -&gt; Eff es (Maybe a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO (Maybe a)
+forall a. MVar a -&gt; IO (Maybe a)
+</span><span class="hs-identifier hs-var">M.tryReadMVar</span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.withMVar'.</span></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679080339"><span id="local-6989586621679080340"><span id="local-6989586621679080341"><span class="annot"><a href="Effectful.Concurrent.MVar.html#withMVar"><span class="hs-identifier hs-type">withMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080339"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080340"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080340"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080339"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080341"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080339"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080341"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-82"></span><span id="withMVar"><span class="annot"><span class="annottext">withMVar :: forall (es :: [Effect]) a b.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es b) -&gt; Eff es b
+</span><a href="Effectful.Concurrent.MVar.html#withMVar"><span class="hs-identifier hs-var hs-var">withMVar</span></a></span></span><span> </span><span id="local-6989586621679080438"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080438"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080439"><span class="annot"><span class="annottext">a -&gt; Eff es b
+</span><a href="#local-6989586621679080439"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080441"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080441"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO b) -&gt; IO b
+forall a b. MVar a -&gt; (a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">M.withMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080438"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO b) -&gt; IO b) -&gt; (a -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es b -&gt; IO b
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080441"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es b -&gt; IO b) -&gt; (a -&gt; Eff es b) -&gt; a -&gt; IO b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es b
+</span><a href="#local-6989586621679080439"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.withMVarMasked'.</span></span><span>
+</span><span id="line-86"></span><span id="local-6989586621679080443"><span id="local-6989586621679080444"><span id="local-6989586621679080445"><span class="annot"><a href="Effectful.Concurrent.MVar.html#withMVarMasked"><span class="hs-identifier hs-type">withMVarMasked</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080443"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080444"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080444"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080443"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080445"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080443"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080445"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-87"></span><span id="withMVarMasked"><span class="annot"><span class="annottext">withMVarMasked :: forall (es :: [Effect]) a b.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es b) -&gt; Eff es b
+</span><a href="Effectful.Concurrent.MVar.html#withMVarMasked"><span class="hs-identifier hs-var hs-var">withMVarMasked</span></a></span></span><span> </span><span id="local-6989586621679080447"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080447"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080448"><span class="annot"><span class="annottext">a -&gt; Eff es b
+</span><a href="#local-6989586621679080448"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080449"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080449"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO b) -&gt; IO b
+forall a b. MVar a -&gt; (a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">M.withMVarMasked</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080447"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO b) -&gt; IO b) -&gt; (a -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es b -&gt; IO b
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080449"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es b -&gt; IO b) -&gt; (a -&gt; Eff es b) -&gt; a -&gt; IO b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es b
+</span><a href="#local-6989586621679080448"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.modifyMVar_'.</span></span><span>
+</span><span id="line-91"></span><span id="local-6989586621679080356"><span id="local-6989586621679080357"><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVar_"><span class="hs-identifier hs-type">modifyMVar_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080356"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080357"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080357"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080356"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080357"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080356"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-92"></span><span id="modifyMVar_"><span class="annot"><span class="annottext">modifyMVar_ :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es a) -&gt; Eff es ()
+</span><a href="Effectful.Concurrent.MVar.html#modifyMVar_"><span class="hs-identifier hs-var hs-var">modifyMVar_</span></a></span></span><span> </span><span id="local-6989586621679080452"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080452"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080453"><span class="annot"><span class="annottext">a -&gt; Eff es a
+</span><a href="#local-6989586621679080453"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ()
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ())
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080454"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080454"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-93"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a. MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><span class="hs-identifier hs-var">M.modifyMVar_</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080452"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO a) -&gt; IO ()) -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080454"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (a -&gt; Eff es a) -&gt; a -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+</span><a href="#local-6989586621679080453"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.modifyMVar'.</span></span><span>
+</span><span id="line-96"></span><span id="local-6989586621679080361"><span id="local-6989586621679080362"><span id="local-6989586621679080363"><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVar"><span class="hs-identifier hs-type">modifyMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080361"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080362"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080362"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080361"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679080363"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080361"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080363"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-97"></span><span id="modifyMVar"><span class="annot"><span class="annottext">modifyMVar :: forall (es :: [Effect]) a b.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es (a, b)) -&gt; Eff es b
+</span><a href="Effectful.Concurrent.MVar.html#modifyMVar"><span class="hs-identifier hs-var hs-var">modifyMVar</span></a></span></span><span> </span><span id="local-6989586621679080457"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080457"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080458"><span class="annot"><span class="annottext">a -&gt; Eff es (a, b)
+</span><a href="#local-6989586621679080458"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080459"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080459"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+</span><span class="hs-identifier hs-var">M.modifyMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080457"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO (a, b)) -&gt; IO b) -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es (a, b) -&gt; IO (a, b)
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080459"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es (a, b) -&gt; IO (a, b))
+-&gt; (a -&gt; Eff es (a, b)) -&gt; a -&gt; IO (a, b)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es (a, b)
+</span><a href="#local-6989586621679080458"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.modifyMVarMasked_'.</span></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679080461"><span id="local-6989586621679080462"><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked_"><span class="hs-identifier hs-type">modifyMVarMasked_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080461"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080462"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080462"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080461"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080462"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080461"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-102"></span><span id="modifyMVarMasked_"><span class="annot"><span class="annottext">modifyMVarMasked_ :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es a) -&gt; Eff es ()
+</span><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked_"><span class="hs-identifier hs-var hs-var">modifyMVarMasked_</span></a></span></span><span> </span><span id="local-6989586621679080464"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080464"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080465"><span class="annot"><span class="annottext">a -&gt; Eff es a
+</span><a href="#local-6989586621679080465"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ()
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ())
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO ()) -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080466"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080466"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-103"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a. MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><span class="hs-identifier hs-var">M.modifyMVarMasked_</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080464"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO a) -&gt; IO ()) -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080466"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (a -&gt; Eff es a) -&gt; a -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+</span><a href="#local-6989586621679080465"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.modifyMVarMasked'.</span></span><span>
+</span><span id="line-106"></span><span id="local-6989586621679080468"><span id="local-6989586621679080469"><span id="local-6989586621679080470"><span class="annot"><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked"><span class="hs-identifier hs-type">modifyMVarMasked</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080468"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080469"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080469"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080468"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679080469"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679080470"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080468"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679080470"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-107"></span><span id="modifyMVarMasked"><span class="annot"><span class="annottext">modifyMVarMasked :: forall (es :: [Effect]) a b.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; (a -&gt; Eff es (a, b)) -&gt; Eff es b
+</span><a href="Effectful.Concurrent.MVar.html#modifyMVarMasked"><span class="hs-identifier hs-var hs-var">modifyMVarMasked</span></a></span></span><span> </span><span id="local-6989586621679080472"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080472"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080473"><span class="annot"><span class="annottext">a -&gt; Eff es (a, b)
+</span><a href="#local-6989586621679080473"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">reallyUnsafeUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080474"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080474"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-108"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+</span><span class="hs-identifier hs-var">M.modifyMVarMasked</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080472"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO (a, b)) -&gt; IO b) -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es (a, b) -&gt; IO (a, b)
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679080474"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es (a, b) -&gt; IO (a, b))
+-&gt; (a -&gt; Eff es (a, b)) -&gt; a -&gt; IO (a, b)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es (a, b)
+</span><a href="#local-6989586621679080473"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="annot"><span class="hs-comment">-- | Lifted 'M.mkWeakMVar'.</span></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679080374"><span id="local-6989586621679080375"><span class="annot"><a href="Effectful.Concurrent.MVar.html#mkWeakMVar"><span class="hs-identifier hs-type">mkWeakMVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Concurrent.Effect.html#Concurrent"><span class="hs-identifier hs-type">Concurrent</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679080374"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080375"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080374"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679080374"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Weak</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679080375"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-112"></span><span id="mkWeakMVar"><span class="annot"><span class="annottext">mkWeakMVar :: forall (es :: [Effect]) a.
+(Concurrent :&gt; es) =&gt;
+MVar a -&gt; Eff es () -&gt; Eff es (Weak (MVar a))
+</span><a href="Effectful.Concurrent.MVar.html#mkWeakMVar"><span class="hs-identifier hs-var hs-var">mkWeakMVar</span></a></span></span><span> </span><span id="local-6989586621679080479"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080479"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679080480"><span class="annot"><span class="annottext">Eff es ()
+</span><a href="#local-6989586621679080480"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO (Weak (MVar a))) -&gt; Eff es (Weak (MVar a))
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff</span></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO (Weak (MVar a))) -&gt; Eff es (Weak (MVar a)))
+-&gt; (Env es -&gt; IO (Weak (MVar a))) -&gt; Eff es (Weak (MVar a))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679080482"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679080482"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-comment">-- The finalizer can run at any point and in any thread.</span><span>
+</span><span id="line-114"></span><span>  </span><span class="annot"><span class="annottext">MVar a -&gt; IO () -&gt; IO (Weak (MVar a))
+forall a. MVar a -&gt; IO () -&gt; IO (Weak (MVar a))
+</span><span class="hs-identifier hs-var">M.mkWeakMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679080479"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO (Weak (MVar a)))
+-&gt; (Env es -&gt; IO ()) -&gt; Env es -&gt; IO (Weak (MVar a))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff es () -&gt; Env es -&gt; IO ()
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><span class="hs-identifier hs-var">unEff</span></span><span> </span><span class="annot"><span class="annottext">Eff es ()
+</span><a href="#local-6989586621679080480"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO (Weak (MVar a))) -&gt; IO (Env es) -&gt; IO (Weak (MVar a))
+forall (m :: Type -&gt; Type) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Env es -&gt; IO (Env es)
+forall (es :: [Effect]). Env es -&gt; IO (Env es)
+</span><span class="hs-identifier hs-var">cloneEnv</span></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679080482"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-115"></span></pre></body></html>

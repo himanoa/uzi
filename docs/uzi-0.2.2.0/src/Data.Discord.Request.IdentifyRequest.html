@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Request.IdentifyRequest</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bits</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#messageContentIntent"><span class="hs-identifier hs-type">messageContentIntent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-13"></span><span id="messageContentIntent"><span class="annot"><span class="annottext">messageContentIntent :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#messageContentIntent"><span class="hs-identifier hs-var hs-var">messageContentIntent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Integer
+forall a. Bits a =&gt; a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">shift</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">15</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#guildMessageContentIntent"><span class="hs-identifier hs-type">guildMessageContentIntent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-16"></span><span id="guildMessageContentIntent"><span class="annot"><span class="annottext">guildMessageContentIntent :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildMessageContentIntent"><span class="hs-identifier hs-var hs-var">guildMessageContentIntent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Integer
+forall a. Bits a =&gt; a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">shift</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">9</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#guildManageChannelsIntent"><span class="hs-identifier hs-type">guildManageChannelsIntent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-19"></span><span id="guildManageChannelsIntent"><span class="annot"><span class="annottext">guildManageChannelsIntent :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildManageChannelsIntent"><span class="hs-identifier hs-var hs-var">guildManageChannelsIntent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Integer
+forall a. Bits a =&gt; a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">shift</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#guildManageServerIntent"><span class="hs-identifier hs-type">guildManageServerIntent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-22"></span><span id="guildManageServerIntent"><span class="annot"><span class="annottext">guildManageServerIntent :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildManageServerIntent"><span class="hs-identifier hs-var hs-var">guildManageServerIntent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Integer
+forall a. Bits a =&gt; a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">shift</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="IdentifyRequestProperties"><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequestProperties"><span class="hs-identifier hs-var">IdentifyRequestProperties</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IdentifyRequestProperties"><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequestProperties"><span class="hs-identifier hs-var">IdentifyRequestProperties</span></a></span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="os"><span class="annot"><span class="annottext">IdentifyRequestProperties -&gt; String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#os"><span class="hs-identifier hs-var hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>    </span><span id="browser"><span class="annot"><span class="annottext">IdentifyRequestProperties -&gt; String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#browser"><span class="hs-identifier hs-var hs-var">browser</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>    </span><span id="device"><span class="annot"><span class="annottext">IdentifyRequestProperties -&gt; String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#device"><span class="hs-identifier hs-var hs-var">device</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302297"><span id="local-6989586621679302306"><span id="local-6989586621679302310"><span class="annot"><span class="annottext">Int -&gt; IdentifyRequestProperties -&gt; ShowS
+[IdentifyRequestProperties] -&gt; ShowS
+IdentifyRequestProperties -&gt; String
+(Int -&gt; IdentifyRequestProperties -&gt; ShowS)
+-&gt; (IdentifyRequestProperties -&gt; String)
+-&gt; ([IdentifyRequestProperties] -&gt; ShowS)
+-&gt; Show IdentifyRequestProperties
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; IdentifyRequestProperties -&gt; ShowS
+showsPrec :: Int -&gt; IdentifyRequestProperties -&gt; ShowS
+$cshow :: IdentifyRequestProperties -&gt; String
+show :: IdentifyRequestProperties -&gt; String
+$cshowList :: [IdentifyRequestProperties] -&gt; ShowS
+showList :: [IdentifyRequestProperties] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302315"><span id="local-6989586621679302317"><span class="annot"><span class="annottext">(forall x.
+ IdentifyRequestProperties -&gt; Rep IdentifyRequestProperties x)
+-&gt; (forall x.
+    Rep IdentifyRequestProperties x -&gt; IdentifyRequestProperties)
+-&gt; Generic IdentifyRequestProperties
+forall x.
+Rep IdentifyRequestProperties x -&gt; IdentifyRequestProperties
+forall x.
+IdentifyRequestProperties -&gt; Rep IdentifyRequestProperties x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x.
+IdentifyRequestProperties -&gt; Rep IdentifyRequestProperties x
+from :: forall x.
+IdentifyRequestProperties -&gt; Rep IdentifyRequestProperties x
+$cto :: forall x.
+Rep IdentifyRequestProperties x -&gt; IdentifyRequestProperties
+to :: forall x.
+Rep IdentifyRequestProperties x -&gt; IdentifyRequestProperties
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302321"><span id="local-6989586621679302328"><span class="annot"><span class="annottext">IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool
+(IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool)
+-&gt; (IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool)
+-&gt; Eq IdentifyRequestProperties
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool
+== :: IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool
+$c/= :: IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool
+/= :: IdentifyRequestProperties -&gt; IdentifyRequestProperties -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302334"><span id="local-6989586621679302341"><span id="local-6989586621679302344"><span id="local-6989586621679302347"><span class="annot"><span class="annottext">[IdentifyRequestProperties] -&gt; Value
+[IdentifyRequestProperties] -&gt; Encoding
+IdentifyRequestProperties -&gt; Value
+IdentifyRequestProperties -&gt; Encoding
+(IdentifyRequestProperties -&gt; Value)
+-&gt; (IdentifyRequestProperties -&gt; Encoding)
+-&gt; ([IdentifyRequestProperties] -&gt; Value)
+-&gt; ([IdentifyRequestProperties] -&gt; Encoding)
+-&gt; ToJSON IdentifyRequestProperties
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: IdentifyRequestProperties -&gt; Value
+toJSON :: IdentifyRequestProperties -&gt; Value
+$ctoEncoding :: IdentifyRequestProperties -&gt; Encoding
+toEncoding :: IdentifyRequestProperties -&gt; Encoding
+$ctoJSONList :: [IdentifyRequestProperties] -&gt; Value
+toJSONList :: [IdentifyRequestProperties] -&gt; Value
+$ctoEncodingList :: [IdentifyRequestProperties] -&gt; Encoding
+toEncodingList :: [IdentifyRequestProperties] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">data</span><span> </span><span id="IdentifyRequest"><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequest"><span class="hs-identifier hs-var">IdentifyRequest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IdentifyRequest"><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequest"><span class="hs-identifier hs-var">IdentifyRequest</span></a></span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="token"><span class="annot"><span class="annottext">IdentifyRequest -&gt; Text
+</span><a href="Data.Discord.Request.IdentifyRequest.html#token"><span class="hs-identifier hs-var hs-var">token</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>    </span><span id="intents"><span class="annot"><span class="annottext">IdentifyRequest -&gt; Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#intents"><span class="hs-identifier hs-var hs-var">intents</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>    </span><span id="properties"><span class="annot"><span class="annottext">IdentifyRequest -&gt; IdentifyRequestProperties
+</span><a href="Data.Discord.Request.IdentifyRequest.html#properties"><span class="hs-identifier hs-var hs-var">properties</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequestProperties"><span class="hs-identifier hs-type">IdentifyRequestProperties</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302464"><span id="local-6989586621679302472"><span id="local-6989586621679302476"><span class="annot"><span class="annottext">Int -&gt; IdentifyRequest -&gt; ShowS
+[IdentifyRequest] -&gt; ShowS
+IdentifyRequest -&gt; String
+(Int -&gt; IdentifyRequest -&gt; ShowS)
+-&gt; (IdentifyRequest -&gt; String)
+-&gt; ([IdentifyRequest] -&gt; ShowS)
+-&gt; Show IdentifyRequest
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; IdentifyRequest -&gt; ShowS
+showsPrec :: Int -&gt; IdentifyRequest -&gt; ShowS
+$cshow :: IdentifyRequest -&gt; String
+show :: IdentifyRequest -&gt; String
+$cshowList :: [IdentifyRequest] -&gt; ShowS
+showList :: [IdentifyRequest] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302479"><span id="local-6989586621679302481"><span class="annot"><span class="annottext">(forall x. IdentifyRequest -&gt; Rep IdentifyRequest x)
+-&gt; (forall x. Rep IdentifyRequest x -&gt; IdentifyRequest)
+-&gt; Generic IdentifyRequest
+forall x. Rep IdentifyRequest x -&gt; IdentifyRequest
+forall x. IdentifyRequest -&gt; Rep IdentifyRequest x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. IdentifyRequest -&gt; Rep IdentifyRequest x
+from :: forall x. IdentifyRequest -&gt; Rep IdentifyRequest x
+$cto :: forall x. Rep IdentifyRequest x -&gt; IdentifyRequest
+to :: forall x. Rep IdentifyRequest x -&gt; IdentifyRequest
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302484"><span id="local-6989586621679302491"><span class="annot"><span class="annottext">IdentifyRequest -&gt; IdentifyRequest -&gt; Bool
+(IdentifyRequest -&gt; IdentifyRequest -&gt; Bool)
+-&gt; (IdentifyRequest -&gt; IdentifyRequest -&gt; Bool)
+-&gt; Eq IdentifyRequest
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: IdentifyRequest -&gt; IdentifyRequest -&gt; Bool
+== :: IdentifyRequest -&gt; IdentifyRequest -&gt; Bool
+$c/= :: IdentifyRequest -&gt; IdentifyRequest -&gt; Bool
+/= :: IdentifyRequest -&gt; IdentifyRequest -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302495"><span id="local-6989586621679302502"><span id="local-6989586621679302505"><span id="local-6989586621679302508"><span class="annot"><span class="annottext">[IdentifyRequest] -&gt; Value
+[IdentifyRequest] -&gt; Encoding
+IdentifyRequest -&gt; Value
+IdentifyRequest -&gt; Encoding
+(IdentifyRequest -&gt; Value)
+-&gt; (IdentifyRequest -&gt; Encoding)
+-&gt; ([IdentifyRequest] -&gt; Value)
+-&gt; ([IdentifyRequest] -&gt; Encoding)
+-&gt; ToJSON IdentifyRequest
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: IdentifyRequest -&gt; Value
+toJSON :: IdentifyRequest -&gt; Value
+$ctoEncoding :: IdentifyRequest -&gt; Encoding
+toEncoding :: IdentifyRequest -&gt; Encoding
+$ctoJSONList :: [IdentifyRequest] -&gt; Value
+toJSONList :: [IdentifyRequest] -&gt; Value
+$ctoEncodingList :: [IdentifyRequest] -&gt; Encoding
+toEncodingList :: [IdentifyRequest] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequestProperties"><span class="hs-identifier hs-type">defaultIdentifyRequestProperties</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequestProperties"><span class="hs-identifier hs-type">IdentifyRequestProperties</span></a></span><span>
+</span><span id="line-41"></span><span id="defaultIdentifyRequestProperties"><span class="annot"><span class="annottext">defaultIdentifyRequestProperties :: IdentifyRequestProperties
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequestProperties"><span class="hs-identifier hs-var hs-var">defaultIdentifyRequestProperties</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequestProperties"><span class="hs-identifier hs-type">IdentifyRequestProperties</span></a></span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">os :: String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#os"><span class="hs-identifier hs-var">os</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Linux&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>      </span><span class="annot"><span class="annottext">browser :: String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#browser"><span class="hs-identifier hs-var">browser</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;browser&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>      </span><span class="annot"><span class="annottext">device :: String
+</span><a href="Data.Discord.Request.IdentifyRequest.html#device"><span class="hs-identifier hs-var">device</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;server&quot;</span></span><span>
+</span><span id="line-46"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#defaultIntents"><span class="hs-identifier hs-type">defaultIntents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-49"></span><span id="defaultIntents"><span class="annot"><span class="annottext">defaultIntents :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIntents"><span class="hs-identifier hs-var hs-var">defaultIntents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#messageContentIntent"><span class="hs-identifier hs-var">messageContentIntent</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Bits a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">.|.</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildMessageContentIntent"><span class="hs-identifier hs-var">guildMessageContentIntent</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Bits a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">.|.</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildManageChannelsIntent"><span class="hs-identifier hs-var">guildManageChannelsIntent</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Bits a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">.|.</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#guildManageServerIntent"><span class="hs-identifier hs-var">guildManageServerIntent</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequest"><span class="hs-identifier hs-type">defaultIdentifyRequest</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequest"><span class="hs-identifier hs-type">IdentifyRequest</span></a></span><span>
+</span><span id="line-52"></span><span id="defaultIdentifyRequest"><span class="annot"><span class="annottext">defaultIdentifyRequest :: Text -&gt; IdentifyRequest
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequest"><span class="hs-identifier hs-var hs-var">defaultIdentifyRequest</span></a></span></span><span> </span><span id="local-6989586621679302590"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679302590"><span class="hs-identifier hs-var">token</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Data.Discord.Request.IdentifyRequest.html#IdentifyRequest"><span class="hs-identifier hs-type">IdentifyRequest</span></a></span><span>
+</span><span id="line-54"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">token :: Text
+</span><a href="Data.Discord.Request.IdentifyRequest.html#token"><span class="hs-identifier hs-var">token</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679302590"><span class="hs-identifier hs-var">token</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>      </span><span class="annot"><span class="annottext">intents :: Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#intents"><span class="hs-identifier hs-var">intents</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIntents"><span class="hs-identifier hs-var">defaultIntents</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>      </span><span class="annot"><span class="annottext">properties :: IdentifyRequestProperties
+</span><a href="Data.Discord.Request.IdentifyRequest.html#properties"><span class="hs-identifier hs-var">properties</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IdentifyRequestProperties
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequestProperties"><span class="hs-identifier hs-var">defaultIdentifyRequestProperties</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-58"></span></pre></body></html>

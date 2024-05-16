@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module: Effectful.DynamicLogger.Effect</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description: &#12525;&#12464;&#12434;&#20986;&#21147;&#12377;&#12427;&#12383;&#12417;&#12398;Effect&#12391;&#12377;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Log&#12434;&#20986;&#21147;&#12377;&#12427;&#12383;&#12417;&#12398;Effect&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.DynamicLogger.Effect</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">send</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">data</span><span> </span><span id="DynamicLogger"><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-var">DynamicLogger</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Effect</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>  </span><span id="local-6989586621679307355"><span id="Info"><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Info"><span class="hs-identifier hs-var">Info</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Utf8Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307355"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-19"></span><span>  </span><span id="local-6989586621679307359"><span id="Attention"><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#Attention"><span class="hs-identifier hs-var">Attention</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Utf8Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307359"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><span class="hs-identifier hs-var">DispatchOf</span></span></span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dynamic</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | &#12525;&#12464;&#12434;&#20986;&#21147;&#12375;&#12414;&#12377;</span></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679307341"><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-type">info</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307341"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#12525;&#12464;&#12395;&#20986;&#21147;&#12377;&#12427;&#20869;&#23481;</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Utf8Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307341"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-29"></span><span id="info"><span class="annot"><span class="annottext">info :: forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var hs-var">info</span></a></span></span><span> </span><span id="local-6989586621679307369"><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307369"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicLogger (Eff es) () -&gt; Eff es ()
+forall (e :: Effect) (es :: [Effect]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Utf8Builder -&gt; DynamicLogger (Eff es) ()
+forall (m :: * -&gt; *). Utf8Builder -&gt; DynamicLogger m ()
+</span><a href="Effectful.DynamicLogger.Effect.html#Info"><span class="hs-identifier hs-var">Info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307369"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | &#12456;&#12521;&#12540;&#12525;&#12464;&#12434;&#20986;&#21147;&#12375;&#12414;&#12377;</span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679307370"><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#attention"><span class="hs-identifier hs-type">attention</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307370"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#12525;&#12464;&#12395;&#20986;&#21147;&#12377;&#12427;&#20869;&#23481;</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Utf8Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-36"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307370"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-37"></span><span id="attention"><span class="annot"><span class="annottext">attention :: forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#attention"><span class="hs-identifier hs-var hs-var">attention</span></a></span></span><span> </span><span id="local-6989586621679307379"><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307379"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynamicLogger (Eff es) () -&gt; Eff es ()
+forall (e :: Effect) (es :: [Effect]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Utf8Builder -&gt; DynamicLogger (Eff es) ()
+forall (m :: * -&gt; *). Utf8Builder -&gt; DynamicLogger m ()
+</span><a href="Effectful.DynamicLogger.Effect.html#Attention"><span class="hs-identifier hs-var">Attention</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><a href="#local-6989586621679307379"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span></pre></body></html>

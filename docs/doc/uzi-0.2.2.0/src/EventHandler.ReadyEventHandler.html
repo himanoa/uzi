@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module: EventHandler.ReadyEventHandler</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description: Discord&#12364;&#36865;&#20449;&#12375;&#12390;&#12367;&#12427;Ready&#12452;&#12505;&#12531;&#12488;&#12398;&#12452;&#12505;&#12531;&#12488;&#12495;&#12531;&#12489;&#12521;&#12391;&#12377;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Discord&#12364;&#36865;&#20449;&#12375;&#12390;&#12367;&#12427;Ready&#12452;&#12505;&#12531;&#12488;&#12398;&#12452;&#12505;&#12531;&#12488;&#12495;&#12531;&#12489;&#12521;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &#35443;&#32048;: https://discord.com/developers/docs/topics/gateway-events#ready</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">EventHandler.ReadyEventHandler</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Response.html"><span class="hs-identifier">Data.Discord.Response</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Response.ReadyEventResponse.html"><span class="hs-identifier">Data.Discord.Response.ReadyEventResponse</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.BotUser.Effect.html"><span class="hs-identifier">Effectful.BotUser.Effect</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.NonDet</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679309312"><span class="annot"><a href="EventHandler.ReadyEventHandler.html#readyEventHandler"><span class="hs-identifier hs-type">readyEventHandler</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309312"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonDet</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309312"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.BotUser.Effect.html#BotUser"><span class="hs-identifier hs-type">BotUser</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309312"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309312"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-25"></span><span id="readyEventHandler"><span class="annot"><span class="annottext">readyEventHandler :: forall (es :: [Effect]).
+(DynamicLogger :&gt; es, NonDet :&gt; es, BotUser :&gt; es) =&gt;
+Response -&gt; Eff es ()
+</span><a href="EventHandler.ReadyEventHandler.html#readyEventHandler"><span class="hs-identifier hs-var hs-var">readyEventHandler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Ready"><span class="hs-identifier hs-type">Ready</span></a></span><span> </span><span id="local-6989586621679309371"><span class="annot"><span class="annottext">ReadyEventResponse
+</span><a href="#local-6989586621679309371"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Dispatch ReadyEventHandler&quot;</span></span><span>
+</span><span id="line-28"></span><span>    </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">(Utf8Builder -&gt; Eff es ())
+-&gt; (ReadyEventResponse -&gt; Utf8Builder)
+-&gt; ReadyEventResponse
+-&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ReadyEventResponse -&gt; Utf8Builder
+forall a. Show a =&gt; a -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">displayShow</span></span><span> </span><span class="annot"><span class="annottext">(ReadyEventResponse -&gt; Eff es ())
+-&gt; ReadyEventResponse -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ReadyEventResponse
+</span><a href="#local-6989586621679309371"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="annottext">User -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, BotUser :&gt; es) =&gt;
+User -&gt; Eff es ()
+</span><a href="Effectful.BotUser.Effect.html#setBotUser"><span class="hs-identifier hs-var">setBotUser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ReadyEventResponse
+</span><a href="#local-6989586621679309371"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">ReadyEventResponse -&gt; Getting User ReadyEventResponse User -&gt; User
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting User ReadyEventResponse User
+Iso' ReadyEventResponse User
+</span><a href="Data.Discord.Response.ReadyEventResponse.html#user"><span class="hs-identifier hs-var">user</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><span class="annottext">Response
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff es ()
+forall (es :: [Effect]) a. (HasCallStack, NonDet :&gt; es) =&gt; Eff es a
+</span><span class="hs-identifier hs-var">emptyEff</span></span><span>
+</span><span id="line-31"></span></pre></body></html>

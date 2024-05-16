@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module: EventHandler.HelloEventHandler</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description: Discord&#12364;&#36865;&#20449;&#12375;&#12390;&#12367;&#12427;HELLO&#12452;&#12505;&#12531;&#12488;&#12398;&#12452;&#12505;&#12531;&#12488;&#12495;&#12531;&#12489;&#12521;&#12391;&#12377;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Discord&#12364;&#36865;&#20449;&#12375;&#12390;&#12367;&#12427;HELLO&#12452;&#12505;&#12531;&#12488;&#12398;&#12452;&#12505;&#12531;&#12488;&#12495;&#12531;&#12489;&#12521;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &#35443;&#32048;: https://discord.com/developers/docs/topics/gateway-events#hello</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">EventHandler.HelloEventHandler</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.html"><span class="hs-identifier">Data.Discord</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Response.HelloEventResponse.html"><span class="hs-identifier">Data.Discord.Response.HelloEventResponse</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Response.HelloEventResponse.html#interval"><span class="hs-identifier">interval</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html"><span class="hs-identifier">Data.Uzi.HeartbeatInterval</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier">HeartbeatInterval</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#makeHeartbeatInterval"><span class="hs-identifier">makeHeartbeatInterval</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.html"><span class="hs-identifier">Effectful.DiscordApiTokenReader</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier">DiscordApiTokenReader</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#getToken"><span class="hs-identifier">getToken</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.html"><span class="hs-identifier">Effectful.DiscordGateway</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier">DiscordGateway</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#sendEvent"><span class="hs-identifier">sendEvent</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.NonDet</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.State.Static.Shared</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span id="local-6989586621679308715"><span class="annot"><a href="EventHandler.HelloEventHandler.html#helloEventHandler"><span class="hs-identifier hs-type">helloEventHandler</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier hs-type">DiscordGateway</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonDet</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679308715"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-28"></span><span id="helloEventHandler"><span class="annot"><span class="annottext">helloEventHandler :: forall (es :: [Effect]).
+(DiscordGateway :&gt; es, DynamicLogger :&gt; es, NonDet :&gt; es,
+ DiscordApiTokenReader :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Response -&gt; Eff es ()
+</span><a href="EventHandler.HelloEventHandler.html#helloEventHandler"><span class="hs-identifier hs-var hs-var">helloEventHandler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Hello"><span class="hs-identifier hs-type">Hello</span></a></span><span> </span><span id="local-6989586621679308807"><span class="annot"><span class="annottext">HelloEventResponse
+</span><a href="#local-6989586621679308807"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308808"><span class="annot"><span class="annottext">interval' :: Int
+</span><a href="#local-6989586621679308808"><span class="hs-identifier hs-var hs-var">interval'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HelloEventResponse
+</span><a href="#local-6989586621679308807"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">HelloEventResponse -&gt; Getting Int HelloEventResponse Int -&gt; Int
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting Int HelloEventResponse Int
+Iso' HelloEventResponse Int
+</span><a href="Data.Discord.Response.HelloEventResponse.html#interval"><span class="hs-identifier hs-var">interval</span></a></span><span>
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679308810"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679308810"><span class="hs-identifier hs-var">discordApiToken</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es Text
+forall (es :: [Effect]).
+(DiscordApiTokenReader :&gt; es) =&gt;
+Eff es Text
+</span><a href="Effectful.DiscordApiTokenReader.Effect.html#getToken"><span class="hs-identifier hs-var">getToken</span></a></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="annottext">Request -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DiscordGateway :&gt; es) =&gt;
+Request -&gt; Eff es ()
+</span><a href="Effectful.DiscordGateway.Effect.html#sendEvent"><span class="hs-identifier hs-var">sendEvent</span></a></span><span> </span><span class="annot"><span class="annottext">(Request -&gt; Eff es ()) -&gt; (Text -&gt; Request) -&gt; Text -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IdentifyRequest -&gt; Request
+</span><a href="Data.Discord.Request.Internal.html#Identify"><span class="hs-identifier hs-var">Identify</span></a></span><span> </span><span class="annot"><span class="annottext">(IdentifyRequest -&gt; Request)
+-&gt; (Text -&gt; IdentifyRequest) -&gt; Text -&gt; Request
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; IdentifyRequest
+</span><a href="Data.Discord.Request.IdentifyRequest.html#defaultIdentifyRequest"><span class="hs-identifier hs-var">defaultIdentifyRequest</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Eff es ()) -&gt; Text -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679308810"><span class="hs-identifier hs-var">discordApiToken</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Sent HelloEvetnt&quot;</span></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Fork heartbeart send task&quot;</span></span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; Eff es () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Maybe HeartbeatInterval -&gt; Eff es ()
+forall s (es :: [Effect]). (State s :&gt; es) =&gt; s -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">put</span></span><span> </span><span class="annot"><span class="annottext">(Maybe HeartbeatInterval -&gt; Eff es ())
+-&gt; (Int -&gt; Maybe HeartbeatInterval) -&gt; Int -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">HeartbeatInterval -&gt; Maybe HeartbeatInterval
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(HeartbeatInterval -&gt; Maybe HeartbeatInterval)
+-&gt; (Int -&gt; HeartbeatInterval) -&gt; Int -&gt; Maybe HeartbeatInterval
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; HeartbeatInterval
+</span><a href="Data.Uzi.HeartbeatInterval.html#makeHeartbeatInterval"><span class="hs-identifier hs-var">makeHeartbeatInterval</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Eff es ()) -&gt; Int -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679308808"><span class="hs-identifier hs-var">interval'</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Put heartbeat interval &quot;</span></span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Utf8Builder -&gt; Utf8Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Utf8Builder
+forall a. Show a =&gt; a -&gt; Utf8Builder
+</span><span class="hs-identifier hs-var">RIO.displayShow</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679308808"><span class="hs-identifier hs-var">interval'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="annottext">Response
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff es ()
+forall (es :: [Effect]) a. (HasCallStack, NonDet :&gt; es) =&gt; Eff es a
+</span><span class="hs-identifier hs-var">emptyEff</span></span><span>
+</span><span id="line-38"></span></pre></body></html>

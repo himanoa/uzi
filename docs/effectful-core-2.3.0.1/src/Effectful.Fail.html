@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Provider of the 'MonadFail' instance for 'Eff'.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Fail</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier">Fail</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Fail.html#runFail"><span class="hs-identifier">runFail</span></a></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Fail.html#runFailIO"><span class="hs-identifier">runFailIO</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Dynamic.html"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Error.Static.html"><span class="hs-identifier">Effectful.Error.Static</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html"><span class="hs-identifier">Effectful.Internal.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier">Fail</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="annot"><span class="hs-comment">-- | Run the 'Fail' effect via 'Error'.</span></span><span>
+</span><span id="line-17"></span><span id="local-6989586621679077323"><span id="local-6989586621679077324"><span class="annot"><a href="Effectful.Fail.html#runFail"><span class="hs-identifier hs-type">runFail</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier hs-type">Fail</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077323"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077324"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077323"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="#local-6989586621679077324"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-18"></span><span id="runFail"><span class="annot"><span class="annottext">runFail :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (Fail : es) a -&gt; Eff es (Either String a)
+</span><a href="Effectful.Fail.html#runFail"><span class="hs-identifier hs-var hs-var">runFail</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Eff (Error String : es) a -&gt; Eff es (Either String a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, Fail :&gt; localEs) =&gt;
+    LocalEnv localEs (Error String : es)
+    -&gt; Fail (Eff localEs) a -&gt; Eff (Error String : es) a)
+-&gt; Eff (Fail : es) a
+-&gt; Eff es (Either String a)
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) b.
+(DispatchOf e ~ 'Dynamic) =&gt;
+(Eff handlerEs a -&gt; Eff es b)
+-&gt; EffectHandler e handlerEs -&gt; Eff (e : es) a -&gt; Eff es b
+</span><a href="Effectful.Dispatch.Dynamic.html#reinterpret"><span class="hs-identifier hs-var">reinterpret</span></a></span><span> </span><span class="annot"><span class="annottext">Eff (Error String : es) a -&gt; Eff es (Either String a)
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (Error e : es) a -&gt; Eff es (Either e a)
+</span><a href="Effectful.Error.Static.html#runErrorNoCallStack"><span class="hs-identifier hs-var">runErrorNoCallStack</span></a></span><span> </span><span class="annot"><span class="annottext">((forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+  (HasCallStack, Fail :&gt; localEs) =&gt;
+  LocalEnv localEs (Error String : es)
+  -&gt; Fail (Eff localEs) a -&gt; Eff (Error String : es) a)
+ -&gt; Eff (Fail : es) a -&gt; Eff es (Either String a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, Fail :&gt; localEs) =&gt;
+    LocalEnv localEs (Error String : es)
+    -&gt; Fail (Eff localEs) a -&gt; Eff (Error String : es) a)
+-&gt; Eff (Fail : es) a
+-&gt; Eff es (Either String a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs (Error String : es)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-19"></span><span>  </span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier hs-type">Fail</span></a></span><span> </span><span id="local-6989586621679077388"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077388"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Eff (Error String : es) a
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, Error e :&gt; es) =&gt;
+e -&gt; Eff es a
+</span><a href="Effectful.Error.Static.html#throwError"><span class="hs-identifier hs-var">throwError</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077388"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Run the 'Fail' effect via the 'MonadFail' instance for 'IO'.</span></span><span>
+</span><span id="line-22"></span><span id="local-6989586621679077360"><span id="local-6989586621679077361"><span class="annot"><a href="Effectful.Fail.html#runFailIO"><span class="hs-identifier hs-type">runFailIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#IOE"><span class="hs-identifier hs-type">IOE</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier hs-type">Fail</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077361"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077361"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-23"></span><span id="runFailIO"><span class="annot"><span class="annottext">runFailIO :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(IOE :&gt; es) =&gt;
+Eff (Fail : es) a -&gt; Eff es a
+</span><a href="Effectful.Fail.html#runFailIO"><span class="hs-identifier hs-var hs-var">runFailIO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler Fail es -&gt; Eff (Fail : es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Dynamic.html#interpret"><span class="hs-identifier hs-var">interpret</span></a></span><span> </span><span class="annot"><span class="annottext">(EffectHandler Fail es -&gt; Eff (Fail : es) a -&gt; Eff es a)
+-&gt; EffectHandler Fail es -&gt; Eff (Fail : es) a -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><a href="Effectful.Internal.Monad.html#Fail"><span class="hs-identifier hs-type">Fail</span></a></span><span> </span><span id="local-6989586621679077400"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077400"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a. IO a -&gt; Eff es a
+forall (m :: Type -&gt; Type) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a) -&gt; IO a -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO a
+forall a. String -&gt; IO a
+forall (m :: Type -&gt; Type) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077400"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-25"></span></pre></body></html>

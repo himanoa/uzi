@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Introduction</span></span><span>
+</span><span id="line-3"></span><span>    </span><span class="annot"><span class="hs-comment">-- $intro</span></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Integration with existing libraries</span></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- $integration</span></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><span class="hs-comment">-- *** Transformed monads</span></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- $transformer</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><span class="hs-comment">-- *** Concrete monads</span></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><span class="hs-comment">-- **** IO</span></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><span class="hs-comment">-- $concrete_io</span></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="hs-comment">-- **** Other</span></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><span class="hs-comment">-- $concrete_other</span></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="hs-comment">-- *** Polymorphic monads</span></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- $poly</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><span class="hs-comment">-- * The 'Eff' monad</span></span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier">Eff</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Effect constraints</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier">Effect</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Dispatch"><span class="hs-identifier">Dispatch</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#DispatchOf"><span class="hs-identifier">DispatchOf</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator">(:&gt;)</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E%3E"><span class="hs-operator">(:&gt;&gt;)</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Running the 'Eff' monad</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Pure computations</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#runPureEff"><span class="hs-identifier">runPureEff</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Computations with side effects</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#runEff"><span class="hs-identifier">runEff</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#IOE"><span class="hs-identifier">IOE</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Unlifting</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Unlift.html#UnliftStrategy"><span class="hs-identifier">UnliftStrategy</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Unlift.html#Persistence"><span class="hs-identifier">Persistence</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Unlift.html#Limit"><span class="hs-identifier">Limit</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#unliftStrategy"><span class="hs-identifier">unliftStrategy</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#withUnliftStrategy"><span class="hs-identifier">withUnliftStrategy</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#withSeqEffToIO"><span class="hs-identifier">withSeqEffToIO</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#withEffToIO"><span class="hs-identifier">withEffToIO</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#withConcEffToIO"><span class="hs-identifier">withConcEffToIO</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Lifting</span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#raise"><span class="hs-identifier">raise</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#raiseWith"><span class="hs-identifier">raiseWith</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#subsume"><span class="hs-identifier">subsume</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#inject"><span class="hs-identifier">inject</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Subset"><span class="hs-identifier">Subset</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Re-exports</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">MonadIO</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">MonadUnliftIO</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Unlift</span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html"><span class="hs-identifier">Effectful.Internal.Effect</span></a></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html"><span class="hs-identifier">Effectful.Internal.Env</span></a></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html"><span class="hs-identifier">Effectful.Internal.Monad</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- $intro</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- Haskell is one of the few programming languages that distinguishes between</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- pure functions and functions that might perform side effects. For example, a</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- function</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- f :: 'Int' -&gt; 'String'</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- can't perform side effects at all, but a function</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- f :: 'Int' -&gt; 'IO' 'String'</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- can perform any side effect. This &quot;all or nothing&quot; approach isn't very</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- satisfactory though, because the vast majority of time we would like to</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- signify that a function can perform /some/ side effects, e.g. only be able to</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- log messages.</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- This library provides support for expressing exactly that with its 'Eff'</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- monad:</span><span>
+</span><span id="line-93"></span><span class="hs-comment">--</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- f :: Log ':&gt;' es =&gt; 'Int' -&gt; 'Eff' es 'String'</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-97"></span><span class="hs-comment">--</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- It implements support for extensible effects with both dynamic and static</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- dispatch. For more information about each type consult the documentation in</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- &quot;Effectful.Dispatch.Dynamic&quot; and &quot;Effectful.Dispatch.Static&quot;.</span><span>
+</span><span id="line-101"></span><span class="hs-comment">--</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- The library provides:</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- - The 'Eff' monad that tracks effects at the type level. This is going to be</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--   the main monad of your application.</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- - A set of predefined, basic effects such as t'Effectful.Error.Static.Error',</span><span>
+</span><span id="line-108"></span><span class="hs-comment">--   t'Effectful.Reader.Static.Reader', t'Effectful.State.Static.Local.State' and</span><span>
+</span><span id="line-109"></span><span class="hs-comment">--   t'Effectful.Writer.Static.Local.Writer'.</span><span>
+</span><span id="line-110"></span><span class="hs-comment">--</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- - Utilities for defining new effects and interpreting them, possibly in terms</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--   of already existing ones.</span><span>
+</span><span id="line-113"></span><span class="hs-comment">--</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- While basic effects can be used out of the box, in general it's recommended</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- to create your own that serve a more specific purpose.</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- $integration</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- Integration with most of existing libraries and frameworks can be done quite</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- easily. The main difference in how that looks like depends on the way a</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- library operates in a monadic context.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- There are three main groups a library might fall into. It either operates:</span><span>
+</span><span id="line-125"></span><span class="hs-comment">--</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- 1) In a monad of your application transformed by a library specific monad</span><span>
+</span><span id="line-127"></span><span class="hs-comment">--    transformer.</span><span>
+</span><span id="line-128"></span><span class="hs-comment">--</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- 2) In its own, concrete monad, which is usually 'IO' or a couple of monad</span><span>
+</span><span id="line-130"></span><span class="hs-comment">--    transformers on top of 'IO'.</span><span>
+</span><span id="line-131"></span><span class="hs-comment">--</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- 3) In a polymorphic monad, which is constrained by a type class that</span><span>
+</span><span id="line-133"></span><span class="hs-comment">--    implements core operations of a library.</span><span>
+</span><span id="line-134"></span><span class="hs-comment">--</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- Each case needs a slightly different approach to integrate with the 'Eff'</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- monad.</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- $transformer</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- These are libraries that provide a custom transformer for the main monad of</span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- your application and their operations make use of it for their</span><span>
+</span><span id="line-142"></span><span class="hs-comment">-- operations. Examples include @InputT@ from the</span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- [haskeline](https://hackage.haskell.org/package/haskeline) package or</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- @ConduitT@ from the [conduit](https://hackage.haskell.org/package/conduit)</span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- package.</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- These libraries can trivially be used with the 'Eff' monad since it provides</span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- typical instances that these libraries require the underlying monad to have,</span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- such as t'Control.Monad.Catch.MonadMask' or 'MonadUnliftIO'.</span><span>
+</span><span id="line-150"></span><span class="hs-comment">--</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- In case the 'Eff' monad doesn't provide a specific instance out of the box,</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- it can be supplied via an effect. As an example see how the instance of</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- @MonadResource@ for 'Eff' is implemented in the</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- [resourcet-effectful](https://hackage.haskell.org/package/resourcet-effectful)</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- package.</span><span>
+</span><span id="line-156"></span><span class="hs-comment">--</span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- $concrete_io</span><span>
+</span><span id="line-159"></span><span class="hs-comment">--</span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- If a library operates in 'IO', there are a couple of ways to integrate it.</span><span>
+</span><span id="line-161"></span><span class="hs-comment">--</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- The easiest way is to use its functions selectively in the 'Eff' monad with</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- the help of 'liftIO' or 'withEffToIO'. However, this is not particularly</span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- robust, since it vastly broadens the scope in which the 'IOE' effect is</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- needed (not to mention that explicit lifting is annoying).</span><span>
+</span><span id="line-166"></span><span class="hs-comment">--</span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- A somewhat better approach is to create a dummy static effect with</span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- lightweight wrappers of the library functions. As an example have a look at</span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- the</span><span>
+</span><span id="line-170"></span><span class="hs-comment">-- [@Effectful.Concurrent.Async@](https://hackage.haskell.org/package/effectful/docs/Effectful-Concurrent-Async.html)</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- module from the [effectful](https://hackage.haskell.org/package/effectful)</span><span>
+</span><span id="line-172"></span><span class="hs-comment">-- package that wraps the API of the</span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- [async](https://hackage.haskell.org/package/async) package. Unfortunately,</span><span>
+</span><span id="line-174"></span><span class="hs-comment">-- this requires the amount of work proportional to the size of the library and</span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- might not be the best option, especially if you only need to make use of a</span><span>
+</span><span id="line-176"></span><span class="hs-comment">-- tiny portion of the API.</span><span>
+</span><span id="line-177"></span><span class="hs-comment">--</span><span>
+</span><span id="line-178"></span><span class="hs-comment">-- Even better (though sometimes hard to do in practice) way is to consider,</span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- what do you need the library for and then create a custom effect with high</span><span>
+</span><span id="line-180"></span><span class="hs-comment">-- level operations that the library in question will help us implement. The</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- advantage of this approach is that we're hiding implementation details from</span><span>
+</span><span id="line-182"></span><span class="hs-comment">-- the so-called &quot;business logic&quot; of our application and make it possible to</span><span>
+</span><span id="line-183"></span><span class="hs-comment">-- easily swap them in different environments or during future refactoring.</span><span>
+</span><span id="line-184"></span><span class="hs-comment">--</span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="hs-comment">-- $concrete_other</span><span>
+</span><span id="line-187"></span><span class="hs-comment">--</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- Some libraries operate in a transformer stack over 'IO' or have its own</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- concrete monad that's a newtype over 'IO', e.g. @Handler@ from the</span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- [servant-server](https://hackage.haskell.org/package/servant-server) package.</span><span>
+</span><span id="line-191"></span><span class="hs-comment">--</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- In such case it's best to mirror the monad in question by the 'Eff' monad</span><span>
+</span><span id="line-193"></span><span class="hs-comment">-- with appropriate effects (as most popular monad transformers have [subtle</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- issues](https://github.com/haskell-effectful/effectful/blob/master/transformers.md)),</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- use it as soon as possible, then at the end feed the final state to the monad</span><span>
+</span><span id="line-196"></span><span class="hs-comment">-- of the library so it proceeds as if nothing unusual happened.</span><span>
+</span><span id="line-197"></span><span class="hs-comment">--</span><span>
+</span><span id="line-198"></span><span class="hs-comment">-- As an example, consider the following monad:</span><span>
+</span><span id="line-199"></span><span class="hs-comment">--</span><span>
+</span><span id="line-200"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Control.Monad.State as T</span><span>
+</span><span id="line-201"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Control.Monad.Except as T</span><span>
+</span><span id="line-202"></span><span class="hs-comment">--</span><span>
+</span><span id="line-203"></span><span class="hs-comment">-- &gt;&gt;&gt; data HandlerState</span><span>
+</span><span id="line-204"></span><span class="hs-comment">-- &gt;&gt;&gt; data HandlerError</span><span>
+</span><span id="line-205"></span><span class="hs-comment">--</span><span>
+</span><span id="line-206"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-207"></span><span class="hs-comment">--   newtype Handler a = Handler (T.ExceptT HandlerError (T.StateT HandlerState IO) a)</span><span>
+</span><span id="line-208"></span><span class="hs-comment">--     deriving ( Applicative, Functor, Monad, MonadIO</span><span>
+</span><span id="line-209"></span><span class="hs-comment">--              , T.MonadState HandlerState, T.MonadError HandlerError</span><span>
+</span><span id="line-210"></span><span class="hs-comment">--              )</span><span>
+</span><span id="line-211"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-212"></span><span class="hs-comment">--</span><span>
+</span><span id="line-213"></span><span class="hs-comment">-- This is how you can execute 'Eff' actions in the @Handler@ monad:</span><span>
+</span><span id="line-214"></span><span class="hs-comment">--</span><span>
+</span><span id="line-215"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.Error.Static</span><span>
+</span><span id="line-216"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.State.Static.Local</span><span>
+</span><span id="line-217"></span><span class="hs-comment">--</span><span>
+</span><span id="line-218"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-219"></span><span class="hs-comment">--   effToHandler :: Eff [Error HandlerError, State HandlerState, IOE] a -&gt; Handler a</span><span>
+</span><span id="line-220"></span><span class="hs-comment">--   effToHandler m = do</span><span>
+</span><span id="line-221"></span><span class="hs-comment">--     -- Retrieve the current state of the Handler.</span><span>
+</span><span id="line-222"></span><span class="hs-comment">--     s &lt;- T.get</span><span>
+</span><span id="line-223"></span><span class="hs-comment">--     -- Run the Eff monad with effects mirroring the capabilities of @Handler@.</span><span>
+</span><span id="line-224"></span><span class="hs-comment">--     (er, s') &lt;- liftIO . runEff . runState s . runErrorNoCallStack @HandlerError $ m</span><span>
+</span><span id="line-225"></span><span class="hs-comment">--     -- Update the state of the Handler and throw an error if appropriate.</span><span>
+</span><span id="line-226"></span><span class="hs-comment">--     T.put s'</span><span>
+</span><span id="line-227"></span><span class="hs-comment">--     either T.throwError pure er</span><span>
+</span><span id="line-228"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-229"></span><span class="hs-comment">--</span><span>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span class="hs-comment">-- $poly</span><span>
+</span><span id="line-232"></span><span class="hs-comment">--</span><span>
+</span><span id="line-233"></span><span class="hs-comment">-- Libraries working in a polymorphic monad use @mtl@ style effects. Details</span><span>
+</span><span id="line-234"></span><span class="hs-comment">-- about their integration with the 'Eff' monad require familiarity with</span><span>
+</span><span id="line-235"></span><span class="hs-comment">-- dynamically dispatched effects and thus are available in the</span><span>
+</span><span id="line-236"></span><span class="hs-comment">-- &quot;Effectful.Dispatch.Dynamic#integration&quot; module.</span><span>
+</span><span id="line-237"></span><span class="hs-comment">--</span><span>
+</span><span id="line-238"></span></pre></body></html>

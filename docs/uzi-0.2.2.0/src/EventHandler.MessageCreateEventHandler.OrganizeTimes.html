@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module: EventHandler.MessageCreateEventHandler.OrganizeTimes</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description : Discord&#12391;'times channel'&#12398;&#25972;&#29702;&#12434;&#34892;&#12358;&#12452;&#12505;&#12531;&#12488;&#12495;&#12531;&#12489;&#12521;&#12540;&#12290;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- &#12371;&#12398;&#12514;&#12472;&#12517;&#12540;&#12523;&#12395;&#12399;&#12289;Discord&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;'message create'&#12452;&#12505;&#12531;&#12488;&#12395;&#23550;&#24540;&#12375;&#12289;&#29305;&#23450;&#12398;&#12467;&#12510;&#12531;&#12489;('organize-times')&#12364;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- &#36865;&#20449;&#12373;&#12428;&#12383;&#38555;&#12395;times channel&#12434;&#25972;&#29702;&#12377;&#12427;&#20966;&#29702;&#12364;&#21547;&#12414;&#12428;&#12390;&#12356;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">EventHandler.MessageCreateEventHandler.OrganizeTimes</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.html"><span class="hs-identifier">Data.Discord</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Content.html"><span class="hs-identifier">Data.Discord.Content</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Response.InteractionCreateEventResponse.html"><span class="hs-identifier">Data.Discord.Response.InteractionCreateEventResponse</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">IC</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html"><span class="hs-identifier">Data.Uzi.OrganizeTimes</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordChannel.html"><span class="hs-identifier">Effectful.DiscordChannel</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Error.Dynamic</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.NonDet</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | 'MessageCreate'&#12452;&#12505;&#12531;&#12488;&#12395;&#21453;&#24540;&#12375;&#12289;&#29305;&#23450;&#12398;&#12513;&#12483;&#12475;&#12540;&#12472;('organize-times')&#12434;&#21463;&#12369;&#21462;&#12387;&#12383;&#38555;&#12395;times channel&#12398;&#25972;&#29702;&#12434;&#34892;&#12356;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- &#25104;&#21151;&#12377;&#12427;&#12392;&#25104;&#21151;&#12398;&#12513;&#12483;&#12475;&#12540;&#12472;&#12434;&#12289;&#22833;&#25943;&#12377;&#12427;&#12392;&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12434;&#36865;&#20449;&#12375;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-29"></span><span class="hs-comment">--</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- &#12371;&#12398;&#38306;&#25968;&#12399;'MessageCreate'&#12452;&#12505;&#12531;&#12488;&#12434;&#20966;&#29702;&#12375;&#12289;&#21463;&#12369;&#21462;&#12387;&#12383;&#12513;&#12483;&#12475;&#12540;&#12472;&#12364;'organize-times'&#12363;&#12393;&#12358;&#12363;&#12434;&#30906;&#35469;&#12375;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- &#26465;&#20214;&#12434;&#28288;&#12383;&#12377;&#22580;&#21512;&#12289;&#25972;&#29702;&#12503;&#12525;&#12475;&#12473;&#12434;&#38283;&#22987;&#12375;&#12289;&#25104;&#21151;&#12414;&#12383;&#12399;&#22833;&#25943;&#12398;&#12525;&#12464;&#12434;&#35352;&#37682;&#12375;&#12289;&#23550;&#24540;&#12377;&#12427;&#12513;&#12483;&#12475;&#12540;&#12472;&#12434;&#12481;&#12515;&#12531;&#12493;&#12523;&#12395;&#36865;&#20449;&#12375;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &#25972;&#29702;&#12503;&#12525;&#12475;&#12473;&#20013;&#12395;&#30330;&#29983;&#12375;&#12383;&#12456;&#12521;&#12540;&#12399;&#36969;&#20999;&#12395;&#12495;&#12531;&#12489;&#12522;&#12531;&#12464;&#12373;&#12428;&#12289;&#12456;&#12521;&#12540;&#12513;&#12483;&#12475;&#12540;&#12472;&#12364;&#36865;&#20449;&#12373;&#12428;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679309050"><span class="annot"><a href="EventHandler.MessageCreateEventHandler.OrganizeTimes.html#organizeTimesHandler"><span class="hs-identifier hs-type">organizeTimesHandler</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309050"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonDet</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309050"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309050"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309050"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-34"></span><span id="organizeTimesHandler"><span class="annot"><span class="annottext">organizeTimesHandler :: forall (es :: [Effect]).
+(DiscordChannel :&gt; es, NonDet :&gt; es, DynamicLogger :&gt; es) =&gt;
+Response -&gt; Eff es ()
+</span><a href="EventHandler.MessageCreateEventHandler.OrganizeTimes.html#organizeTimesHandler"><span class="hs-identifier hs-var hs-var">organizeTimesHandler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><a href="Data.Discord.Response.Internal.html#InteractionCreate"><span class="hs-identifier hs-type">InteractionCreate</span></a></span><span> </span><span id="local-6989586621679309159"><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span><span> </span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+-&gt; Getting Text InteractionCreateEventResponse Text -&gt; Text
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting Text InteractionCreateEventResponse Text
+Lens' InteractionCreateEventResponse Text
+</span><a href="Data.Discord.Response.InteractionCreateEventResponse.html#slashCommandName"><span class="hs-identifier hs-var">IC.slashCommandName</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;organize-times&quot;</span></span><span>
+</span><span id="line-37"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-38"></span><span>        </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;organizeTimesHandler dispatched&quot;</span></span><span>
+</span><span id="line-39"></span><span>        </span><span class="annot"><span class="annottext">SendMessageParams -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DiscordChannel :&gt; es) =&gt;
+SendMessageParams -&gt; Eff es ()
+</span><a href="Effectful.DiscordChannel.Effect.html#sendMessage"><span class="hs-identifier hs-var">sendMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; Content -&gt; SendMessageParams
+</span><a href="Effectful.DiscordChannel.Effect.html#makeMessage"><span class="hs-identifier hs-var">makeMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span><span> </span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+-&gt; Getting ChannelId InteractionCreateEventResponse ChannelId
+-&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId InteractionCreateEventResponse ChannelId
+Lens' InteractionCreateEventResponse ChannelId
+</span><a href="Data.Discord.Response.InteractionCreateEventResponse.html#channelId"><span class="hs-identifier hs-var">IC.channelId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Content
+</span><a href="Data.Discord.Content.html#makeUnsafeContent"><span class="hs-identifier hs-var">makeUnsafeContent</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;times channel&#12398;&#25972;&#29702;&#12434;&#38283;&#22987;&#12375;&#12383;&#12424;&#65281;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>        </span><span id="local-6989586621679309167"><span class="annot"><span class="annottext">Either (CallStack, OrganizeTimesError) ()
+</span><a href="#local-6989586621679309167"><span class="hs-identifier hs-var">organizeTimesEither</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall e (es :: [Effect]) a.
+Eff (Error e : es) a -&gt; Eff es (Either (CallStack, e) a)
+</span><span class="hs-identifier hs-var">runError</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier hs-type">OrganizeTimesError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">GuildId -&gt; Eff (Error OrganizeTimesError : es) ()
+forall (es :: [Effect]).
+(DiscordChannel :&gt; es, Error OrganizeTimesError :&gt; es,
+ DynamicLogger :&gt; es) =&gt;
+GuildId -&gt; Eff es ()
+</span><a href="Data.Uzi.OrganizeTimes.html#organizeTimes"><span class="hs-identifier hs-var">organizeTimes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span><span> </span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+-&gt; Getting GuildId InteractionCreateEventResponse GuildId
+-&gt; GuildId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting GuildId InteractionCreateEventResponse GuildId
+Lens' InteractionCreateEventResponse GuildId
+</span><a href="Data.Discord.Response.InteractionCreateEventResponse.html#guildId"><span class="hs-identifier hs-var">IC.guildId</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Either (CallStack, OrganizeTimesError) ()
+</span><a href="#local-6989586621679309167"><span class="hs-identifier hs-var">organizeTimesEither</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-42"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-43"></span><span>            </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Organized times&quot;</span></span><span>
+</span><span id="line-44"></span><span>            </span><span class="annot"><span class="annottext">SendMessageParams -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DiscordChannel :&gt; es) =&gt;
+SendMessageParams -&gt; Eff es ()
+</span><a href="Effectful.DiscordChannel.Effect.html#sendMessage"><span class="hs-identifier hs-var">sendMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; Content -&gt; SendMessageParams
+</span><a href="Effectful.DiscordChannel.Effect.html#makeMessage"><span class="hs-identifier hs-var">makeMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span><span> </span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+-&gt; Getting ChannelId InteractionCreateEventResponse ChannelId
+-&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId InteractionCreateEventResponse ChannelId
+Lens' InteractionCreateEventResponse ChannelId
+</span><a href="Data.Discord.Response.InteractionCreateEventResponse.html#channelId"><span class="hs-identifier hs-var">IC.channelId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Content
+</span><a href="Data.Discord.Content.html#makeUnsafeContent"><span class="hs-identifier hs-var">makeUnsafeContent</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;times channel&#12434;&#25972;&#29702;&#12375;&#12383;&#12424;&#65281;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CallStack
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679309171"><span class="annot"><span class="annottext">OrganizeTimesError
+</span><a href="#local-6989586621679309171"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-46"></span><span>            </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#attention"><span class="hs-identifier hs-var">attention</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Failed organize times&quot;</span></span><span>
+</span><span id="line-47"></span><span>            </span><span class="annot"><span class="annottext">SendMessageParams -&gt; Eff es ()
+forall (es :: [Effect]).
+(HasCallStack, DiscordChannel :&gt; es) =&gt;
+SendMessageParams -&gt; Eff es ()
+</span><a href="Effectful.DiscordChannel.Effect.html#sendMessage"><span class="hs-identifier hs-var">sendMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; Content -&gt; SendMessageParams
+</span><a href="Effectful.DiscordChannel.Effect.html#makeMessage"><span class="hs-identifier hs-var">makeMessage</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+</span><a href="#local-6989586621679309159"><span class="hs-identifier hs-var">event</span></a></span><span> </span><span class="annot"><span class="annottext">InteractionCreateEventResponse
+-&gt; Getting ChannelId InteractionCreateEventResponse ChannelId
+-&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId InteractionCreateEventResponse ChannelId
+Lens' InteractionCreateEventResponse ChannelId
+</span><a href="Data.Discord.Response.InteractionCreateEventResponse.html#channelId"><span class="hs-identifier hs-var">IC.channelId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Content
+</span><a href="Data.Discord.Content.html#makeUnsafeContent"><span class="hs-identifier hs-var">makeUnsafeContent</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;times channel&#12398;&#25972;&#29702;&#12395;&#22833;&#25943;&#12375;&#12383;&#12424;&#65281; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Text)
+-&gt; (OrganizeTimesError -&gt; String) -&gt; OrganizeTimesError -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">OrganizeTimesError -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">(OrganizeTimesError -&gt; Text) -&gt; OrganizeTimesError -&gt; Text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">OrganizeTimesError
+</span><a href="#local-6989586621679309171"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Eff es ()
+forall (es :: [Effect]) a. (HasCallStack, NonDet :&gt; es) =&gt; Eff es a
+</span><span class="hs-identifier hs-var">emptyEff</span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">Response
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff es ()
+forall (es :: [Effect]) a. (HasCallStack, NonDet :&gt; es) =&gt; Eff es a
+</span><span class="hs-identifier hs-var">emptyEff</span></span><span>
+</span><span id="line-50"></span></pre></body></html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679070734"><span id="local-6989586621679070735"><span id="local-6989586621679070736"><span id="local-6989586621679070737"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="annot"><span class="hs-comment">-- |Type aliases used throughout the crypto-api modules.</span></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Crypto.Types</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>      </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">X</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Typeable</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- |Initilization Vectors for BlockCipher implementations (IV k) are</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- used for various modes and guarrenteed to be blockSize bits long.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- The common ways to obtain an IV are to generate one ('getIV' or</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- 'getIVIO') or to use one provided with the ciphertext (using the</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- 'Serialize' instance of IV).</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- 'zeroIV' also exists and is of particular use for starting 'ctr'</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- mode with a fresh key.</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="IV"><span class="annot"><a href="Crypto.Types.html#IV"><span class="hs-identifier hs-var">IV</span></a></span></span><span> </span><span id="local-6989586621679070649"><span class="annot"><a href="#local-6989586621679070649"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IV"><span class="annot"><a href="Crypto.Types.html#IV"><span class="hs-identifier hs-var">IV</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="initializationVector"><span class="annot"><span class="annottext">forall k. IV k -&gt; ByteString
+</span><a href="Crypto.Types.html#initializationVector"><span class="hs-identifier hs-var hs-var">initializationVector</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span>
+</span><span id="line-20"></span><span>               </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679070741"><span id="local-6989586621679070745"><span class="annot"><span class="annottext">IV k -&gt; IV k -&gt; Bool
+(IV k -&gt; IV k -&gt; Bool) -&gt; (IV k -&gt; IV k -&gt; Bool) -&gt; Eq (IV k)
+forall k. IV k -&gt; IV k -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall k. IV k -&gt; IV k -&gt; Bool
+== :: IV k -&gt; IV k -&gt; Bool
+$c/= :: forall k. IV k -&gt; IV k -&gt; Bool
+/= :: IV k -&gt; IV k -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070752"><span id="local-6989586621679070756"><span id="local-6989586621679070759"><span id="local-6989586621679070763"><span id="local-6989586621679070766"><span id="local-6989586621679070769"><span id="local-6989586621679070772"><span class="annot"><span class="annottext">Eq (IV k)
+Eq (IV k) =&gt;
+(IV k -&gt; IV k -&gt; Ordering)
+-&gt; (IV k -&gt; IV k -&gt; Bool)
+-&gt; (IV k -&gt; IV k -&gt; Bool)
+-&gt; (IV k -&gt; IV k -&gt; Bool)
+-&gt; (IV k -&gt; IV k -&gt; Bool)
+-&gt; (IV k -&gt; IV k -&gt; IV k)
+-&gt; (IV k -&gt; IV k -&gt; IV k)
+-&gt; Ord (IV k)
+IV k -&gt; IV k -&gt; Bool
+IV k -&gt; IV k -&gt; Ordering
+IV k -&gt; IV k -&gt; IV k
+forall k. Eq (IV k)
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k. IV k -&gt; IV k -&gt; Bool
+forall k. IV k -&gt; IV k -&gt; Ordering
+forall k. IV k -&gt; IV k -&gt; IV k
+$ccompare :: forall k. IV k -&gt; IV k -&gt; Ordering
+compare :: IV k -&gt; IV k -&gt; Ordering
+$c&lt; :: forall k. IV k -&gt; IV k -&gt; Bool
+&lt; :: IV k -&gt; IV k -&gt; Bool
+$c&lt;= :: forall k. IV k -&gt; IV k -&gt; Bool
+&lt;= :: IV k -&gt; IV k -&gt; Bool
+$c&gt; :: forall k. IV k -&gt; IV k -&gt; Bool
+&gt; :: IV k -&gt; IV k -&gt; Bool
+$c&gt;= :: forall k. IV k -&gt; IV k -&gt; Bool
+&gt;= :: IV k -&gt; IV k -&gt; Bool
+$cmax :: forall k. IV k -&gt; IV k -&gt; IV k
+max :: IV k -&gt; IV k -&gt; IV k
+$cmin :: forall k. IV k -&gt; IV k -&gt; IV k
+min :: IV k -&gt; IV k -&gt; IV k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070776"><span id="local-6989586621679070782"><span id="local-6989586621679070786"><span class="annot"><span class="annottext">Int -&gt; IV k -&gt; ShowS
+[IV k] -&gt; ShowS
+IV k -&gt; String
+(Int -&gt; IV k -&gt; ShowS)
+-&gt; (IV k -&gt; String) -&gt; ([IV k] -&gt; ShowS) -&gt; Show (IV k)
+forall k. Int -&gt; IV k -&gt; ShowS
+forall k. [IV k] -&gt; ShowS
+forall k. IV k -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall k. Int -&gt; IV k -&gt; ShowS
+showsPrec :: Int -&gt; IV k -&gt; ShowS
+$cshow :: forall k. IV k -&gt; String
+show :: IV k -&gt; String
+$cshowList :: forall k. [IV k] -&gt; ShowS
+showList :: [IV k] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- |The length of a field (usually a ByteString) in bits</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">type</span><span> </span><span id="BitLength"><span class="annot"><a href="Crypto.Types.html#BitLength"><span class="hs-identifier hs-var">BitLength</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><span class="hs-comment">-- |The length fo a field in bytes.</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">type</span><span> </span><span id="ByteLength"><span class="annot"><a href="Crypto.Types.html#ByteLength"><span class="hs-identifier hs-var">ByteLength</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="BlockCipherError"><span class="annot"><a href="Crypto.Types.html#BlockCipherError"><span class="hs-identifier hs-var">BlockCipherError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="InputTooLong"><span class="annot"><a href="Crypto.Types.html#InputTooLong"><span class="hs-identifier hs-var">InputTooLong</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-30"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="AuthenticationFailed"><span class="annot"><a href="Crypto.Types.html#AuthenticationFailed"><span class="hs-identifier hs-var">AuthenticationFailed</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-31"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="Other"><span class="annot"><a href="Crypto.Types.html#Other"><span class="hs-identifier hs-var">Other</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679070795"><span id="local-6989586621679070802"><span class="annot"><span class="annottext">BlockCipherError -&gt; BlockCipherError -&gt; Bool
+(BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; Eq BlockCipherError
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+== :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+$c/= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+/= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070809"><span id="local-6989586621679070816"><span id="local-6989586621679070822"><span id="local-6989586621679070826"><span id="local-6989586621679070829"><span id="local-6989586621679070832"><span id="local-6989586621679070835"><span class="annot"><span class="annottext">Eq BlockCipherError
+Eq BlockCipherError =&gt;
+(BlockCipherError -&gt; BlockCipherError -&gt; Ordering)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; Bool)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError)
+-&gt; (BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError)
+-&gt; Ord BlockCipherError
+BlockCipherError -&gt; BlockCipherError -&gt; Bool
+BlockCipherError -&gt; BlockCipherError -&gt; Ordering
+BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BlockCipherError -&gt; BlockCipherError -&gt; Ordering
+compare :: BlockCipherError -&gt; BlockCipherError -&gt; Ordering
+$c&lt; :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+&lt; :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+$c&lt;= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+&lt;= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+$c&gt; :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+&gt; :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+$c&gt;= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+&gt;= :: BlockCipherError -&gt; BlockCipherError -&gt; Bool
+$cmax :: BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError
+max :: BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError
+$cmin :: BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError
+min :: BlockCipherError -&gt; BlockCipherError -&gt; BlockCipherError
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070839"><span id="local-6989586621679070849"><span id="local-6989586621679070853"><span class="annot"><span class="annottext">Int -&gt; BlockCipherError -&gt; ShowS
+[BlockCipherError] -&gt; ShowS
+BlockCipherError -&gt; String
+(Int -&gt; BlockCipherError -&gt; ShowS)
+-&gt; (BlockCipherError -&gt; String)
+-&gt; ([BlockCipherError] -&gt; ShowS)
+-&gt; Show BlockCipherError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BlockCipherError -&gt; ShowS
+showsPrec :: Int -&gt; BlockCipherError -&gt; ShowS
+$cshow :: BlockCipherError -&gt; String
+show :: BlockCipherError -&gt; String
+$cshowList :: [BlockCipherError] -&gt; ShowS
+showList :: [BlockCipherError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070857"><span id="local-6989586621679070861"><span id="local-6989586621679070864"><span id="local-6989586621679070881"><span class="annot"><span class="annottext">ReadPrec [BlockCipherError]
+ReadPrec BlockCipherError
+Int -&gt; ReadS BlockCipherError
+ReadS [BlockCipherError]
+(Int -&gt; ReadS BlockCipherError)
+-&gt; ReadS [BlockCipherError]
+-&gt; ReadPrec BlockCipherError
+-&gt; ReadPrec [BlockCipherError]
+-&gt; Read BlockCipherError
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS BlockCipherError
+readsPrec :: Int -&gt; ReadS BlockCipherError
+$creadList :: ReadS [BlockCipherError]
+readList :: ReadS [BlockCipherError]
+$creadPrec :: ReadPrec BlockCipherError
+readPrec :: ReadPrec BlockCipherError
+$creadListPrec :: ReadPrec [BlockCipherError]
+readListPrec :: ReadPrec [BlockCipherError]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679070888"><span id="local-6989586621679070895"><span id="local-6989586621679070901"><span id="local-6989586621679070903"><span id="local-6989586621679070905"><span id="local-6989586621679070911"><span id="local-6989586621679070916"><span id="local-6989586621679070919"><span id="local-6989586621679070922"><span id="local-6989586621679070925"><span id="local-6989586621679070928"><span id="local-6989586621679070931"><span id="local-6989586621679070936"><span id="local-6989586621679070941"><span class="annot"><span class="annottext">Typeable BlockCipherError
+Typeable BlockCipherError =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; BlockCipherError -&gt; c BlockCipherError)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c BlockCipherError)
+-&gt; (BlockCipherError -&gt; Constr)
+-&gt; (BlockCipherError -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c BlockCipherError))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c BlockCipherError))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; BlockCipherError -&gt; BlockCipherError)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; BlockCipherError -&gt; m BlockCipherError)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; BlockCipherError -&gt; m BlockCipherError)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; BlockCipherError -&gt; m BlockCipherError)
+-&gt; Data BlockCipherError
+BlockCipherError -&gt; Constr
+BlockCipherError -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; BlockCipherError -&gt; BlockCipherError
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c BlockCipherError
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; BlockCipherError -&gt; c BlockCipherError
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c BlockCipherError)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c BlockCipherError)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; BlockCipherError -&gt; c BlockCipherError
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; BlockCipherError -&gt; c BlockCipherError
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c BlockCipherError
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c BlockCipherError
+$ctoConstr :: BlockCipherError -&gt; Constr
+toConstr :: BlockCipherError -&gt; Constr
+$cdataTypeOf :: BlockCipherError -&gt; DataType
+dataTypeOf :: BlockCipherError -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c BlockCipherError)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c BlockCipherError)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c BlockCipherError)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c BlockCipherError)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; BlockCipherError -&gt; BlockCipherError
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; BlockCipherError -&gt; BlockCipherError
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; BlockCipherError -&gt; r
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; BlockCipherError -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; BlockCipherError -&gt; m BlockCipherError
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679070952"><span id="local-6989586621679070956"><span id="local-6989586621679070959"><span class="annot"><span class="hs-identifier hs-type">X.Exception</span></span><span> </span><span class="annot"><a href="Crypto.Types.html#BlockCipherError"><span class="hs-identifier hs-type">BlockCipherError</span></a></span></span></span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span></pre></body></html>

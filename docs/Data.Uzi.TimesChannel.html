@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BlockArguments #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Module: Data.Uzi.TimesChannel</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Description: &#23431;&#27835;&#20849;&#21644;&#22269;&#12398;Discord&#12395;&#23384;&#22312;&#12377;&#12427;times&#12486;&#12461;&#12473;&#12488;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#23450;&#32681;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- &#23431;&#27835;&#20849;&#21644;&#22269;&#12398;Discord&#12395;&#23384;&#22312;&#12377;&#12427;times&#12486;&#12461;&#12473;&#12488;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#23450;&#32681;</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Uzi.TimesChannel</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html"><span class="hs-identifier">Data.Discord.Channel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html"><span class="hs-identifier">Data.Discord.ChannelName</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Either.Combinators</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">rightToMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Vector</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">RIOV</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | Times&#12481;&#12515;&#12531;&#12493;&#12523;&#12395;&#20351;&#12431;&#12428;&#12390;&#12356;&#12427;&#21517;&#21069;&#12398;&#12487;&#12540;&#12479;&#27083;&#36896;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- &#22522;&#26412;&#30340;&#12394;&#24418;&#12399; #times-{name} &#12398;name&#12398;&#37096;&#20998;&#12434;&#34920;&#12431;&#12375;&#12390;&#12356;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- &#12384;&#12364;&#12418;&#12375;&#12289;&#21531;&#12364;&#20363;&#22806;&#12384;&#12392;&#12356;&#12358;&#12398;&#12394;&#12425;&#8230;</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &#12394;&#12425;&#12400;&#29983;&#12365;&#24310;&#12403;&#12427;&#12364;&#12356;&#12356;&#12289;&#21531;&#12395;&#12399;&#12381;&#12398;&#27177;&#21033;&#12392;&#32681;&#21209;&#12364;&#12354;&#12427;</span><span>
+</span><span id="line-33"></span><span class="hs-comment">--</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &#35443;&#32048;&#12399; 'Data.Uzi.makeTimesChannel' &#12434;&#21442;&#29031;&#12375;&#12390;&#12367;&#12384;&#12373;&#12356;&#12290;</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">newtype</span><span> </span><span id="TimesName"><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-var">TimesName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TimesName"><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-var">TimesName</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305404"><span id="local-6989586621679305410"><span id="local-6989586621679305414"><span class="annot"><span class="annottext">Int -&gt; TimesName -&gt; ShowS
+[TimesName] -&gt; ShowS
+TimesName -&gt; String
+(Int -&gt; TimesName -&gt; ShowS)
+-&gt; (TimesName -&gt; String)
+-&gt; ([TimesName] -&gt; ShowS)
+-&gt; Show TimesName
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; TimesName -&gt; ShowS
+showsPrec :: Int -&gt; TimesName -&gt; ShowS
+$cshow :: TimesName -&gt; String
+show :: TimesName -&gt; String
+$cshowList :: [TimesName] -&gt; ShowS
+showList :: [TimesName] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305418"><span id="local-6989586621679305423"><span class="annot"><span class="annottext">TimesName -&gt; TimesName -&gt; Bool
+(TimesName -&gt; TimesName -&gt; Bool)
+-&gt; (TimesName -&gt; TimesName -&gt; Bool) -&gt; Eq TimesName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: TimesName -&gt; TimesName -&gt; Bool
+== :: TimesName -&gt; TimesName -&gt; Bool
+$c/= :: TimesName -&gt; TimesName -&gt; Bool
+/= :: TimesName -&gt; TimesName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305429"><span id="local-6989586621679305434"><span class="annot"><span class="annottext">Value -&gt; Parser [TimesName]
+Value -&gt; Parser TimesName
+(Value -&gt; Parser TimesName)
+-&gt; (Value -&gt; Parser [TimesName]) -&gt; FromJSON TimesName
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser TimesName
+parseJSON :: Value -&gt; Parser TimesName
+$cparseJSONList :: Value -&gt; Parser [TimesName]
+parseJSONList :: Value -&gt; Parser [TimesName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305440"><span id="local-6989586621679305445"><span id="local-6989586621679305449"><span id="local-6989586621679305453"><span class="annot"><span class="annottext">[TimesName] -&gt; Value
+[TimesName] -&gt; Encoding
+TimesName -&gt; Value
+TimesName -&gt; Encoding
+(TimesName -&gt; Value)
+-&gt; (TimesName -&gt; Encoding)
+-&gt; ([TimesName] -&gt; Value)
+-&gt; ([TimesName] -&gt; Encoding)
+-&gt; ToJSON TimesName
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: TimesName -&gt; Value
+toJSON :: TimesName -&gt; Value
+$ctoEncoding :: TimesName -&gt; Encoding
+toEncoding :: TimesName -&gt; Encoding
+$ctoJSONList :: [TimesName] -&gt; Value
+toJSONList :: [TimesName] -&gt; Value
+$ctoEncodingList :: [TimesName] -&gt; Encoding
+toEncodingList :: [TimesName] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305461"><span id="local-6989586621679305466"><span id="local-6989586621679305470"><span id="local-6989586621679305474"><span id="local-6989586621679305478"><span id="local-6989586621679305482"><span id="local-6989586621679305486"><span class="annot"><span class="annottext">Eq TimesName
+Eq TimesName =&gt;
+(TimesName -&gt; TimesName -&gt; Ordering)
+-&gt; (TimesName -&gt; TimesName -&gt; Bool)
+-&gt; (TimesName -&gt; TimesName -&gt; Bool)
+-&gt; (TimesName -&gt; TimesName -&gt; Bool)
+-&gt; (TimesName -&gt; TimesName -&gt; Bool)
+-&gt; (TimesName -&gt; TimesName -&gt; TimesName)
+-&gt; (TimesName -&gt; TimesName -&gt; TimesName)
+-&gt; Ord TimesName
+TimesName -&gt; TimesName -&gt; Bool
+TimesName -&gt; TimesName -&gt; Ordering
+TimesName -&gt; TimesName -&gt; TimesName
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: TimesName -&gt; TimesName -&gt; Ordering
+compare :: TimesName -&gt; TimesName -&gt; Ordering
+$c&lt; :: TimesName -&gt; TimesName -&gt; Bool
+&lt; :: TimesName -&gt; TimesName -&gt; Bool
+$c&lt;= :: TimesName -&gt; TimesName -&gt; Bool
+&lt;= :: TimesName -&gt; TimesName -&gt; Bool
+$c&gt; :: TimesName -&gt; TimesName -&gt; Bool
+&gt; :: TimesName -&gt; TimesName -&gt; Bool
+$c&gt;= :: TimesName -&gt; TimesName -&gt; Bool
+&gt;= :: TimesName -&gt; TimesName -&gt; Bool
+$cmax :: TimesName -&gt; TimesName -&gt; TimesName
+max :: TimesName -&gt; TimesName -&gt; TimesName
+$cmin :: TimesName -&gt; TimesName -&gt; TimesName
+min :: TimesName -&gt; TimesName -&gt; TimesName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="annot"><a href="Data.Uzi.TimesChannel.html#coerceTimesName"><span class="hs-identifier hs-type">coerceTimesName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-40"></span><span id="coerceTimesName"><span class="annot"><span class="annottext">coerceTimesName :: TimesName -&gt; Text
+</span><a href="Data.Uzi.TimesChannel.html#coerceTimesName"><span class="hs-identifier hs-var hs-var">coerceTimesName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TimesName -&gt; Text
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Times&#12481;&#12515;&#12531;&#12493;&#12523;&#12434;&#34920;&#12377;&#12487;&#12540;&#12479;&#27083;&#36896;&#12391;&#12377;&#12290;</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="TimesChannel"><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-var">TimesChannel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TimesChannel"><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-var">TimesChannel</span></a></span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="hs-comment">-- | TimesChannel&#12398;Discord&#19978;&#12391;&#12398;&#12481;&#12515;&#12531;&#12493;&#12523;ID</span></span><span>
+</span><span id="line-45"></span><span>    </span><span id="_id"><span class="annot"><span class="annottext">TimesChannel -&gt; ChannelId
+</span><a href="Data.Uzi.TimesChannel.html#_id"><span class="hs-identifier hs-var hs-var">_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><span class="hs-comment">-- | &#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#21517;&#21069;</span></span><span>
+</span><span id="line-47"></span><span>    </span><span id="_name"><span class="annot"><span class="annottext">TimesChannel -&gt; TimesName
+</span><a href="Data.Uzi.TimesChannel.html#_name"><span class="hs-identifier hs-var hs-var">_name</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305496"><span id="local-6989586621679305502"><span id="local-6989586621679305506"><span class="annot"><span class="annottext">Int -&gt; TimesChannel -&gt; ShowS
+[TimesChannel] -&gt; ShowS
+TimesChannel -&gt; String
+(Int -&gt; TimesChannel -&gt; ShowS)
+-&gt; (TimesChannel -&gt; String)
+-&gt; ([TimesChannel] -&gt; ShowS)
+-&gt; Show TimesChannel
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; TimesChannel -&gt; ShowS
+showsPrec :: Int -&gt; TimesChannel -&gt; ShowS
+$cshow :: TimesChannel -&gt; String
+show :: TimesChannel -&gt; String
+$cshowList :: [TimesChannel] -&gt; ShowS
+showList :: [TimesChannel] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305509"><span id="local-6989586621679305514"><span class="annot"><span class="annottext">TimesChannel -&gt; TimesChannel -&gt; Bool
+(TimesChannel -&gt; TimesChannel -&gt; Bool)
+-&gt; (TimesChannel -&gt; TimesChannel -&gt; Bool) -&gt; Eq TimesChannel
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: TimesChannel -&gt; TimesChannel -&gt; Bool
+== :: TimesChannel -&gt; TimesChannel -&gt; Bool
+$c/= :: TimesChannel -&gt; TimesChannel -&gt; Bool
+/= :: TimesChannel -&gt; TimesChannel -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span id="id"><span id="name"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">TimesChannel</span></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679305535"><span id="local-6989586621679305539"><span id="local-6989586621679305542"><span id="local-6989586621679305545"><span id="local-6989586621679305548"><span id="local-6989586621679305551"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TimesChannel</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679305556"><span class="annot"><span class="annottext">compare :: TimesChannel -&gt; TimesChannel -&gt; Ordering
+</span><a href="#local-6989586621679305556"><span class="hs-identifier hs-var hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span id="local-6989586621679305558"><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305558"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679305559"><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305559"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TimesName -&gt; TimesName -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305558"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+-&gt; Getting TimesName TimesChannel TimesName -&gt; TimesName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting TimesName TimesChannel TimesName
+Lens' TimesChannel TimesName
+</span><a href="Data.Uzi.TimesChannel.html#name"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305559"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+-&gt; Getting TimesName TimesChannel TimesName -&gt; TimesName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting TimesName TimesChannel TimesName
+Lens' TimesChannel TimesName
+</span><a href="Data.Uzi.TimesChannel.html#name"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- | Discord&#12398;Channel&#12363;&#12425;TimesChannel&#22411;&#12395;&#22793;&#25563;&#12377;&#12427;&#12383;&#12417;&#12398;&#12473;&#12510;&#12540;&#12488;&#12467;&#12531;&#12473;&#12488;&#12521;&#12463;&#12479;&#12391;&#12377;</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- &#22793;&#25563;&#12395;&#22833;&#25943;&#12377;&#12427;&#21487;&#33021;&#24615;&#12364;&#12354;&#12426;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- &#22833;&#25943;&#35201;&#22240;&#12399;&#24460;&#36848;&#12377;&#12427; TimesChannel&#12398;&#21629;&#21517;&#35215;&#21063;&#12434;&#28288;&#12383;&#12373;&#12394;&#12356;&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#24341;&#25968;&#12395;&#28193;&#12373;&#12428;&#12383;&#22580;&#21512;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- = TimesChannel&#12398;&#21629;&#21517;&#35215;&#21063;</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- TimesChannel&#12399;&#27425;&#12398;&#21629;&#21517;&#35215;&#21063;&#12398;&#20013;&#12391;&#12356;&#12378;&#12428;&#12363;&#12434;&#28288;&#12383;&#12377;&#24517;&#35201;&#12364;&#12354;&#12426;&#12414;&#12377;</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- * BasicTimesName: #times-{name} &#12398;&#24418;&#24335;</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- * ShortTimesName: #time${name} &#12398;&#24418;&#24335;</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- * TheNyTimesName: #the-{name}-times &#12398;&#24418;&#24335;</span><span>
+</span><span id="line-68"></span><span class="annot"><a href="Data.Uzi.TimesChannel.html#makeTimesChannel"><span class="hs-identifier hs-type">makeTimesChannel</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="hs-comment">-- | TimesChannel&#12395;&#22793;&#25563;&#12375;&#12383;&#12356;Discord&#19978;&#12398;Channel</span></span><span>
+</span><span id="line-70"></span><span>  </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#22793;&#25563;&#12395;&#25104;&#21151;&#12375;&#12383;&#22580;&#21512;&#12399;'Just' &#12290;&#22833;&#25943;&#12375;&#12383;&#22580;&#21512;&#12399; 'Nothing'</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TimesChannel</span></a></span><span>
+</span><span id="line-73"></span><span id="makeTimesChannel"><span class="annot"><span class="annottext">makeTimesChannel :: Channel -&gt; Maybe TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#makeTimesChannel"><span class="hs-identifier hs-var hs-var">makeTimesChannel</span></a></span></span><span> </span><span id="local-6989586621679305562"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305562"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305562"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelType Channel ChannelType -&gt; ChannelType
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelType Channel ChannelType
+Lens' Channel ChannelType
+</span><a href="Data.Discord.Channel.html#_type"><span class="hs-identifier hs-var">C._type</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildVoice"><span class="hs-identifier hs-var">C.GuildVoice</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannel
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">C.GuildCategory</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannel
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildText"><span class="hs-identifier hs-var">C.GuildText</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679305567"><span class="annot"><span class="annottext">channelName :: ChannelName
+</span><a href="#local-6989586621679305567"><span class="hs-identifier hs-var hs-var">channelName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305562"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelName Channel ChannelName -&gt; ChannelName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelName Channel ChannelName
+Lens' Channel ChannelName
+</span><a href="Data.Discord.Channel.html#_name"><span class="hs-identifier hs-var">C._name</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679305569"><span class="annot"><span class="annottext">cid :: ChannelId
+</span><a href="#local-6989586621679305569"><span class="hs-identifier hs-var hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305562"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelId Channel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId Channel ChannelId
+Lens' Channel ChannelId
+</span><a href="Data.Discord.Channel.html#_id"><span class="hs-identifier hs-var">C._id</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679305571"><span class="annot"><span class="annottext">timesNameMaybe :: Maybe TimesName
+</span><a href="#local-6989586621679305571"><span class="hs-identifier hs-var hs-var">timesNameMaybe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either ParseError TimesName -&gt; Maybe TimesName
+forall a b. Either a b -&gt; Maybe b
+</span><span class="hs-identifier hs-var">rightToMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parsec Text () TimesName
+-&gt; () -&gt; String -&gt; Text -&gt; Either ParseError TimesName
+forall s t u a.
+Stream s Identity t =&gt;
+Parsec s u a -&gt; u -&gt; String -&gt; s -&gt; Either ParseError a
+</span><span class="hs-identifier hs-var">P.runParser</span></span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+</span><a href="#local-6989586621679305573"><span class="hs-identifier hs-var">timesNameParser</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;TimesName&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelName -&gt; Text
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">ChannelName
+</span><a href="#local-6989586621679305567"><span class="hs-identifier hs-var">channelName</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="annottext">(TimesName -&gt; TimesChannel)
+-&gt; Maybe TimesName -&gt; Maybe TimesChannel
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679305574"><span class="annot"><span class="annottext">TimesName
+</span><a href="#local-6989586621679305574"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TimesChannel</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_id :: ChannelId
+</span><a href="Data.Uzi.TimesChannel.html#_id"><span class="hs-identifier hs-var">_id</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679305569"><span class="hs-identifier hs-var">cid</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">_name :: TimesName
+</span><a href="Data.Uzi.TimesChannel.html#_name"><span class="hs-identifier hs-var">_name</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TimesName
+</span><a href="#local-6989586621679305574"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe TimesName
+</span><a href="#local-6989586621679305571"><span class="hs-identifier hs-var">timesNameMaybe</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="#local-6989586621679305575"><span class="hs-identifier hs-type">basicTimesNameParser</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.Parser</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span id="local-6989586621679305575"><span class="annot"><span class="annottext">basicTimesNameParser :: Parsec Text () TimesName
+</span><a href="#local-6989586621679305575"><span class="hs-identifier hs-var hs-var">basicTimesNameParser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m String
+</span><span class="hs-identifier hs-var">P.string</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;times-&quot;</span></span><span>
+</span><span id="line-85"></span><span>      </span><span id="local-6989586621679305578"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305578"><span class="hs-identifier hs-var">chars</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Char -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) t u a.
+Stream s m t =&gt;
+ParsecT s u m a -&gt; ParsecT s u m [a]
+</span><span class="hs-identifier hs-var">P.many1</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Char
+forall s (m :: * -&gt; *) u. Stream s m Char =&gt; ParsecT s u m Char
+</span><span class="hs-identifier hs-var">P.anyChar</span></span><span>
+</span><span id="line-86"></span><span>      </span><span class="annot"><span class="annottext">TimesName -&gt; Parsec Text () TimesName
+forall a. a -&gt; ParsecT Text () Identity a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(TimesName -&gt; Parsec Text () TimesName)
+-&gt; (String -&gt; TimesName) -&gt; String -&gt; Parsec Text () TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; TimesName
+</span><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-var">TimesName</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; TimesName) -&gt; (String -&gt; Text) -&gt; String -&gt; TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Parsec Text () TimesName)
+-&gt; String -&gt; Parsec Text () TimesName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305578"><span class="hs-identifier hs-var">chars</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><a href="#local-6989586621679305583"><span class="hs-identifier hs-type">shortTimesNameParser</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.Parser</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679305583"><span class="annot"><span class="annottext">shortTimesNameParser :: Parsec Text () TimesName
+</span><a href="#local-6989586621679305583"><span class="hs-identifier hs-var hs-var">shortTimesNameParser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-90"></span><span>      </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity () -&gt; ParsecT Text () Identity ()
+forall s u (m :: * -&gt; *) a. ParsecT s u m a -&gt; ParsecT s u m a
+</span><span class="hs-identifier hs-var">P.try</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m String
+</span><span class="hs-identifier hs-var">P.string</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;time&quot;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity String
+-&gt; ParsecT Text () Identity () -&gt; ParsecT Text () Identity ()
+forall a b.
+ParsecT Text () Identity a
+-&gt; ParsecT Text () Identity b -&gt; ParsecT Text () Identity b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity String -&gt; ParsecT Text () Identity ()
+forall s (m :: * -&gt; *) t a u.
+(Stream s m t, Show a) =&gt;
+ParsecT s u m a -&gt; ParsecT s u m ()
+</span><span class="hs-identifier hs-var">P.notFollowedBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m String
+</span><span class="hs-identifier hs-var">P.string</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;s-&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>      </span><span id="local-6989586621679305586"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305586"><span class="hs-identifier hs-var">chars</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Char -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) t u a.
+Stream s m t =&gt;
+ParsecT s u m a -&gt; ParsecT s u m [a]
+</span><span class="hs-identifier hs-var">P.many1</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Char
+forall s (m :: * -&gt; *) u. Stream s m Char =&gt; ParsecT s u m Char
+</span><span class="hs-identifier hs-var">P.anyChar</span></span><span>
+</span><span id="line-92"></span><span>      </span><span class="annot"><span class="annottext">TimesName -&gt; Parsec Text () TimesName
+forall a. a -&gt; ParsecT Text () Identity a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(TimesName -&gt; Parsec Text () TimesName)
+-&gt; (String -&gt; TimesName) -&gt; String -&gt; Parsec Text () TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; TimesName
+</span><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-var">TimesName</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; TimesName) -&gt; (String -&gt; Text) -&gt; String -&gt; TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Parsec Text () TimesName)
+-&gt; String -&gt; Parsec Text () TimesName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305586"><span class="hs-identifier hs-var">chars</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><a href="#local-6989586621679305587"><span class="hs-identifier hs-type">theNyTimesParser</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.Parser</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679305587"><span class="annot"><span class="annottext">theNyTimesParser :: Parsec Text () TimesName
+</span><a href="#local-6989586621679305587"><span class="hs-identifier hs-var hs-var">theNyTimesParser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity String -&gt; ParsecT Text () Identity String
+forall s u (m :: * -&gt; *) a. ParsecT s u m a -&gt; ParsecT s u m a
+</span><span class="hs-identifier hs-var">P.try</span></span><span> </span><span class="annot"><span class="annottext">(ParsecT Text () Identity String
+ -&gt; ParsecT Text () Identity String)
+-&gt; (String -&gt; ParsecT Text () Identity String)
+-&gt; String
+-&gt; ParsecT Text () Identity String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m String
+</span><span class="hs-identifier hs-var">P.string</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; ParsecT Text () Identity String)
+-&gt; String -&gt; ParsecT Text () Identity String
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;the-&quot;</span></span><span>
+</span><span id="line-97"></span><span>      </span><span id="local-6989586621679305588"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305588"><span class="hs-identifier hs-var">chars</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Char -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) t u a.
+Stream s m t =&gt;
+ParsecT s u m a -&gt; ParsecT s u m [a]
+</span><span class="hs-identifier hs-var">P.many1</span></span><span> </span><span class="annot"><span class="annottext">(ParsecT Text () Identity Char -&gt; ParsecT Text () Identity String)
+-&gt; (String -&gt; ParsecT Text () Identity Char)
+-&gt; String
+-&gt; ParsecT Text () Identity String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity Char
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m Char
+</span><span class="hs-identifier hs-var">P.noneOf</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; ParsecT Text () Identity String)
+-&gt; String -&gt; ParsecT Text () Identity String
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;-&quot;</span></span><span>
+</span><span id="line-98"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; ParsecT Text () Identity String
+forall s (m :: * -&gt; *) u.
+Stream s m Char =&gt;
+String -&gt; ParsecT s u m String
+</span><span class="hs-identifier hs-var">P.string</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;-times&quot;</span></span><span>
+</span><span id="line-99"></span><span>      </span><span class="annot"><span class="annottext">TimesName -&gt; Parsec Text () TimesName
+forall a. a -&gt; ParsecT Text () Identity a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(TimesName -&gt; Parsec Text () TimesName)
+-&gt; (String -&gt; TimesName) -&gt; String -&gt; Parsec Text () TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; TimesName
+</span><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-var">TimesName</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; TimesName) -&gt; (String -&gt; Text) -&gt; String -&gt; TimesName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Parsec Text () TimesName)
+-&gt; String -&gt; Parsec Text () TimesName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679305588"><span class="hs-identifier hs-var">chars</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>    </span><span class="annot"><a href="#local-6989586621679305573"><span class="hs-identifier hs-type">timesNameParser</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.Parser</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TimesName</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679305573"><span class="annot"><span class="annottext">timesNameParser :: Parsec Text () TimesName
+</span><a href="#local-6989586621679305573"><span class="hs-identifier hs-var hs-var">timesNameParser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+</span><a href="#local-6989586621679305587"><span class="hs-identifier hs-var">theNyTimesParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+-&gt; Parsec Text () TimesName -&gt; Parsec Text () TimesName
+forall s u (m :: * -&gt; *) a.
+ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
+</span><span class="hs-operator hs-var">P.&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+</span><a href="#local-6989586621679305583"><span class="hs-identifier hs-var">shortTimesNameParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+-&gt; Parsec Text () TimesName -&gt; Parsec Text () TimesName
+forall s u (m :: * -&gt; *) a.
+ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
+</span><span class="hs-operator hs-var">P.&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parsec Text () TimesName
+</span><a href="#local-6989586621679305575"><span class="hs-identifier hs-var">basicTimesNameParser</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="annot"><span class="hs-comment">-- | &#35079;&#25968;&#12398; 'Data.Discord.Channel' &#12395;&#23550;&#12375;&#12390;&#22793;&#25563;&#20966;&#29702;&#12434;&#34892;&#12356;&#12289;&#25104;&#21151;&#12375;&#12383;&#12418;&#12398;&#12398;&#12415;&#12434;&#36820;&#12377;&#38306;&#25968;</span></span><span>
+</span><span id="line-105"></span><span class="annot"><a href="Data.Uzi.TimesChannel.html#fromChannels"><span class="hs-identifier hs-type">fromChannels</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RIO.Vector</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RIO.Vector</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TimesChannel</span></a></span><span>
+</span><span id="line-106"></span><span id="fromChannels"><span class="annot"><span class="annottext">fromChannels :: Vector Channel -&gt; Vector TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#fromChannels"><span class="hs-identifier hs-var hs-var">fromChannels</span></a></span></span><span> </span><span id="local-6989586621679305592"><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679305592"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[TimesChannel] -&gt; Vector TimesChannel
+forall (v :: * -&gt; *) a. Vector v a =&gt; [a] -&gt; v a
+</span><span class="hs-identifier hs-var">RIOV.fromList</span></span><span> </span><span class="annot"><span class="annottext">([TimesChannel] -&gt; Vector TimesChannel)
+-&gt; [TimesChannel] -&gt; Vector TimesChannel
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Maybe TimesChannel] -&gt; [TimesChannel]
+forall a. [Maybe a] -&gt; [a]
+</span><span class="hs-identifier hs-var">RIO.catMaybes</span></span><span> </span><span class="annot"><span class="annottext">([Maybe TimesChannel] -&gt; [TimesChannel])
+-&gt; [Maybe TimesChannel] -&gt; [TimesChannel]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Channel -&gt; Maybe TimesChannel)
+-&gt; [Channel] -&gt; [Maybe TimesChannel]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Maybe TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#makeTimesChannel"><span class="hs-identifier hs-var">makeTimesChannel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector Channel -&gt; [Channel]
+forall a. Vector a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">RIO.toList</span></span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679305592"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span></pre></body></html>

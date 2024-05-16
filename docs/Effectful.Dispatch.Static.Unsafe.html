@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Unsafe utilities for statically dispatched effects.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Dispatch.Static.Unsafe</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeLiftMapIO"><span class="hs-identifier">reallyUnsafeLiftMapIO</span></a></span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeUnliftIO"><span class="hs-identifier">reallyUnsafeUnliftIO</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html"><span class="hs-identifier">Effectful.Internal.Monad</span></a></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- | Utility for lifting 'IO' computations of type</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- @'IO' a -&gt; 'IO' b@</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- to</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- @'Eff' es a -&gt; 'Eff' es b@</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- This function is __really unsafe__ because:</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- - It can be used to introduce arbitrary 'IO' actions into pure 'Eff'</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--   computations.</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- - The 'IO' computation must run its argument in a way that's perceived as</span><span>
+</span><span id="line-23"></span><span class="hs-comment">--   sequential to the outside observer, e.g. in the same thread or in a worker</span><span>
+</span><span id="line-24"></span><span class="hs-comment">--   thread that finishes before the argument is run again.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- __Warning:__ if you disregard the second point, you will experience weird</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- bugs, data races or internal consistency check failures.</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- When in doubt, use 'Effectful.Dispatch.Static.unsafeLiftMapIO', especially</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- since this version saves only a simple safety check per call of</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- @reallyUnsafeLiftMapIO f@.</span><span>
+</span><span id="line-32"></span><span id="local-6989586621679076354"><span id="local-6989586621679076355"><span id="local-6989586621679076356"><span class="annot"><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeLiftMapIO"><span class="hs-identifier hs-type">reallyUnsafeLiftMapIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076354"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076355"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076356"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076354"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076356"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076355"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-33"></span><span id="reallyUnsafeLiftMapIO"><span class="annot"><span class="annottext">reallyUnsafeLiftMapIO :: forall a b (es :: [Effect]). (IO a -&gt; IO b) -&gt; Eff es a -&gt; Eff es b
+</span><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeLiftMapIO"><span class="hs-identifier hs-var hs-var">reallyUnsafeLiftMapIO</span></a></span></span><span> </span><span id="local-6989586621679076377"><span class="annot"><span class="annottext">IO a -&gt; IO b
+</span><a href="#local-6989586621679076377"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679076378"><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679076378"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO b) -&gt; Eff es b) -&gt; (Env es -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076380"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076380"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; IO b
+</span><a href="#local-6989586621679076377"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es a -&gt; Env es -&gt; IO a
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-identifier hs-var">unEff</span></a></span><span> </span><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679076378"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076380"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- | Create an unlifting function.</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- This function is __really unsafe__ because:</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- - It can be used to introduce arbitrary 'IO' actions into pure 'Eff'</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--   computations.</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- - Unlifted 'Eff' computations must be run in a way that's perceived as</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--   sequential to the outside observer, e.g. in the same thread as the caller</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--   of 'reallyUnsafeUnliftIO' or in a worker thread that finishes before</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--   another unlifted computation is run.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- __Warning:__ if you disregard the second point, you will experience weird</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- bugs, data races or internal consistency check failures.</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- When in doubt, use 'Effectful.Dispatch.Static.unsafeSeqUnliftIO', especially</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- since this version saves only a simple safety check per call of the unlifting</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- function.</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679076369"><span id="local-6989586621679076371"><span class="annot"><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeUnliftIO"><span class="hs-identifier hs-type">reallyUnsafeUnliftIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679076370"><span class="annot"><a href="#local-6989586621679076370"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076369"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076370"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076370"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076371"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076369"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076371"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-54"></span><span id="reallyUnsafeUnliftIO"><span class="annot"><span class="annottext">reallyUnsafeUnliftIO :: forall (es :: [Effect]) a.
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Static.Unsafe.html#reallyUnsafeUnliftIO"><span class="hs-identifier hs-var hs-var">reallyUnsafeUnliftIO</span></a></span></span><span> </span><span id="local-6989586621679076382"><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076382"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO a) -&gt; Eff es a) -&gt; (Env es -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076383"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076383"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076382"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es r -&gt; Env es -&gt; IO r
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-operator hs-var">`unEff`</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076383"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span></pre></body></html>

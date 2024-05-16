@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.GlobalName</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">newtype</span><span> </span><span id="GlobalName"><span class="annot"><a href="Data.Discord.GlobalName.html#GlobalName"><span class="hs-identifier hs-var">GlobalName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GlobalName"><span class="annot"><a href="Data.Discord.GlobalName.html#GlobalName"><span class="hs-identifier hs-var">GlobalName</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679297667"><span id="local-6989586621679297673"><span id="local-6989586621679297677"><span class="annot"><span class="annottext">Int -&gt; GlobalName -&gt; ShowS
+[GlobalName] -&gt; ShowS
+GlobalName -&gt; String
+(Int -&gt; GlobalName -&gt; ShowS)
+-&gt; (GlobalName -&gt; String)
+-&gt; ([GlobalName] -&gt; ShowS)
+-&gt; Show GlobalName
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; GlobalName -&gt; ShowS
+showsPrec :: Int -&gt; GlobalName -&gt; ShowS
+$cshow :: GlobalName -&gt; String
+show :: GlobalName -&gt; String
+$cshowList :: [GlobalName] -&gt; ShowS
+showList :: [GlobalName] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297681"><span id="local-6989586621679297686"><span class="annot"><span class="annottext">GlobalName -&gt; GlobalName -&gt; Bool
+(GlobalName -&gt; GlobalName -&gt; Bool)
+-&gt; (GlobalName -&gt; GlobalName -&gt; Bool) -&gt; Eq GlobalName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: GlobalName -&gt; GlobalName -&gt; Bool
+== :: GlobalName -&gt; GlobalName -&gt; Bool
+$c/= :: GlobalName -&gt; GlobalName -&gt; Bool
+/= :: GlobalName -&gt; GlobalName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679297692"><span id="local-6989586621679297697"><span class="annot"><span class="annottext">Value -&gt; Parser [GlobalName]
+Value -&gt; Parser GlobalName
+(Value -&gt; Parser GlobalName)
+-&gt; (Value -&gt; Parser [GlobalName]) -&gt; FromJSON GlobalName
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser GlobalName
+parseJSON :: Value -&gt; Parser GlobalName
+$cparseJSONList :: Value -&gt; Parser [GlobalName]
+parseJSONList :: Value -&gt; Parser [GlobalName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297703"><span id="local-6989586621679297708"><span id="local-6989586621679297712"><span id="local-6989586621679297716"><span class="annot"><span class="annottext">[GlobalName] -&gt; Value
+[GlobalName] -&gt; Encoding
+GlobalName -&gt; Value
+GlobalName -&gt; Encoding
+(GlobalName -&gt; Value)
+-&gt; (GlobalName -&gt; Encoding)
+-&gt; ([GlobalName] -&gt; Value)
+-&gt; ([GlobalName] -&gt; Encoding)
+-&gt; ToJSON GlobalName
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: GlobalName -&gt; Value
+toJSON :: GlobalName -&gt; Value
+$ctoEncoding :: GlobalName -&gt; Encoding
+toEncoding :: GlobalName -&gt; Encoding
+$ctoJSONList :: [GlobalName] -&gt; Value
+toJSONList :: [GlobalName] -&gt; Value
+$ctoEncodingList :: [GlobalName] -&gt; Encoding
+toEncodingList :: [GlobalName] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-13"></span></pre></body></html>

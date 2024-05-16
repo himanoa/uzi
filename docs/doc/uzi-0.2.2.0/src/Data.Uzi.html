@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- |</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- Module: Data.Uzi</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Description: &#23431;&#27835;&#20849;&#21644;&#22269;&#29305;&#26377;&#12398;&#12525;&#12472;&#12483;&#12463;&#12420;&#27083;&#36896;&#12434;&#34920;&#12377;&#12514;&#12472;&#12517;&#12540;&#12523;</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Uzi</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Uzi.html#timesId"><span class="hs-identifier">timesId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Data.Uzi.html#timesName"><span class="hs-identifier">timesName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier">TC.TimesChannel</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier">TC.TimesName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#organizeTimes"><span class="hs-identifier">OT.organizeTimes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html#OrganizeTimesError"><span class="hs-identifier">OT.OrganizeTimesError</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.OrganizeTimes.html"><span class="hs-identifier">Data.Uzi.OrganizeTimes</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OT</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html"><span class="hs-identifier">Data.Uzi.TimesChannel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TC</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span id="local-6989586621679308478"><span class="annot"><a href="Data.Uzi.html#timesId"><span class="hs-identifier hs-type">timesId</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679308478"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679308478"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><a href="#local-6989586621679308478"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span></span><span>
+</span><span id="line-25"></span><span id="timesId"><span class="annot"><span class="annottext">timesId :: forall (f :: * -&gt; *).
+Functor f =&gt;
+(ChannelId -&gt; f ChannelId) -&gt; TimesChannel -&gt; f TimesChannel
+</span><a href="Data.Uzi.html#timesId"><span class="hs-identifier hs-var hs-var">timesId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ChannelId -&gt; f ChannelId) -&gt; TimesChannel -&gt; f TimesChannel
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(ChannelId -&gt; f ChannelId) -&gt; TimesChannel -&gt; f TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#id"><span class="hs-identifier hs-var">TC.id</span></a></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span id="local-6989586621679308482"><span class="annot"><a href="Data.Uzi.html#timesName"><span class="hs-identifier hs-type">timesName</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679308482"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TC.TimesName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679308482"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesName"><span class="hs-identifier hs-type">TC.TimesName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="#local-6989586621679308482"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span></span><span>
+</span><span id="line-32"></span><span id="timesName"><span class="annot"><span class="annottext">timesName :: forall (f :: * -&gt; *).
+Functor f =&gt;
+(TimesName -&gt; f TimesName) -&gt; TimesChannel -&gt; f TimesChannel
+</span><a href="Data.Uzi.html#timesName"><span class="hs-identifier hs-var hs-var">timesName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(TimesName -&gt; f TimesName) -&gt; TimesChannel -&gt; f TimesChannel
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(TimesName -&gt; f TimesName) -&gt; TimesChannel -&gt; f TimesChannel
+</span><a href="Data.Uzi.TimesChannel.html#name"><span class="hs-identifier hs-var">TC.name</span></a></span><span>
+</span><span id="line-33"></span></pre></body></html>

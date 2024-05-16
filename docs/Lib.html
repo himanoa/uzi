@@ -1,0 +1,1014 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE StrictData #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Lib</span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Lib.html#runUzi"><span class="hs-identifier">runUzi</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Lib.html#UziError"><span class="hs-identifier">UziError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Lib.html#CrashError"><span class="hs-identifier">CrashError</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception.Safe</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.html"><span class="hs-identifier">Data.Discord</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html"><span class="hs-identifier">Data.Discord.Request.SlashCommand</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.User.html"><span class="hs-identifier">Data.Discord.User</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html"><span class="hs-identifier">Data.Uzi.HeartbeatInterval</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Eff</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">IOE</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">runEff</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(:&gt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.BotUser.html"><span class="hs-identifier">Effectful.BotUser</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Concurrent</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Concurrent</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">threadDelay</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Concurrent.Async</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">forConcurrently_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">runConcurrent</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Concurrent.STM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">atomically</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">newTQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">readTQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">writeTQueue</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.html"><span class="hs-identifier">Effectful.DiscordApiTokenReader</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.html"><span class="hs-identifier">Effectful.DiscordApplication</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#runDiscordApplication"><span class="hs-identifier">runDiscordApplication</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordChannel.html"><span class="hs-identifier">Effectful.DiscordChannel</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.html"><span class="hs-identifier">Effectful.DiscordGateway</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordSlash.html"><span class="hs-identifier">Effectful.DiscordSlash</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordSlash.Effect.html"><span class="hs-identifier">Effectful.DiscordSlash.Effect</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.html"><span class="hs-identifier">Effectful.DynamicLogger</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Environment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Environment</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">runEnvironment</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Log.Static</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Req.html"><span class="hs-identifier">Effectful.Req</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.State.Static.Shared</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="EventHandler.html"><span class="hs-identifier">EventHandler</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.WebSockets</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Connection</span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">atomically</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">catch</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">forConcurrently_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">newTQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">readTQueue</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">threadDelay</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">writeTQueue</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">data</span><span> </span><span id="FromEnvironmentError"><span class="annot"><a href="Lib.html#FromEnvironmentError"><span class="hs-identifier hs-var">FromEnvironmentError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DiscordApiTokenIsUndefined"><span class="annot"><a href="Lib.html#DiscordApiTokenIsUndefined"><span class="hs-identifier hs-var">DiscordApiTokenIsUndefined</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679309693"><span id="local-6989586621679309695"><span id="local-6989586621679309699"><span class="annot"><span class="annottext">Int -&gt; FromEnvironmentError -&gt; ShowS
+[FromEnvironmentError] -&gt; ShowS
+FromEnvironmentError -&gt; String
+(Int -&gt; FromEnvironmentError -&gt; ShowS)
+-&gt; (FromEnvironmentError -&gt; String)
+-&gt; ([FromEnvironmentError] -&gt; ShowS)
+-&gt; Show FromEnvironmentError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+showsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+$cshow :: FromEnvironmentError -&gt; String
+show :: FromEnvironmentError -&gt; String
+$cshowList :: [FromEnvironmentError] -&gt; ShowS
+showList :: [FromEnvironmentError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679309707"><span id="local-6989586621679309711"><span id="local-6989586621679309714"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="Lib.html#FromEnvironmentError"><span class="hs-identifier hs-type">FromEnvironmentError</span></a></span></span></span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Lib.html#runUzi"><span class="hs-identifier hs-type">runUzi</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">data</span><span> </span><span id="UziError"><span class="annot"><a href="Lib.html#UziError"><span class="hs-identifier hs-var">UziError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CrashError"><span class="annot"><a href="Lib.html#CrashError"><span class="hs-identifier hs-var">CrashError</span></a></span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679309718"><span id="local-6989586621679309720"><span id="local-6989586621679309724"><span class="annot"><span class="annottext">Int -&gt; UziError -&gt; ShowS
+[UziError] -&gt; ShowS
+UziError -&gt; String
+(Int -&gt; UziError -&gt; ShowS)
+-&gt; (UziError -&gt; String) -&gt; ([UziError] -&gt; ShowS) -&gt; Show UziError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; UziError -&gt; ShowS
+showsPrec :: Int -&gt; UziError -&gt; ShowS
+$cshow :: UziError -&gt; String
+show :: UziError -&gt; String
+$cshowList :: [UziError] -&gt; ShowS
+showList :: [UziError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679309731"><span id="local-6989586621679309735"><span id="local-6989586621679309738"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="Lib.html#UziError"><span class="hs-identifier hs-type">UziError</span></a></span></span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="runUzi"><span class="annot"><span class="annottext">runUzi :: IO ()
+</span><a href="Lib.html#runUzi"><span class="hs-identifier hs-var hs-var">runUzi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eff '[IOE] () -&gt; IO ()
+forall a. Eff '[IOE] a -&gt; IO a
+</span><span class="hs-identifier hs-var">runEff</span></span><span> </span><span class="annot"><span class="annottext">(Eff '[IOE] () -&gt; IO ()) -&gt; Eff '[IOE] () -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679309740"><span class="annot"><span class="annottext">LogOptions
+</span><a href="#local-6989586621679309740"><span class="hs-identifier hs-var">logOptions</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Bool -&gt; Eff '[IOE] LogOptions
+forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; Bool -&gt; m LogOptions
+</span><span class="hs-identifier hs-var">logOptionsHandle</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><span class="hs-identifier hs-var">RIO.stderr</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">Eff '[Concurrent, IOE] () -&gt; Eff '[IOE] ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(IOE :&gt; es) =&gt;
+Eff (Concurrent : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">runConcurrent</span></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">(Eff '[Concurrent, IOE] () -&gt; Eff '[IOE] ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff '[Concurrent, IOE] ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[IOE] ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff '[Environment, Concurrent, IOE] () -&gt; Eff '[Concurrent, IOE] ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(IOE :&gt; es) =&gt;
+Eff (Environment : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">runEnvironment</span></span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><span class="annottext">(Eff '[Environment, Concurrent, IOE] ()
+ -&gt; Eff '[Concurrent, IOE] ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff '[Environment, Concurrent, IOE] ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[Concurrent, IOE] ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LogOptions
+-&gt; Eff '[Log, Environment, Concurrent, IOE] ()
+-&gt; Eff '[Environment, Concurrent, IOE] ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(IOE :&gt; es) =&gt;
+LogOptions -&gt; Eff (Log : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">runLog</span></span><span> </span><span class="annot"><span class="annottext">LogOptions
+</span><a href="#local-6989586621679309740"><span class="hs-identifier hs-var">logOptions</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">(Eff '[Log, Environment, Concurrent, IOE] ()
+ -&gt; Eff '[Environment, Concurrent, IOE] ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff '[Log, Environment, Concurrent, IOE] ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[Environment, Concurrent, IOE] ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ()
+-&gt; Eff '[Log, Environment, Concurrent, IOE] ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(Log :&gt; es) =&gt;
+Eff (DynamicLogger : es) a -&gt; Eff es a
+</span><a href="Effectful.DynamicLogger.Interpreter.html#runDynamicLogger"><span class="hs-identifier hs-var">runDynamicLogger</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><span class="annottext">(Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ()
+ -&gt; Eff '[Log, Environment, Concurrent, IOE] ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[Log, Environment, Concurrent, IOE] ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+    Concurrent, IOE]
+  ()
+-&gt; Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(Environment :&gt; es) =&gt;
+Eff (DiscordApiTokenReader : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordApiTokenReader.Interpreter.html#runDiscordApiTokenReader"><span class="hs-identifier hs-var">runDiscordApiTokenReader</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+     Concurrent, IOE]
+   ()
+ -&gt; Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+           Concurrent, IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[DynamicLogger, Log, Environment, Concurrent, IOE] ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+    Concurrent, IOE]
+  ()
+-&gt; Eff
+     '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+       Concurrent, IOE]
+     ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+Eff (Request : es) a -&gt; Eff es a
+</span><a href="Effectful.Req.html#runRequest"><span class="hs-identifier hs-var">runRequest</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+     Concurrent, IOE]
+   ()
+ -&gt; Eff
+      '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+        Concurrent, IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+           Concurrent, IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[DiscordApiTokenReader, DynamicLogger, Log, Environment,
+       Concurrent, IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[DiscordApplication, Request, DiscordApiTokenReader,
+    DynamicLogger, Log, Environment, Concurrent, IOE]
+  ()
+-&gt; Eff
+     '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+       Concurrent, IOE]
+     ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(DiscordApiTokenReader :&gt; es, Request :&gt; es) =&gt;
+Eff (DiscordApplication : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordApplication.Interpreter.html#runDiscordApplication"><span class="hs-identifier hs-var">runDiscordApplication</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[DiscordApplication, Request, DiscordApiTokenReader,
+     DynamicLogger, Log, Environment, Concurrent, IOE]
+   ()
+ -&gt; Eff
+      '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+        Concurrent, IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[DiscordApplication, Request, DiscordApiTokenReader,
+           DynamicLogger, Log, Environment, Concurrent, IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[Request, DiscordApiTokenReader, DynamicLogger, Log, Environment,
+       Concurrent, IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[DiscordChannel, DiscordApplication, Request,
+    DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+    IOE]
+  ()
+-&gt; Eff
+     '[DiscordApplication, Request, DiscordApiTokenReader,
+       DynamicLogger, Log, Environment, Concurrent, IOE]
+     ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(DiscordApiTokenReader :&gt; es, Request :&gt; es) =&gt;
+Eff (DiscordChannel : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordChannel.Interpreter.html#runDiscordChannel"><span class="hs-identifier hs-var">runDiscordChannel</span></a></span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[DiscordChannel, DiscordApplication, Request,
+     DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+     IOE]
+   ()
+ -&gt; Eff
+      '[DiscordApplication, Request, DiscordApiTokenReader,
+        DynamicLogger, Log, Environment, Concurrent, IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[DiscordChannel, DiscordApplication, Request,
+           DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+           IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[DiscordApplication, Request, DiscordApiTokenReader,
+       DynamicLogger, Log, Environment, Concurrent, IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[SlashCommand, DiscordChannel, DiscordApplication, Request,
+    DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+    IOE]
+  ()
+-&gt; Eff
+     '[DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(DiscordApiTokenReader :&gt; es, Request :&gt; es,
+ DiscordApplication :&gt; es, DynamicLogger :&gt; es) =&gt;
+Eff (SlashCommand : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordSlash.Interpreter.html#runRegisterSlash"><span class="hs-identifier hs-var">runRegisterSlash</span></a></span><span>
+</span><span id="line-61"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[SlashCommand, DiscordChannel, DiscordApplication, Request,
+     DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+     IOE]
+   ()
+ -&gt; Eff
+      '[DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[SlashCommand, DiscordChannel, DiscordApplication, Request,
+           DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+           IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall s (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+s -&gt; Eff (State s : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">evalState</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.User.html#User"><span class="hs-identifier hs-type">User</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe User
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[State (Maybe User), SlashCommand, DiscordChannel,
+     DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+     Log, Environment, Concurrent, IOE]
+   ()
+ -&gt; Eff
+      '[SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[State (Maybe User), SlashCommand, DiscordChannel,
+           DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+           Log, Environment, Concurrent, IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[BotUser, State (Maybe User), SlashCommand, DiscordChannel,
+    DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+    Log, Environment, Concurrent, IOE]
+  ()
+-&gt; Eff
+     '[State (Maybe User), SlashCommand, DiscordChannel,
+       DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+       Log, Environment, Concurrent, IOE]
+     ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(State (Maybe User) :&gt; es) =&gt;
+Eff (BotUser : es) a -&gt; Eff es a
+</span><a href="Effectful.BotUser.Interpreter.html#runBotUser"><span class="hs-identifier hs-var">runBotUser</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[BotUser, State (Maybe User), SlashCommand, DiscordChannel,
+     DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+     Log, Environment, Concurrent, IOE]
+   ()
+ -&gt; Eff
+      '[State (Maybe User), SlashCommand, DiscordChannel,
+        DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+        Log, Environment, Concurrent, IOE]
+      ())
+-&gt; (Eff
+      '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+        SlashCommand, DiscordChannel, DiscordApplication, Request,
+        DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+        IOE]
+      ()
+    -&gt; Eff
+         '[BotUser, State (Maybe User), SlashCommand, DiscordChannel,
+           DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+           Log, Environment, Concurrent, IOE]
+         ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff
+     '[State (Maybe User), SlashCommand, DiscordChannel,
+       DiscordApplication, Request, DiscordApiTokenReader, DynamicLogger,
+       Log, Environment, Concurrent, IOE]
+     ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall s (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+s -&gt; Eff (State s : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">evalState</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe HeartbeatInterval
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><span class="annottext">(Eff
+   '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+     SlashCommand, DiscordChannel, DiscordApplication, Request,
+     DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+     IOE]
+   ()
+ -&gt; Eff '[IOE] ())
+-&gt; Eff
+     '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+       SlashCommand, DiscordChannel, DiscordApplication, Request,
+       DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+       IOE]
+     ()
+-&gt; Eff '[IOE] ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff
+  '[State (Maybe HeartbeatInterval), BotUser, State (Maybe User),
+    SlashCommand, DiscordChannel, DiscordApplication, Request,
+    DiscordApiTokenReader, DynamicLogger, Log, Environment, Concurrent,
+    IOE]
+  ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, IOE :&gt; es, Concurrent :&gt; es,
+ Environment :&gt; es, DiscordApiTokenReader :&gt; es,
+ DiscordChannel :&gt; es, BotUser :&gt; es, SlashCommand :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Eff es ()
+</span><a href="Lib.html#startUp"><span class="hs-identifier hs-var">startUp</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679309512"><span class="annot"><a href="Lib.html#startUp"><span class="hs-identifier hs-type">startUp</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">IOE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Concurrent</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Environment</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-73"></span><span>    </span><span class="annot"><a href="Effectful.BotUser.Effect.html#BotUser"><span class="hs-identifier hs-type">BotUser</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><a href="Effectful.DiscordSlash.Effect.html#SlashCommand"><span class="hs-identifier hs-type">SlashCommand</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309512"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-78"></span><span id="startUp"><span class="annot"><span class="annottext">startUp :: forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, IOE :&gt; es, Concurrent :&gt; es,
+ Environment :&gt; es, DiscordApiTokenReader :&gt; es,
+ DiscordChannel :&gt; es, BotUser :&gt; es, SlashCommand :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Eff es ()
+</span><a href="Lib.html#startUp"><span class="hs-identifier hs-var hs-var">startUp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Hello uzi&quot;</span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Register Slash&quot;</span></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">SlashCommand (Eff es) () -&gt; Eff es ()
+forall (e :: (* -&gt; *) -&gt; * -&gt; *) (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span>
+</span><span id="line-85"></span><span>      </span><span class="annot"><span class="annottext">(SlashCommand (Eff es) () -&gt; Eff es ())
+-&gt; SlashCommand (Eff es) () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand (Eff es) ()
+forall (m :: * -&gt; *).
+Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand m ()
+</span><a href="Effectful.DiscordSlash.Effect.html#makeGlobalSlashCommand"><span class="hs-identifier hs-var">makeGlobalSlashCommand</span></a></span><span>
+</span><span id="line-86"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;create-times&quot;</span></span><span>
+</span><span id="line-87"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;#times-&lt;&#12354;&#12394;&#12383;&#12398;&#21517;&#21069;&gt; &#12398;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#20316;&#25104;&#12373;&#12428;&#12289;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#12477;&#12540;&#12488;&#12373;&#12428;&#12414;&#12377;&quot;</span></span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name -&gt; Description -&gt; Bool -&gt; CommandOption
+</span><a href="Data.Discord.Request.SlashCommand.html#StringOption"><span class="hs-identifier hs-var">StringOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Name
+</span><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier hs-var">Name</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;name&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Description
+</span><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier hs-var">Description</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;times-{name} &#12392;&#12356;&#12358;&#21517;&#21069;&#12391;&#20316;&#25104;&#12375;&#12414;&#12377;&#12290;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">]</span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><span class="annottext">Int -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(Concurrent :&gt; es) =&gt;
+Int -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">threadDelay</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5000000</span></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-91"></span><span>    </span><span class="annot"><span class="annottext">SlashCommand (Eff es) () -&gt; Eff es ()
+forall (e :: (* -&gt; *) -&gt; * -&gt; *) (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span>
+</span><span id="line-92"></span><span>      </span><span class="annot"><span class="annottext">(SlashCommand (Eff es) () -&gt; Eff es ())
+-&gt; SlashCommand (Eff es) () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand (Eff es) ()
+forall (m :: * -&gt; *).
+Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand m ()
+</span><a href="Effectful.DiscordSlash.Effect.html#makeGlobalSlashCommand"><span class="hs-identifier hs-var">makeGlobalSlashCommand</span></a></span><span>
+</span><span id="line-93"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;organize-times&quot;</span></span><span>
+</span><span id="line-94"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12434; times- prefix&#12434;&#38500;&#12356;&#12383; A-M N-Z &#12398;&#12464;&#12523;&#12540;&#12503;&#12395;&#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12375;&#12390;&#12363;&#12425;&#12289;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#20006;&#12403;&#38918;&#12434;&#12477;&#12540;&#12488;&#12375;&#12414;&#12377;&quot;</span></span><span>
+</span><span id="line-95"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><span class="annottext">Int -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(Concurrent :&gt; es) =&gt;
+Int -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">threadDelay</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5000000</span></span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-98"></span><span>    </span><span class="annot"><span class="annottext">SlashCommand (Eff es) () -&gt; Eff es ()
+forall (e :: (* -&gt; *) -&gt; * -&gt; *) (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span>
+</span><span id="line-99"></span><span>      </span><span class="annot"><span class="annottext">(SlashCommand (Eff es) () -&gt; Eff es ())
+-&gt; SlashCommand (Eff es) () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand (Eff es) ()
+forall (m :: * -&gt; *).
+Text -&gt; Text -&gt; [CommandOption] -&gt; SlashCommand m ()
+</span><a href="Effectful.DiscordSlash.Effect.html#makeGlobalSlashCommand"><span class="hs-identifier hs-var">makeGlobalSlashCommand</span></a></span><span>
+</span><span id="line-100"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;help&quot;</span></span><span>
+</span><span id="line-101"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;help&#12398;&#26360;&#12363;&#12428;&#12383;&#12522;&#12531;&#12463;&#12364;&#25237;&#31295;&#12373;&#12428;&#12414;&#12377;&quot;</span></span><span>
+</span><span id="line-102"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Load enviroments&quot;</span></span><span>
+</span><span id="line-105"></span><span>  </span><span class="annot"><span class="annottext">(Connection -&gt; Eff es ()) -&gt; Eff es ()
+forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+(Connection -&gt; m a) -&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#withDiscordGatewayConnection"><span class="hs-identifier hs-var">withDiscordGatewayConnection</span></a></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, IOE :&gt; es, Concurrent :&gt; es,
+ Environment :&gt; es, DiscordApiTokenReader :&gt; es,
+ DiscordChannel :&gt; es, BotUser :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Connection -&gt; Eff es ()
+</span><a href="Lib.html#onConnect"><span class="hs-identifier hs-var">onConnect</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span class="annot"><span class="annottext">() -&gt; Eff es ()
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679309537"><span class="annot"><a href="Lib.html#onConnect"><span class="hs-identifier hs-type">onConnect</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-110"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">IOE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-111"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Concurrent</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-112"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Environment</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-114"></span><span>    </span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><a href="Effectful.BotUser.Effect.html#BotUser"><span class="hs-identifier hs-type">BotUser</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-116"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-118"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-119"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309537"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-120"></span><span id="onConnect"><span class="annot"><span class="annottext">onConnect :: forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, IOE :&gt; es, Concurrent :&gt; es,
+ Environment :&gt; es, DiscordApiTokenReader :&gt; es,
+ DiscordChannel :&gt; es, BotUser :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Connection -&gt; Eff es ()
+</span><a href="Lib.html#onConnect"><span class="hs-identifier hs-var hs-var">onConnect</span></a></span></span><span> </span><span id="local-6989586621679309883"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679309883"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Connected websocket&quot;</span></span><span>
+</span><span id="line-122"></span><span>  </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Int -&gt; IO () -&gt; Eff es () -&gt; Eff es ()
+forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+Connection -&gt; Int -&gt; IO () -&gt; m a -&gt; m a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#withPingThread"><span class="hs-identifier hs-var">withPingThread</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679309883"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">15</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; IO ()
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; Eff es () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621679309885"><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309885"><span class="hs-identifier hs-var">queue</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STM (TQueue Response) -&gt; Eff es (TQueue Response)
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(Concurrent :&gt; es) =&gt;
+STM a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="annot"><span class="annottext">STM (TQueue Response)
+forall a. STM (TQueue a)
+</span><span class="hs-identifier hs-var">newTQueue</span></span><span>
+</span><span id="line-124"></span><span>    </span><span class="annot"><span class="annottext">[Eff (DiscordGateway : es) ()]
+-&gt; (Eff (DiscordGateway : es) () -&gt; Eff es Any) -&gt; Eff es ()
+forall (f :: * -&gt; *) (es :: [(* -&gt; *) -&gt; * -&gt; *]) a b.
+(Foldable f, Concurrent :&gt; es) =&gt;
+f a -&gt; (a -&gt; Eff es b) -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">forConcurrently_</span></span><span>
+</span><span id="line-125"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TQueue Response -&gt; Eff (DiscordGateway : es) ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(Concurrent :&gt; es, DiscordGateway :&gt; es) =&gt;
+TQueue Response -&gt; Eff es ()
+</span><a href="Lib.html#receiver"><span class="hs-identifier hs-var">receiver</span></a></span><span> </span><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309885"><span class="hs-identifier hs-var">queue</span></a></span><span> </span><span class="annot"><span class="annottext">Eff (DiscordGateway : es) ()
+-&gt; (ReceiverError -&gt; Eff (DiscordGateway : es) ())
+-&gt; Eff (DiscordGateway : es) ()
+forall (m :: * -&gt; *) e a.
+(HasCallStack, MonadCatch m, Exception e) =&gt;
+m a -&gt; (e -&gt; m a) -&gt; m a
+</span><span class="hs-operator hs-var">`catch`</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">ReceiverError
+</span><a href="Lib.html#EventNotFound"><span class="hs-identifier hs-var">EventNotFound</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (DiscordGateway : es) ()
+forall a. a -&gt; Eff (DiscordGateway : es) a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-126"></span><span>        </span><span class="annot"><span class="annottext">TQueue Response -&gt; Eff (DiscordGateway : es) ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, Concurrent :&gt; es, DiscordGateway :&gt; es,
+ DiscordApiTokenReader :&gt; es, DiscordChannel :&gt; es, BotUser :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+TQueue Response -&gt; Eff es ()
+</span><a href="Lib.html#sender"><span class="hs-identifier hs-var">sender</span></a></span><span> </span><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309885"><span class="hs-identifier hs-var">queue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-127"></span><span>        </span><span class="annot"><span class="annottext">Eff (DiscordGateway : es) ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DiscordGateway :&gt; es, Concurrent :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es, DynamicLogger :&gt; es) =&gt;
+Eff es ()
+</span><a href="Lib.html#sendHeartbeat"><span class="hs-identifier hs-var">sendHeartbeat</span></a></span><span> </span><span class="annot"><span class="annottext">Eff (DiscordGateway : es) ()
+-&gt; (SendHeartbeatError -&gt; Eff (DiscordGateway : es) ())
+-&gt; Eff (DiscordGateway : es) ()
+forall (m :: * -&gt; *) e a.
+(HasCallStack, MonadCatch m, Exception e) =&gt;
+m a -&gt; (e -&gt; m a) -&gt; m a
+</span><span class="hs-operator hs-var">`catch`</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">SendHeartbeatError
+</span><a href="Lib.html#MissingHeartbeatInterval"><span class="hs-identifier hs-var">MissingHeartbeatInterval</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (DiscordGateway : es) ()
+forall a. a -&gt; Eff (DiscordGateway : es) a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-129"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es Any
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">forever</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es Any)
+-&gt; (Eff (DiscordGateway : es) () -&gt; Eff es ())
+-&gt; Eff (DiscordGateway : es) ()
+-&gt; Eff es Any
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Eff (DiscordGateway : es) () -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(IOE :&gt; es, Environment :&gt; es, DynamicLogger :&gt; es) =&gt;
+Connection -&gt; Eff (DiscordGateway : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordGateway.Interpreter.html#runDiscordGateway"><span class="hs-identifier hs-var">runDiscordGateway</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679309883"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-comment">-- TODO: Handle Ctrl + C and kill signal</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">() -&gt; Eff es ()
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-keyword">data</span><span> </span><span id="ReceiverError"><span class="annot"><a href="Lib.html#ReceiverError"><span class="hs-identifier hs-var">ReceiverError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="EventNotFound"><span class="annot"><a href="Lib.html#EventNotFound"><span class="hs-identifier hs-var">EventNotFound</span></a></span></span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679309895"><span id="local-6989586621679309897"><span id="local-6989586621679309901"><span class="annot"><span class="annottext">Int -&gt; ReceiverError -&gt; ShowS
+[ReceiverError] -&gt; ShowS
+ReceiverError -&gt; String
+(Int -&gt; ReceiverError -&gt; ShowS)
+-&gt; (ReceiverError -&gt; String)
+-&gt; ([ReceiverError] -&gt; ShowS)
+-&gt; Show ReceiverError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReceiverError -&gt; ShowS
+showsPrec :: Int -&gt; ReceiverError -&gt; ShowS
+$cshow :: ReceiverError -&gt; String
+show :: ReceiverError -&gt; String
+$cshowList :: [ReceiverError] -&gt; ShowS
+showList :: [ReceiverError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679309904"><span id="local-6989586621679309906"><span class="annot"><span class="annottext">ReceiverError -&gt; ReceiverError -&gt; Bool
+(ReceiverError -&gt; ReceiverError -&gt; Bool)
+-&gt; (ReceiverError -&gt; ReceiverError -&gt; Bool) -&gt; Eq ReceiverError
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ReceiverError -&gt; ReceiverError -&gt; Bool
+== :: ReceiverError -&gt; ReceiverError -&gt; Bool
+$c/= :: ReceiverError -&gt; ReceiverError -&gt; Bool
+/= :: ReceiverError -&gt; ReceiverError -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679309915"><span id="local-6989586621679309918"><span id="local-6989586621679309921"><span class="annot"><span class="annottext">Show ReceiverError
+Typeable ReceiverError
+(Typeable ReceiverError, Show ReceiverError) =&gt;
+(ReceiverError -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe ReceiverError)
+-&gt; (ReceiverError -&gt; String)
+-&gt; Exception ReceiverError
+SomeException -&gt; Maybe ReceiverError
+ReceiverError -&gt; String
+ReceiverError -&gt; SomeException
+forall e.
+(Typeable e, Show e) =&gt;
+(e -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe e) -&gt; (e -&gt; String) -&gt; Exception e
+$ctoException :: ReceiverError -&gt; SomeException
+toException :: ReceiverError -&gt; SomeException
+$cfromException :: SomeException -&gt; Maybe ReceiverError
+fromException :: SomeException -&gt; Maybe ReceiverError
+$cdisplayException :: ReceiverError -&gt; String
+displayException :: ReceiverError -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Exception</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621679309558"><span class="annot"><a href="Lib.html#receiver"><span class="hs-identifier hs-type">receiver</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Concurrent</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309558"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier hs-type">DiscordGateway</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309558"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TQueue</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309558"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-137"></span><span id="receiver"><span class="annot"><span class="annottext">receiver :: forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(Concurrent :&gt; es, DiscordGateway :&gt; es) =&gt;
+TQueue Response -&gt; Eff es ()
+</span><a href="Lib.html#receiver"><span class="hs-identifier hs-var hs-var">receiver</span></a></span></span><span> </span><span id="local-6989586621679309937"><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309937"><span class="hs-identifier hs-var">queue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621679309938"><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679309938"><span class="hs-identifier hs-var">event</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es Response
+-&gt; (Response -&gt; Eff es Response)
+-&gt; Maybe Response
+-&gt; Eff es Response
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">RIO.maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ReceiverError -&gt; Eff es Response
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Eff es a
+forall (m :: * -&gt; *) e a.
+(MonadThrow m, HasCallStack, Exception e) =&gt;
+e -&gt; m a
+</span><span class="hs-identifier hs-var">RIO.throwM</span></span><span> </span><span class="annot"><span class="annottext">ReceiverError
+</span><a href="Lib.html#EventNotFound"><span class="hs-identifier hs-var">EventNotFound</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Response -&gt; Eff es Response
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Response -&gt; Eff es Response)
+-&gt; Eff es (Maybe Response) -&gt; Eff es Response
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Eff es (Maybe Response)
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DiscordGateway :&gt; es) =&gt;
+Eff es (Maybe Response)
+</span><a href="Effectful.DiscordGateway.Effect.html#receiveEvent"><span class="hs-identifier hs-var">receiveEvent</span></a></span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="annottext">STM () -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(Concurrent :&gt; es) =&gt;
+STM a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="annot"><span class="annottext">(STM () -&gt; Eff es ()) -&gt; STM () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TQueue Response -&gt; Response -&gt; STM ()
+forall a. TQueue a -&gt; a -&gt; STM ()
+</span><span class="hs-identifier hs-var">writeTQueue</span></span><span> </span><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309937"><span class="hs-identifier hs-var">queue</span></a></span><span> </span><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679309938"><span class="hs-identifier hs-var">event</span></a></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-keyword">data</span><span> </span><span id="SenderError"><span class="annot"><a href="Lib.html#SenderError"><span class="hs-identifier hs-var">SenderError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="EventQueueIsEmpty"><span class="annot"><a href="Lib.html#EventQueueIsEmpty"><span class="hs-identifier hs-var">EventQueueIsEmpty</span></a></span></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679309945"><span id="local-6989586621679309947"><span id="local-6989586621679309951"><span class="annot"><span class="annottext">Int -&gt; SenderError -&gt; ShowS
+[SenderError] -&gt; ShowS
+SenderError -&gt; String
+(Int -&gt; SenderError -&gt; ShowS)
+-&gt; (SenderError -&gt; String)
+-&gt; ([SenderError] -&gt; ShowS)
+-&gt; Show SenderError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; SenderError -&gt; ShowS
+showsPrec :: Int -&gt; SenderError -&gt; ShowS
+$cshow :: SenderError -&gt; String
+show :: SenderError -&gt; String
+$cshowList :: [SenderError] -&gt; ShowS
+showList :: [SenderError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span id="local-6989586621679309562"><span class="annot"><a href="Lib.html#sender"><span class="hs-identifier hs-type">sender</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-145"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-146"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Concurrent</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-147"></span><span>    </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier hs-type">DiscordGateway</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-148"></span><span>    </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><a href="Effectful.DiscordChannel.Effect.html#DiscordChannel"><span class="hs-identifier hs-type">DiscordChannel</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-150"></span><span>    </span><span class="annot"><a href="Effectful.BotUser.Effect.html#BotUser"><span class="hs-identifier hs-type">BotUser</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-152"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-153"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">TQueue</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.Internal.html#Response"><span class="hs-identifier hs-type">Response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309562"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-155"></span><span id="sender"><span class="annot"><span class="annottext">sender :: forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DynamicLogger :&gt; es, Concurrent :&gt; es, DiscordGateway :&gt; es,
+ DiscordApiTokenReader :&gt; es, DiscordChannel :&gt; es, BotUser :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+TQueue Response -&gt; Eff es ()
+</span><a href="Lib.html#sender"><span class="hs-identifier hs-var hs-var">sender</span></a></span></span><span> </span><span id="local-6989586621679309968"><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309968"><span class="hs-identifier hs-var">queue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-156"></span><span>  </span><span id="local-6989586621679309969"><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679309969"><span class="hs-identifier hs-var">event</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STM Response -&gt; Eff es Response
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]) a.
+(Concurrent :&gt; es) =&gt;
+STM a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="annot"><span class="annottext">(STM Response -&gt; Eff es Response)
+-&gt; STM Response -&gt; Eff es Response
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TQueue Response -&gt; STM Response
+forall a. TQueue a -&gt; STM a
+</span><span class="hs-identifier hs-var">readTQueue</span></span><span> </span><span class="annot"><span class="annottext">TQueue Response
+</span><a href="#local-6989586621679309968"><span class="hs-identifier hs-var">queue</span></a></span><span>
+</span><span id="line-157"></span><span>  </span><span class="annot"><span class="annottext">Response -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DiscordGateway :&gt; es, DynamicLogger :&gt; es,
+ DiscordApiTokenReader :&gt; es, DiscordChannel :&gt; es, BotUser :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es) =&gt;
+Response -&gt; Eff es ()
+</span><a href="EventHandler.html#dispatchEventHandlers"><span class="hs-identifier hs-var">dispatchEventHandlers</span></a></span><span> </span><span class="annot"><span class="annottext">Response
+</span><a href="#local-6989586621679309969"><span class="hs-identifier hs-var">event</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="hs-keyword">data</span><span> </span><span id="SendHeartbeatError"><span class="annot"><a href="Lib.html#SendHeartbeatError"><span class="hs-identifier hs-var">SendHeartbeatError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MissingHeartbeatInterval"><span class="annot"><a href="Lib.html#MissingHeartbeatInterval"><span class="hs-identifier hs-var">MissingHeartbeatInterval</span></a></span></span><span>
+</span><span id="line-160"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679309972"><span id="local-6989586621679309974"><span id="local-6989586621679309978"><span class="annot"><span class="annottext">Int -&gt; SendHeartbeatError -&gt; ShowS
+[SendHeartbeatError] -&gt; ShowS
+SendHeartbeatError -&gt; String
+(Int -&gt; SendHeartbeatError -&gt; ShowS)
+-&gt; (SendHeartbeatError -&gt; String)
+-&gt; ([SendHeartbeatError] -&gt; ShowS)
+-&gt; Show SendHeartbeatError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; SendHeartbeatError -&gt; ShowS
+showsPrec :: Int -&gt; SendHeartbeatError -&gt; ShowS
+$cshow :: SendHeartbeatError -&gt; String
+show :: SendHeartbeatError -&gt; String
+$cshowList :: [SendHeartbeatError] -&gt; ShowS
+showList :: [SendHeartbeatError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679309981"><span id="local-6989586621679309983"><span class="annot"><span class="annottext">SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool
+(SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool)
+-&gt; (SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool)
+-&gt; Eq SendHeartbeatError
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool
+== :: SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool
+$c/= :: SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool
+/= :: SendHeartbeatError -&gt; SendHeartbeatError -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679309991"><span id="local-6989586621679309994"><span id="local-6989586621679309997"><span class="annot"><span class="annottext">Show SendHeartbeatError
+Typeable SendHeartbeatError
+(Typeable SendHeartbeatError, Show SendHeartbeatError) =&gt;
+(SendHeartbeatError -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe SendHeartbeatError)
+-&gt; (SendHeartbeatError -&gt; String)
+-&gt; Exception SendHeartbeatError
+SomeException -&gt; Maybe SendHeartbeatError
+SendHeartbeatError -&gt; String
+SendHeartbeatError -&gt; SomeException
+forall e.
+(Typeable e, Show e) =&gt;
+(e -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe e) -&gt; (e -&gt; String) -&gt; Exception e
+$ctoException :: SendHeartbeatError -&gt; SomeException
+toException :: SendHeartbeatError -&gt; SomeException
+$cfromException :: SomeException -&gt; Maybe SendHeartbeatError
+fromException :: SomeException -&gt; Maybe SendHeartbeatError
+$cdisplayException :: SendHeartbeatError -&gt; String
+displayException :: SendHeartbeatError -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Exception</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span id="local-6989586621679309563"><span class="annot"><a href="Lib.html#sendHeartbeat"><span class="hs-identifier hs-type">sendHeartbeat</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-163"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DiscordGateway.Effect.html#DiscordGateway"><span class="hs-identifier hs-type">DiscordGateway</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309563"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-164"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Concurrent</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309563"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-165"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">State</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309563"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><a href="Effectful.DynamicLogger.Effect.html#DynamicLogger"><span class="hs-identifier hs-type">DynamicLogger</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679309563"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-167"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-168"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679309563"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-169"></span><span id="sendHeartbeat"><span class="annot"><span class="annottext">sendHeartbeat :: forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(DiscordGateway :&gt; es, Concurrent :&gt; es,
+ State (Maybe HeartbeatInterval) :&gt; es, DynamicLogger :&gt; es) =&gt;
+Eff es ()
+</span><a href="Lib.html#sendHeartbeat"><span class="hs-identifier hs-var hs-var">sendHeartbeat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-170"></span><span>  </span><span id="local-6989586621679310032"><span class="annot"><span class="annottext">Maybe HeartbeatInterval
+</span><a href="#local-6989586621679310032"><span class="hs-identifier hs-var">intervalMaybe</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall s (es :: [(* -&gt; *) -&gt; * -&gt; *]). (State s :&gt; es) =&gt; Eff es s
+</span><span class="hs-identifier hs-var">get</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-171"></span><span>  </span><span id="local-6989586621679310034"><span class="annot"><span class="annottext">HeartbeatInterval
+</span><a href="#local-6989586621679310034"><span class="hs-identifier hs-var">interval</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es HeartbeatInterval
+-&gt; (HeartbeatInterval -&gt; Eff es HeartbeatInterval)
+-&gt; Maybe HeartbeatInterval
+-&gt; Eff es HeartbeatInterval
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SendHeartbeatError -&gt; Eff es HeartbeatInterval
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Eff es a
+forall (m :: * -&gt; *) e a.
+(MonadThrow m, HasCallStack, Exception e) =&gt;
+e -&gt; m a
+</span><span class="hs-identifier hs-var">RIO.throwM</span></span><span> </span><span class="annot"><span class="annottext">SendHeartbeatError
+</span><a href="Lib.html#MissingHeartbeatInterval"><span class="hs-identifier hs-var">MissingHeartbeatInterval</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">HeartbeatInterval -&gt; Eff es HeartbeatInterval
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe HeartbeatInterval
+</span><a href="#local-6989586621679310032"><span class="hs-identifier hs-var">intervalMaybe</span></a></span><span>
+</span><span id="line-172"></span><span>  </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Start send heartbeart&quot;</span></span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="annottext">Request -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DiscordGateway :&gt; es) =&gt;
+Request -&gt; Eff es ()
+</span><a href="Effectful.DiscordGateway.Effect.html#sendEvent"><span class="hs-identifier hs-var">sendEvent</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="Data.Discord.Request.Internal.html#Heartbeat"><span class="hs-identifier hs-var">Heartbeat</span></a></span><span>
+</span><span id="line-174"></span><span>  </span><span class="annot"><span class="annottext">Utf8Builder -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(HasCallStack, DynamicLogger :&gt; es) =&gt;
+Utf8Builder -&gt; Eff es ()
+</span><a href="Effectful.DynamicLogger.Effect.html#info"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">Utf8Builder
+</span><span class="hs-string">&quot;Sent heartbeart&quot;</span></span><span>
+</span><span id="line-175"></span><span>  </span><span class="annot"><span class="annottext">Eff es () -&gt; Eff es ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">RIO.void</span></span><span> </span><span class="annot"><span class="annottext">(Eff es () -&gt; Eff es ()) -&gt; (Int -&gt; Eff es ()) -&gt; Int -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Eff es ()
+forall (es :: [(* -&gt; *) -&gt; * -&gt; *]).
+(Concurrent :&gt; es) =&gt;
+Int -&gt; Eff es ()
+</span><span class="hs-identifier hs-var">threadDelay</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Eff es ()) -&gt; Int -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HeartbeatInterval -&gt; Int
+</span><a href="Data.Uzi.HeartbeatInterval.html#coerceHeartbeatInterval"><span class="hs-identifier hs-var">coerceHeartbeatInterval</span></a></span><span> </span><span class="annot"><span class="annottext">HeartbeatInterval
+</span><a href="#local-6989586621679310034"><span class="hs-identifier hs-var">interval</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-176"></span></pre></body></html>

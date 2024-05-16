@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE MagicHash #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE UnliftedFFITypes #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK not-home #-}</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Internal.Utils</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#inlineBracket"><span class="hs-identifier">inlineBracket</span></a></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Utils for 'ThreadId'</span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#weakThreadId"><span class="hs-identifier">weakThreadId</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#eqThreadId"><span class="hs-identifier">eqThreadId</span></a></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Utils for 'Any'</span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Any</span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#toAny"><span class="hs-identifier">toAny</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#fromAny"><span class="hs-identifier">fromAny</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Strict 'IORef'</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier">IORef'</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#newIORef%27"><span class="hs-identifier">newIORef'</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#readIORef%27"><span class="hs-identifier">readIORef'</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#writeIORef%27"><span class="hs-identifier">writeIORef'</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Strict 'MVar'</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier">MVar'</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#toMVar%27"><span class="hs-identifier">toMVar'</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier">newMVar'</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier">readMVar'</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#modifyMVar%27"><span class="hs-identifier">modifyMVar'</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier">modifyMVar_'</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Unique</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier">Unique</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#newUnique"><span class="hs-identifier">newUnique</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-comment">-- * CallStack</span></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#thawCallStack"><span class="hs-identifier">thawCallStack</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Concurrent.MVar</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.IORef</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Primitive.ByteArray</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Conc.Sync</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ThreadId</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Any</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">RealWorld</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CallStack</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Unsafe.Coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unsafeCoerce</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if MIN_VERSION_base(4,19,0)
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Conc.Sync</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">fromThreadId</span><span class="hs-special">)</span><span class="hs-cpp">
+#else
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Addr#</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">ThreadId#</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unsafeCoerce#</span></span><span class="hs-special">)</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &gt;= 904
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span class="hs-cpp">
+#else
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Foreign.C.Types</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">#endif
+</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Version of bracket with an INLINE pragma to work around</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/-/issues/22824.</span><span>
+</span><span id="line-61"></span><span id="local-6989586621679073912"><span id="local-6989586621679073913"><span id="local-6989586621679073914"><span class="annot"><a href="Effectful.Internal.Utils.html#inlineBracket"><span class="hs-identifier hs-type">inlineBracket</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073912"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679073912"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073913"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679073912"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073914"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073914"><span class="hs-identifier hs-type">c</span></a></span></span></span></span><span>
+</span><span id="line-62"></span><span id="inlineBracket"><span class="annot"><span class="annottext">inlineBracket :: forall a b c. IO a -&gt; (a -&gt; IO b) -&gt; (a -&gt; IO c) -&gt; IO c
+</span><a href="Effectful.Internal.Utils.html#inlineBracket"><span class="hs-identifier hs-var hs-var">inlineBracket</span></a></span></span><span> </span><span id="local-6989586621679074023"><span class="annot"><span class="annottext">IO a
+</span><a href="#local-6989586621679074023"><span class="hs-identifier hs-var">before</span></a></span></span><span> </span><span id="local-6989586621679074024"><span class="annot"><span class="annottext">a -&gt; IO b
+</span><a href="#local-6989586621679074024"><span class="hs-identifier hs-var">after</span></a></span></span><span> </span><span id="local-6989586621679074025"><span class="annot"><span class="annottext">a -&gt; IO c
+</span><a href="#local-6989586621679074025"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall a. IO a -&gt; IO a) -&gt; IO c) -&gt; IO c
+forall b. ((forall a. IO a -&gt; IO a) -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">mask</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. IO a -&gt; IO a) -&gt; IO c) -&gt; IO c)
+-&gt; ((forall a. IO a -&gt; IO a) -&gt; IO c) -&gt; IO c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679074027"><span class="annot"><span class="annottext">forall a. IO a -&gt; IO a
+</span><a href="#local-6989586621679074027"><span class="hs-identifier hs-var">unmask</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679074028"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074028"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO a
+</span><a href="#local-6989586621679074023"><span class="hs-identifier hs-var">before</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679074029"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679074029"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO c -&gt; IO c
+forall a. IO a -&gt; IO a
+</span><a href="#local-6989586621679074027"><span class="hs-identifier hs-var">unmask</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; IO c
+</span><a href="#local-6989586621679074025"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074028"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IO c -&gt; IO b -&gt; IO c
+forall a b. IO a -&gt; IO b -&gt; IO a
+</span><span class="hs-operator hs-var">`onException`</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO b
+</span><a href="#local-6989586621679074024"><span class="hs-identifier hs-var">after</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074028"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; IO b
+</span><a href="#local-6989586621679074024"><span class="hs-identifier hs-var">after</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074028"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">c -&gt; IO c
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679074029"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-67"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#inlineBracket"><span class="hs-pragma hs-type">inlineBracket</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><span class="hs-comment">-- | Get an id of a thread that doesn't prevent its garbage collection.</span></span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Effectful.Internal.Utils.html#weakThreadId"><span class="hs-identifier hs-type">weakThreadId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ThreadId</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-cpp">
+#if MIN_VERSION_base(4,19,0)
+</span><span class="hs-identifier">weakThreadId</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">fromIntegral</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">fromThreadId</span><span class="hs-cpp">
+#else
+</span><span id="weakThreadId"><span class="annot"><span class="annottext">weakThreadId :: ThreadId -&gt; Int
+</span><a href="Effectful.Internal.Utils.html#weakThreadId"><span class="hs-identifier hs-var hs-var">weakThreadId</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ThreadId</span></span><span> </span><span id="local-6989586621679074031"><span class="annot"><span class="annottext">ThreadId#
+</span><a href="#local-6989586621679074031"><span class="hs-identifier hs-var">t#</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Word64 -&gt; Int) -&gt; Word64 -&gt; Int
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Addr# -&gt; Word64
+</span><a href="Effectful.Internal.Utils.html#rts_getThreadId"><span class="hs-identifier hs-var">rts_getThreadId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ThreadId# -&gt; Addr#
+</span><a href="Effectful.Internal.Utils.html#threadIdToAddr%23"><span class="hs-identifier hs-var">threadIdToAddr#</span></a></span><span> </span><span class="annot"><span class="annottext">ThreadId#
+</span><a href="#local-6989586621679074031"><span class="hs-identifier hs-var">t#</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;rts_getThreadId&quot;</span></span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &gt;= 904
+</span><span>  </span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/-/merge_requests/6163</span><span>
+</span><span id="line-81"></span><span>  </span><span id="rts_getThreadId"><span class="annot"><a href="Effectful.Internal.Utils.html#rts_getThreadId"><span class="hs-identifier hs-var">rts_getThreadId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Addr#</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span class="hs-cpp">
+#elif __GLASGOW_HASKELL__ &gt;= 900
+</span><span>  </span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/-/merge_requests/1254</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-identifier">rts_getThreadId</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">Addr#</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">CLong</span><span class="hs-cpp">
+#else
+</span><span>  </span><span class="hs-identifier">rts_getThreadId</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">Addr#</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">CInt</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- Note: FFI imports take Addr# instead of ThreadId# because of</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/-/issues/8281, which would prevent loading</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- effectful-core into GHCi.</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- Previous workaround was to use an internal library with just this module, but</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- this is not viable because of bugs in stack (sigh).</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- The coercion is fine because GHC represents ThreadId# as a pointer.</span><span>
+</span><span id="line-97"></span><span class="annot"><a href="Effectful.Internal.Utils.html#threadIdToAddr%23"><span class="hs-identifier hs-type">threadIdToAddr#</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ThreadId#</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Addr#</span></span><span>
+</span><span id="line-98"></span><span id="threadIdToAddr%23"><span class="annot"><span class="annottext">threadIdToAddr# :: ThreadId# -&gt; Addr#
+</span><a href="Effectful.Internal.Utils.html#threadIdToAddr%23"><span class="hs-identifier hs-var hs-var">threadIdToAddr#</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ThreadId# -&gt; Addr#
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce#</span></span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-101"></span><span class="hs-comment">----------------------------------------</span><span class="hs-cpp">
+
+#if __GLASGOW_HASKELL__ &lt; 900
+</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- | 'Eq' instance for 'ThreadId' is broken in GHC &lt; 9, see</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/-/issues/16761 for more info.</span><span>
+</span><span id="line-107"></span><span class="hs-identifier">eqThreadId</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">ThreadId</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">ThreadId</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">Bool</span><span>
+</span><span id="line-108"></span><span class="hs-identifier">eqThreadId</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">ThreadId</span><span> </span><span class="hs-identifier">t1#</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">ThreadId</span><span> </span><span class="hs-identifier">t2#</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-identifier">eq_thread</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">threadIdToAddr#</span><span> </span><span class="hs-identifier">t1#</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">threadIdToAddr#</span><span> </span><span class="hs-identifier">t2#</span><span class="hs-special">)</span><span> </span><span class="hs-operator">==</span><span> </span><span class="hs-number">1</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">ccall</span><span> </span><span class="hs-keyword">unsafe</span><span> </span><span class="hs-string">&quot;effectful_eq_thread&quot;</span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-identifier">eq_thread</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">Addr#</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">Addr#</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">CLong</span><span class="hs-cpp">
+
+#else
+</span><span>
+</span><span id="line-116"></span><span class="annot"><a href="Effectful.Internal.Utils.html#eqThreadId"><span class="hs-identifier hs-type">eqThreadId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ThreadId</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ThreadId</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-117"></span><span id="eqThreadId"><span class="annot"><span class="annottext">eqThreadId :: ThreadId -&gt; ThreadId -&gt; Bool
+</span><a href="Effectful.Internal.Utils.html#eqThreadId"><span class="hs-identifier hs-var hs-var">eqThreadId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ThreadId -&gt; ThreadId -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(==)</span></span><span class="hs-cpp">
+
+#endif
+</span><span>
+</span><span id="line-121"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span id="local-6989586621679073934"><span class="annot"><a href="Effectful.Internal.Utils.html#toAny"><span class="hs-identifier hs-type">toAny</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679073934"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Any</span></span></span><span>
+</span><span id="line-124"></span><span id="toAny"><span class="annot"><span class="annottext">toAny :: forall a. a -&gt; Any
+</span><a href="Effectful.Internal.Utils.html#toAny"><span class="hs-identifier hs-var hs-var">toAny</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Any
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce</span></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679073938"><span class="annot"><a href="Effectful.Internal.Utils.html#fromAny"><span class="hs-identifier hs-type">fromAny</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Any</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679073938"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-127"></span><span id="fromAny"><span class="annot"><span class="annottext">fromAny :: forall a. Any -&gt; a
+</span><a href="Effectful.Internal.Utils.html#fromAny"><span class="hs-identifier hs-var hs-var">fromAny</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Any -&gt; a
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce</span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="annot"><span class="hs-comment">-- | A strict variant of 'IORef'.</span></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">newtype</span><span> </span><span id="IORef%27"><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-var">IORef'</span></a></span></span><span> </span><span id="local-6989586621679073951"><span class="annot"><a href="#local-6989586621679073951"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IORef%27"><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-var">IORef'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IORef</span></span><span> </span><span class="annot"><a href="#local-6989586621679073951"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679074036"><span id="local-6989586621679074041"><span class="annot"><span class="annottext">IORef' a -&gt; IORef' a -&gt; Bool
+(IORef' a -&gt; IORef' a -&gt; Bool)
+-&gt; (IORef' a -&gt; IORef' a -&gt; Bool) -&gt; Eq (IORef' a)
+forall a. IORef' a -&gt; IORef' a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. IORef' a -&gt; IORef' a -&gt; Bool
+== :: IORef' a -&gt; IORef' a -&gt; Bool
+$c/= :: forall a. IORef' a -&gt; IORef' a -&gt; Bool
+/= :: IORef' a -&gt; IORef' a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span id="local-6989586621679073948"><span class="annot"><a href="Effectful.Internal.Utils.html#newIORef%27"><span class="hs-identifier hs-type">newIORef'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679073948"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-type">IORef'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073948"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-136"></span><span id="newIORef%27"><span class="annot"><span class="annottext">newIORef' :: forall a. a -&gt; IO (IORef' a)
+</span><a href="Effectful.Internal.Utils.html#newIORef%27"><span class="hs-identifier hs-var hs-var">newIORef'</span></a></span></span><span> </span><span id="local-6989586621679074047"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074047"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074047"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (IORef' a) -&gt; IO (IORef' a)
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IORef a -&gt; IORef' a
+forall a. IORef a -&gt; IORef' a
+</span><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-var">IORef'</span></a></span><span> </span><span class="annot"><span class="annottext">(IORef a -&gt; IORef' a) -&gt; IO (IORef a) -&gt; IO (IORef' a)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (IORef a)
+forall a. a -&gt; IO (IORef a)
+</span><span class="hs-identifier hs-var">newIORef</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074047"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span id="local-6989586621679073956"><span class="annot"><a href="Effectful.Internal.Utils.html#readIORef%27"><span class="hs-identifier hs-type">readIORef'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-type">IORef'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073956"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073956"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-139"></span><span id="readIORef%27"><span class="annot"><span class="annottext">readIORef' :: forall a. IORef' a -&gt; IO a
+</span><a href="Effectful.Internal.Utils.html#readIORef%27"><span class="hs-identifier hs-var hs-var">readIORef'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-type">IORef'</span></a></span><span> </span><span id="local-6989586621679074050"><span class="annot"><span class="annottext">IORef a
+</span><a href="#local-6989586621679074050"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IORef a -&gt; IO a
+forall a. IORef a -&gt; IO a
+</span><span class="hs-identifier hs-var">readIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef a
+</span><a href="#local-6989586621679074050"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679073959"><span class="annot"><a href="Effectful.Internal.Utils.html#writeIORef%27"><span class="hs-identifier hs-type">writeIORef'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-type">IORef'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073959"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679073959"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-142"></span><span id="writeIORef%27"><span class="annot"><span class="annottext">writeIORef' :: forall a. IORef' a -&gt; a -&gt; IO ()
+</span><a href="Effectful.Internal.Utils.html#writeIORef%27"><span class="hs-identifier hs-var hs-var">writeIORef'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#IORef%27"><span class="hs-identifier hs-type">IORef'</span></a></span><span> </span><span id="local-6989586621679074052"><span class="annot"><span class="annottext">IORef a
+</span><a href="#local-6989586621679074052"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679074053"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074053"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074053"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO () -&gt; IO ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">IORef a -&gt; a -&gt; IO ()
+forall a. IORef a -&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">writeIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef a
+</span><a href="#local-6989586621679074052"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074053"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="annot"><span class="hs-comment">-- | A strict variant of 'MVar'.</span></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">newtype</span><span> </span><span id="MVar%27"><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-var">MVar'</span></a></span></span><span> </span><span id="local-6989586621679073969"><span class="annot"><a href="#local-6989586621679073969"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MVar%27"><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-var">MVar'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679073969"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679074057"><span id="local-6989586621679074062"><span class="annot"><span class="annottext">MVar' a -&gt; MVar' a -&gt; Bool
+(MVar' a -&gt; MVar' a -&gt; Bool)
+-&gt; (MVar' a -&gt; MVar' a -&gt; Bool) -&gt; Eq (MVar' a)
+forall a. MVar' a -&gt; MVar' a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. MVar' a -&gt; MVar' a -&gt; Bool
+== :: MVar' a -&gt; MVar' a -&gt; Bool
+$c/= :: forall a. MVar' a -&gt; MVar' a -&gt; Bool
+/= :: MVar' a -&gt; MVar' a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span id="local-6989586621679073967"><span class="annot"><a href="Effectful.Internal.Utils.html#toMVar%27"><span class="hs-identifier hs-type">toMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679073967"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073967"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-151"></span><span id="toMVar%27"><span class="annot"><span class="annottext">toMVar' :: forall a. MVar a -&gt; IO (MVar' a)
+</span><a href="Effectful.Internal.Utils.html#toMVar%27"><span class="hs-identifier hs-var hs-var">toMVar'</span></a></span></span><span> </span><span id="local-6989586621679074069"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074069"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-152"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679074070"><span class="annot"><span class="annottext">var' :: MVar' a
+</span><a href="#local-6989586621679074070"><span class="hs-identifier hs-var hs-var">var'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; MVar' a
+forall a. MVar a -&gt; MVar' a
+</span><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-var">MVar'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074069"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-153"></span><span>  </span><span class="annot"><span class="annottext">MVar' a -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a. MVar' a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier hs-var">modifyMVar_'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' a
+</span><a href="#local-6989586621679074070"><span class="hs-identifier hs-var">var'</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO a
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">MVar' a -&gt; IO (MVar' a)
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVar' a
+</span><a href="#local-6989586621679074070"><span class="hs-identifier hs-var">var'</span></a></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span id="local-6989586621679073971"><span class="annot"><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier hs-type">newMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679073971"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073971"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-157"></span><span id="newMVar%27"><span class="annot"><span class="annottext">newMVar' :: forall a. a -&gt; IO (MVar' a)
+</span><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier hs-var hs-var">newMVar'</span></a></span></span><span> </span><span id="local-6989586621679074072"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074072"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074072"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (MVar' a) -&gt; IO (MVar' a)
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar a -&gt; MVar' a
+forall a. MVar a -&gt; MVar' a
+</span><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-var">MVar'</span></a></span><span> </span><span class="annot"><span class="annottext">(MVar a -&gt; MVar' a) -&gt; IO (MVar a) -&gt; IO (MVar' a)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (MVar a)
+forall a. a -&gt; IO (MVar a)
+</span><span class="hs-identifier hs-var">newMVar</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074072"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span id="local-6989586621679073974"><span class="annot"><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier hs-type">readMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073974"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073974"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-160"></span><span id="readMVar%27"><span class="annot"><span class="annottext">readMVar' :: forall a. MVar' a -&gt; IO a
+</span><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier hs-var hs-var">readMVar'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span id="local-6989586621679074074"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074074"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; IO a
+forall a. MVar a -&gt; IO a
+</span><span class="hs-identifier hs-var">readMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074074"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span id="local-6989586621679073977"><span id="local-6989586621679073978"><span class="annot"><a href="Effectful.Internal.Utils.html#modifyMVar%27"><span class="hs-identifier hs-type">modifyMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073977"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679073977"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679073977"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679073978"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073978"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-163"></span><span id="modifyMVar%27"><span class="annot"><span class="annottext">modifyMVar' :: forall a r. MVar' a -&gt; (a -&gt; IO (a, r)) -&gt; IO r
+</span><a href="Effectful.Internal.Utils.html#modifyMVar%27"><span class="hs-identifier hs-var hs-var">modifyMVar'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span id="local-6989586621679074078"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074078"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679074079"><span class="annot"><span class="annottext">a -&gt; IO (a, r)
+</span><a href="#local-6989586621679074079"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO (a, r)) -&gt; IO r
+forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+</span><span class="hs-identifier hs-var">modifyMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074078"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO (a, r)) -&gt; IO r) -&gt; (a -&gt; IO (a, r)) -&gt; IO r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679074081"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074081"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-164"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679074082"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074082"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679074083"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679074083"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (a, r)
+</span><a href="#local-6989586621679074079"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074081"><span class="hs-identifier hs-var">a0</span></a></span><span>
+</span><span id="line-165"></span><span>  </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074082"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (a, r) -&gt; IO (a, r)
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">(a, r) -&gt; IO (a, r)
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074082"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679074083"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span id="local-6989586621679073970"><span class="annot"><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier hs-type">modifyMVar_'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073970"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679073970"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679073970"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-168"></span><span id="modifyMVar_%27"><span class="annot"><span class="annottext">modifyMVar_' :: forall a. MVar' a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier hs-var hs-var">modifyMVar_'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span id="local-6989586621679074086"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074086"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679074087"><span class="annot"><span class="annottext">a -&gt; IO a
+</span><a href="#local-6989586621679074087"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a. MVar a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><span class="hs-identifier hs-var">modifyMVar_</span></span><span> </span><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621679074086"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO a) -&gt; IO ()) -&gt; (a -&gt; IO a) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679074089"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074089"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-169"></span><span>  </span><span id="local-6989586621679074090"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074090"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; IO a
+</span><a href="#local-6989586621679074087"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074089"><span class="hs-identifier hs-var">a0</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074090"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO a -&gt; IO a
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO a
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074090"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="hs-comment">-- | A unique with no possibility for CAS contention.</span><span>
+</span><span id="line-175"></span><span class="hs-comment">--</span><span>
+</span><span id="line-176"></span><span class="hs-comment">-- Credits for this go to Edward Kmett.</span><span>
+</span><span id="line-177"></span><span class="hs-keyword">newtype</span><span> </span><span id="Unique"><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-var">Unique</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Unique"><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-var">Unique</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MutableByteArray</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealWorld</span></span><span class="hs-special">)</span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679074094"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-180"></span><span>  </span><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span id="local-6989586621679074097"><span class="annot"><span class="annottext">MutableByteArray RealWorld
+</span><a href="#local-6989586621679074097"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679074098"><span class="annot"><span class="annottext">== :: Unique -&gt; Unique -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span id="local-6989586621679074099"><span class="annot"><span class="annottext">MutableByteArray RealWorld
+</span><a href="#local-6989586621679074099"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MutableByteArray RealWorld -&gt; MutableByteArray RealWorld -&gt; Bool
+forall s. MutableByteArray s -&gt; MutableByteArray s -&gt; Bool
+</span><span class="hs-identifier hs-var">sameMutableByteArray</span></span><span> </span><span class="annot"><span class="annottext">MutableByteArray RealWorld
+</span><a href="#local-6989586621679074097"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">MutableByteArray RealWorld
+</span><a href="#local-6989586621679074099"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span class="annot"><a href="Effectful.Internal.Utils.html#newUnique"><span class="hs-identifier hs-type">newUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
+</span><span id="line-183"></span><span id="newUnique"><span class="annot"><span class="annottext">newUnique :: IO Unique
+</span><a href="Effectful.Internal.Utils.html#newUnique"><span class="hs-identifier hs-var hs-var">newUnique</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MutableByteArray RealWorld -&gt; Unique
+</span><a href="Effectful.Internal.Utils.html#Unique"><span class="hs-identifier hs-var">Unique</span></a></span><span> </span><span class="annot"><span class="annottext">(MutableByteArray RealWorld -&gt; Unique)
+-&gt; IO (MutableByteArray RealWorld) -&gt; IO Unique
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO (MutableByteArray (PrimState IO))
+forall (m :: Type -&gt; Type).
+PrimMonad m =&gt;
+Int -&gt; m (MutableByteArray (PrimState m))
+</span><span class="hs-identifier hs-var">newByteArray</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="annot"><a href="Effectful.Internal.Utils.html#thawCallStack"><span class="hs-identifier hs-type">thawCallStack</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CallStack</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CallStack</span></span><span>
+</span><span id="line-188"></span><span id="thawCallStack"><span class="annot"><span class="annottext">thawCallStack :: CallStack -&gt; CallStack
+</span><a href="Effectful.Internal.Utils.html#thawCallStack"><span class="hs-identifier hs-var hs-var">thawCallStack</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-189"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">FreezeCallStack</span></span><span> </span><span id="local-6989586621679074103"><span class="annot"><span class="annottext">CallStack
+</span><a href="#local-6989586621679074103"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CallStack -&gt; CallStack
+</span><a href="Effectful.Internal.Utils.html#thawCallStack"><span class="hs-identifier hs-var">thawCallStack</span></a></span><span> </span><span class="annot"><span class="annottext">CallStack
+</span><a href="#local-6989586621679074103"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-190"></span><span>  </span><span id="local-6989586621679074104"><span class="annot"><span class="annottext">CallStack
+</span><a href="#local-6989586621679074104"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CallStack
+</span><a href="#local-6989586621679074104"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-191"></span></pre></body></html>

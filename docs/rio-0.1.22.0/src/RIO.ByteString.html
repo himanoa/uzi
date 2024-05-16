@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- | Strict @ByteString@. Import as:</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- &gt; import qualified RIO.ByteString as B</span><span>
+</span><span id="line-6"></span><span class="hs-comment">--</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- This module does not export any partial functions.  For those, see</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- &quot;RIO.ByteString.Partial&quot;</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">RIO.ByteString</span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="RIO.ByteString.html"><span class="hs-identifier">RIO.ByteString</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">head</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">last</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">tail</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">init</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">foldl1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">foldl1'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">foldr1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">foldr1'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">maximum</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">minimum</span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">findSubstring</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">findSubstrings</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">packCString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">packCStringLen</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">useAsCString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">useAsCStringLen</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">getLine</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">getContents</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">putStr</span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">putStrLn</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">interact</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">readFile</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">writeFile</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">appendFile</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hGetLine</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hGetContents</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hGet</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hGetSome</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hGetNonBlocking</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hPut</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hPutNonBlocking</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">hPutStr</span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">hPutStrLn</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">breakByte</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="RIO.html"><span class="hs-identifier">RIO</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.String</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">CStringLen</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.packCString'</span></span><span>
+</span><span id="line-20"></span><span id="local-6989586621679103226"><span class="annot"><a href="RIO.ByteString.html#packCString"><span class="hs-identifier hs-type">packCString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103226"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103226"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-21"></span><span id="packCString"><span class="annot"><span class="annottext">packCString :: forall (m :: * -&gt; *). MonadIO m =&gt; CString -&gt; m ByteString
+</span><a href="RIO.ByteString.html#packCString"><span class="hs-identifier hs-var hs-var">packCString</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (CString -&gt; IO ByteString) -&gt; CString -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.packCString</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.packCStringLen'</span></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679103236"><span class="annot"><a href="RIO.ByteString.html#packCStringLen"><span class="hs-identifier hs-type">packCStringLen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103236"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CStringLen</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103236"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-25"></span><span id="packCStringLen"><span class="annot"><span class="annottext">packCStringLen :: forall (m :: * -&gt; *). MonadIO m =&gt; CStringLen -&gt; m ByteString
+</span><a href="RIO.ByteString.html#packCStringLen"><span class="hs-identifier hs-var hs-var">packCStringLen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (CStringLen -&gt; IO ByteString) -&gt; CStringLen -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CStringLen -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.packCStringLen</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | Unlifted 'B.useAsCString'</span></span><span>
+</span><span id="line-28"></span><span id="local-6989586621679103239"><span id="local-6989586621679103241"><span class="annot"><a href="RIO.ByteString.html#useAsCString"><span class="hs-identifier hs-type">useAsCString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103239"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103239"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103241"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103239"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103241"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-29"></span><span id="useAsCString"><span class="annot"><span class="annottext">useAsCString :: forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+ByteString -&gt; (CString -&gt; m a) -&gt; m a
+</span><a href="RIO.ByteString.html#useAsCString"><span class="hs-identifier hs-var hs-var">useAsCString</span></a></span></span><span> </span><span id="local-6989586621679103322"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679103322"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span id="local-6989586621679103323"><span class="annot"><span class="annottext">CString -&gt; m a
+</span><a href="#local-6989586621679103323"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+forall (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+</span><span class="hs-identifier hs-var">withRunInIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a)
+-&gt; ((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679103325"><span class="annot"><span class="annottext">forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679103325"><span class="hs-identifier hs-var">run</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (CString -&gt; IO a) -&gt; IO a
+forall a. ByteString -&gt; (CString -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">B.useAsCString</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679103322"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO a) -&gt; IO a) -&gt; (CString -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; IO a
+forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679103325"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; IO a) -&gt; (CString -&gt; m a) -&gt; CString -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CString -&gt; m a
+</span><a href="#local-6989586621679103323"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | Unlifted 'B.useAsCStringLen'</span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679103251"><span id="local-6989586621679103252"><span class="annot"><a href="RIO.ByteString.html#useAsCStringLen"><span class="hs-identifier hs-type">useAsCStringLen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103251"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CStringLen</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103251"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103252"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103251"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103252"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-33"></span><span id="useAsCStringLen"><span class="annot"><span class="annottext">useAsCStringLen :: forall (m :: * -&gt; *) a.
+MonadUnliftIO m =&gt;
+ByteString -&gt; (CStringLen -&gt; m a) -&gt; m a
+</span><a href="RIO.ByteString.html#useAsCStringLen"><span class="hs-identifier hs-var hs-var">useAsCStringLen</span></a></span></span><span> </span><span id="local-6989586621679103329"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679103329"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span id="local-6989586621679103330"><span class="annot"><span class="annottext">CStringLen -&gt; m a
+</span><a href="#local-6989586621679103330"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+forall (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b
+</span><span class="hs-identifier hs-var">withRunInIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a)
+-&gt; ((forall a. m a -&gt; IO a) -&gt; IO a) -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679103331"><span class="annot"><span class="annottext">forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679103331"><span class="hs-identifier hs-var">run</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+forall a. ByteString -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">B.useAsCStringLen</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679103329"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">((CStringLen -&gt; IO a) -&gt; IO a) -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; IO a
+forall a. m a -&gt; IO a
+</span><a href="#local-6989586621679103331"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; IO a) -&gt; (CStringLen -&gt; m a) -&gt; CStringLen -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CStringLen -&gt; m a
+</span><a href="#local-6989586621679103330"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.getLine'</span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679103256"><span class="annot"><a href="RIO.ByteString.html#getLine"><span class="hs-identifier hs-type">getLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103256"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103256"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-37"></span><span id="getLine"><span class="annot"><span class="annottext">getLine :: forall (m :: * -&gt; *). MonadIO m =&gt; m ByteString
+</span><a href="RIO.ByteString.html#getLine"><span class="hs-identifier hs-var hs-var">getLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">IO ByteString
+</span><span class="hs-identifier hs-var">B.getLine</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.getContents'</span></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679103335"><span class="annot"><a href="RIO.ByteString.html#getContents"><span class="hs-identifier hs-type">getContents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103335"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103335"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-41"></span><span id="getContents"><span class="annot"><span class="annottext">getContents :: forall (m :: * -&gt; *). MonadIO m =&gt; m ByteString
+</span><a href="RIO.ByteString.html#getContents"><span class="hs-identifier hs-var hs-var">getContents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">IO ByteString
+</span><span class="hs-identifier hs-var">B.getContents</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.putStr'</span></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679103259"><span class="annot"><a href="RIO.ByteString.html#putStr"><span class="hs-identifier hs-type">putStr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103259"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103259"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-45"></span><span id="putStr"><span class="annot"><span class="annottext">putStr :: forall (m :: * -&gt; *). MonadIO m =&gt; ByteString -&gt; m ()
+</span><a href="RIO.ByteString.html#putStr"><span class="hs-identifier hs-var hs-var">putStr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ()) -&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.putStr</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.interact'</span></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679103261"><span class="annot"><a href="RIO.ByteString.html#interact"><span class="hs-identifier hs-type">interact</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103261"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103261"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-49"></span><span id="interact"><span class="annot"><span class="annottext">interact :: forall (m :: * -&gt; *).
+MonadIO m =&gt;
+(ByteString -&gt; ByteString) -&gt; m ()
+</span><a href="RIO.ByteString.html#interact"><span class="hs-identifier hs-var hs-var">interact</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ())
+-&gt; ((ByteString -&gt; ByteString) -&gt; IO ())
+-&gt; (ByteString -&gt; ByteString)
+-&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; ByteString) -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.interact</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.readFile'</span></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679103263"><span class="annot"><a href="RIO.ByteString.html#readFile"><span class="hs-identifier hs-type">readFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103263"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103263"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-53"></span><span id="readFile"><span class="annot"><span class="annottext">readFile :: forall (m :: * -&gt; *). MonadIO m =&gt; FilePath -&gt; m ByteString
+</span><a href="RIO.ByteString.html#readFile"><span class="hs-identifier hs-var hs-var">readFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (FilePath -&gt; IO ByteString) -&gt; FilePath -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.readFile</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.writeFile'</span></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679103266"><span class="annot"><a href="RIO.ByteString.html#writeFile"><span class="hs-identifier hs-type">writeFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103266"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103266"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-57"></span><span id="writeFile"><span class="annot"><span class="annottext">writeFile :: forall (m :: * -&gt; *). MonadIO m =&gt; FilePath -&gt; ByteString -&gt; m ()
+</span><a href="RIO.ByteString.html#writeFile"><span class="hs-identifier hs-var hs-var">writeFile</span></a></span></span><span> </span><span id="local-6989586621679103351"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679103351"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ()) -&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.writeFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679103351"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.appendFile'</span></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679103352"><span class="annot"><a href="RIO.ByteString.html#appendFile"><span class="hs-identifier hs-type">appendFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103352"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103352"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-61"></span><span id="appendFile"><span class="annot"><span class="annottext">appendFile :: forall (m :: * -&gt; *). MonadIO m =&gt; FilePath -&gt; ByteString -&gt; m ()
+</span><a href="RIO.ByteString.html#appendFile"><span class="hs-identifier hs-var hs-var">appendFile</span></a></span></span><span> </span><span id="local-6989586621679103356"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679103356"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ()) -&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.appendFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679103356"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hGetLine'</span></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679103269"><span class="annot"><a href="RIO.ByteString.html#hGetLine"><span class="hs-identifier hs-type">hGetLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103269"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103269"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-65"></span><span id="hGetLine"><span class="annot"><span class="annottext">hGetLine :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hGetLine"><span class="hs-identifier hs-var hs-var">hGetLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (Handle -&gt; IO ByteString) -&gt; Handle -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hGetLine</span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hGetContents'</span></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679103360"><span class="annot"><a href="RIO.ByteString.html#hGetContents"><span class="hs-identifier hs-type">hGetContents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-69"></span><span id="hGetContents"><span class="annot"><span class="annottext">hGetContents :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hGetContents"><span class="hs-identifier hs-var hs-var">hGetContents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (Handle -&gt; IO ByteString) -&gt; Handle -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hGetContents</span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hGet'</span></span><span>
+</span><span id="line-72"></span><span id="local-6989586621679103273"><span class="annot"><a href="RIO.ByteString.html#hGet"><span class="hs-identifier hs-type">hGet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103273"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103273"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-73"></span><span id="hGet"><span class="annot"><span class="annottext">hGet :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; Int -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hGet"><span class="hs-identifier hs-var hs-var">hGet</span></a></span></span><span> </span><span id="local-6989586621679103367"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103367"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (Int -&gt; IO ByteString) -&gt; Int -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Int -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hGet</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103367"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hGetSome'</span></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679103368"><span class="annot"><a href="RIO.ByteString.html#hGetSome"><span class="hs-identifier hs-type">hGetSome</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103368"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103368"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-77"></span><span id="hGetSome"><span class="annot"><span class="annottext">hGetSome :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; Int -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hGetSome"><span class="hs-identifier hs-var hs-var">hGetSome</span></a></span></span><span> </span><span id="local-6989586621679103372"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103372"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (Int -&gt; IO ByteString) -&gt; Int -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Int -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hGetSome</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103372"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hGetNonBlocking'</span></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679103373"><span class="annot"><a href="RIO.ByteString.html#hGetNonBlocking"><span class="hs-identifier hs-type">hGetNonBlocking</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103373"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103373"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-81"></span><span id="hGetNonBlocking"><span class="annot"><span class="annottext">hGetNonBlocking :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; Int -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hGetNonBlocking"><span class="hs-identifier hs-var hs-var">hGetNonBlocking</span></a></span></span><span> </span><span id="local-6989586621679103377"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103377"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (Int -&gt; IO ByteString) -&gt; Int -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Int -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hGetNonBlocking</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103377"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hPut'</span></span><span>
+</span><span id="line-84"></span><span id="local-6989586621679103277"><span class="annot"><a href="RIO.ByteString.html#hPut"><span class="hs-identifier hs-type">hPut</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103277"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103277"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-85"></span><span id="hPut"><span class="annot"><span class="annottext">hPut :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; ByteString -&gt; m ()
+</span><a href="RIO.ByteString.html#hPut"><span class="hs-identifier hs-var hs-var">hPut</span></a></span></span><span> </span><span id="local-6989586621679103381"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103381"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ()) -&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.hPut</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103381"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hPutNonBlocking'</span></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679103279"><span class="annot"><a href="RIO.ByteString.html#hPutNonBlocking"><span class="hs-identifier hs-type">hPutNonBlocking</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103279"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103279"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-89"></span><span id="hPutNonBlocking"><span class="annot"><span class="annottext">hPutNonBlocking :: forall (m :: * -&gt; *).
+MonadIO m =&gt;
+Handle -&gt; ByteString -&gt; m ByteString
+</span><a href="RIO.ByteString.html#hPutNonBlocking"><span class="hs-identifier hs-var hs-var">hPutNonBlocking</span></a></span></span><span> </span><span id="local-6989586621679103385"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103385"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; m ByteString
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; m ByteString)
+-&gt; (ByteString -&gt; IO ByteString) -&gt; ByteString -&gt; m ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">B.hPutNonBlocking</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103385"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="annot"><span class="hs-comment">-- | Lifted 'B.hPutStr'</span></span><span>
+</span><span id="line-92"></span><span id="local-6989586621679103386"><span class="annot"><a href="RIO.ByteString.html#hPutStr"><span class="hs-identifier hs-type">hPutStr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679103386"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103386"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-93"></span><span id="hPutStr"><span class="annot"><span class="annottext">hPutStr :: forall (m :: * -&gt; *). MonadIO m =&gt; Handle -&gt; ByteString -&gt; m ()
+</span><a href="RIO.ByteString.html#hPutStr"><span class="hs-identifier hs-var hs-var">hPutStr</span></a></span></span><span> </span><span id="local-6989586621679103390"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103390"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; m ()
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; m ()) -&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">B.hPutStr</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679103390"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-94"></span></pre></body></html>

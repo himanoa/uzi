@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Support for access to a write only value of a particular type.</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- The value is shared between multiple threads. If you want each thead to</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- manage its own version of the value, use &quot;Effectful.Writer.Static.Local&quot;.</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- /Warning:/ 'Writer'\'s state will be accumulated via __left-associated__ uses</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- of '&lt;&gt;', which makes it unsuitable for use with types for which such pattern</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- is inefficient. __This applies, in particular, to the standard list type__,</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- which makes the 'Writer' effect pretty niche.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- /Note:/ while the 'Control.Monad.Trans.Writer.Strict.Writer' from the</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- @transformers@ package includes additional operations</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- 'Control.Monad.Trans.Writer.Strict.pass' and</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- 'Control.Monad.Trans.Writer.Strict.censor', they don't cooperate with runtime</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- exceptions very well, so they're deliberately omitted here.</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Writer.Static.Shared</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier">Writer</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#runWriter"><span class="hs-identifier">runWriter</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#execWriter"><span class="hs-identifier">execWriter</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Operations</span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#tell"><span class="hs-identifier">tell</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#listen"><span class="hs-identifier">listen</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#listens"><span class="hs-identifier">listens</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">onException</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">uninterruptibleMask</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html"><span class="hs-identifier">Effectful.Dispatch.Static</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.Primitive.html"><span class="hs-identifier">Effectful.Dispatch.Static.Primitive</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html"><span class="hs-identifier">Effectful.Internal.Utils</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="annot"><span class="hs-comment">-- | Provide access to a strict (WHNF), shared, write only value of type @w@.</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">data</span><span> </span><span id="Writer"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span></span><span> </span><span id="local-6989586621679079604"><span class="annot"><a href="#local-6989586621679079604"><span class="hs-identifier hs-type">w</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><a href="Effectful.Internal.Env.html#DispatchOf"><span class="hs-identifier hs-var">DispatchOf</span></a></span></span><span> </span><span id="local-6989586621679079606"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079606"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Static"><span class="hs-identifier hs-type">Static</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#NoSideEffects"><span class="hs-identifier hs-type">NoSideEffects</span></a></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-var">StaticRep</span></a></span></span><span> </span><span id="local-6989586621679079541"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079541"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Writer"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Utils.html#MVar%27"><span class="hs-identifier hs-type">MVar'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079541"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- | Run a 'Writer' effect and return the final value along with the final</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- output.</span><span>
+</span><span id="line-45"></span><span id="local-6989586621679079509"><span id="local-6989586621679079511"><span id="local-6989586621679079512"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#runWriter"><span class="hs-identifier hs-type">runWriter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679079509"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079509"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679079511"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679079512"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079511"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679079512"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679079509"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-46"></span><span id="runWriter"><span class="annot"><span class="annottext">runWriter :: forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Monoid w =&gt;
+Eff (Writer w : es) a -&gt; Eff es (a, w)
+</span><a href="Effectful.Writer.Static.Shared.html#runWriter"><span class="hs-identifier hs-var hs-var">runWriter</span></a></span></span><span> </span><span id="local-6989586621679079618"><span class="annot"><span class="annottext">Eff (Writer w : es) a
+</span><a href="#local-6989586621679079618"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621679079619"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079619"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (MVar' w) -&gt; Eff es (MVar' w)
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="annot"><span class="annottext">(IO (MVar' w) -&gt; Eff es (MVar' w))
+-&gt; IO (MVar' w) -&gt; Eff es (MVar' w)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">w -&gt; IO (MVar' w)
+forall a. a -&gt; IO (MVar' a)
+</span><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier hs-var">newMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">w
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679079622"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079622"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StaticRep (Writer w) -&gt; Eff (Writer w : es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#evalStaticRep"><span class="hs-identifier hs-var">evalStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar' w -&gt; StaticRep (Writer w)
+forall w. MVar' w -&gt; StaticRep (Writer w)
+</span><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079619"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (Writer w : es) a
+</span><a href="#local-6989586621679079618"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079622"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(w -&gt; (a, w)) -&gt; Eff es w -&gt; Eff es (a, w)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">IO w -&gt; Eff es w
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar' w -&gt; IO w
+forall a. MVar' a -&gt; IO a
+</span><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier hs-var">readMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079619"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Run a 'Writer' effect and return the final output, discarding the final</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- value.</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679079546"><span id="local-6989586621679079547"><span id="local-6989586621679079548"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#execWriter"><span class="hs-identifier hs-type">execWriter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679079546"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079546"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679079547"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679079548"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079547"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079546"><span class="hs-identifier hs-type">w</span></a></span></span></span></span><span>
+</span><span id="line-54"></span><span id="execWriter"><span class="annot"><span class="annottext">execWriter :: forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Monoid w =&gt;
+Eff (Writer w : es) a -&gt; Eff es w
+</span><a href="Effectful.Writer.Static.Shared.html#execWriter"><span class="hs-identifier hs-var hs-var">execWriter</span></a></span></span><span> </span><span id="local-6989586621679079634"><span class="annot"><span class="annottext">Eff (Writer w : es) a
+</span><a href="#local-6989586621679079634"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679079635"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079635"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (MVar' w) -&gt; Eff es (MVar' w)
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="annot"><span class="annottext">(IO (MVar' w) -&gt; Eff es (MVar' w))
+-&gt; IO (MVar' w) -&gt; Eff es (MVar' w)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">w -&gt; IO (MVar' w)
+forall a. a -&gt; IO (MVar' a)
+</span><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier hs-var">newMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">w
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StaticRep (Writer w) -&gt; Eff (Writer w : es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#evalStaticRep"><span class="hs-identifier hs-var">evalStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar' w -&gt; StaticRep (Writer w)
+forall w. MVar' w -&gt; StaticRep (Writer w)
+</span><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079635"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (Writer w : es) a
+</span><a href="#local-6989586621679079634"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="annottext">IO w -&gt; Eff es w
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="annot"><span class="annottext">(IO w -&gt; Eff es w) -&gt; IO w -&gt; Eff es w
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MVar' w -&gt; IO w
+forall a. MVar' a -&gt; IO a
+</span><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier hs-var">readMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079635"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="annot"><span class="hs-comment">-- | Append the given output to the overall output of the 'Writer'.</span></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679079552"><span id="local-6989586621679079553"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#tell"><span class="hs-identifier hs-type">tell</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079552"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079553"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679079552"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679079552"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079553"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-61"></span><span id="tell"><span class="annot"><span class="annottext">tell :: forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(Writer w :&gt; es, Monoid w) =&gt;
+w -&gt; Eff es ()
+</span><a href="Effectful.Writer.Static.Shared.html#tell"><span class="hs-identifier hs-var hs-var">tell</span></a></span></span><span> </span><span id="local-6989586621679079646"><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079646"><span class="hs-identifier hs-var">w1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO ()) -&gt; Eff es ()
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO ()) -&gt; Eff es ()) -&gt; (Env es -&gt; IO ()) -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679079648"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079648"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span id="local-6989586621679079649"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079649"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Env es -&gt; IO (EffectRep (DispatchOf (Writer w)) (Writer w))
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(e :&gt; es) =&gt;
+Env es -&gt; IO (EffectRep (DispatchOf e) e)
+</span><a href="Effectful.Internal.Env.html#getEnv"><span class="hs-identifier hs-var">getEnv</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079648"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">MVar' w -&gt; (w -&gt; IO w) -&gt; IO ()
+forall a. MVar' a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier hs-var">modifyMVar_'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079649"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">((w -&gt; IO w) -&gt; IO ()) -&gt; (w -&gt; IO w) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679079652"><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079652"><span class="hs-identifier hs-var">w0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679079653"><span class="annot"><span class="annottext">w :: w
+</span><a href="#local-6989586621679079653"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079652"><span class="hs-identifier hs-var">w0</span></a></span><span> </span><span class="annot"><span class="annottext">w -&gt; w -&gt; w
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079646"><span class="hs-identifier hs-var">w1</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">w -&gt; IO w
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079653"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- | Execute an action and append its output to the overall output of the</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- 'Writer'.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- /Note:/ if an exception is received while the action is executed, the partial</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- output of the action will still be appended to the overall output of the</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- 'Writer':</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-73"></span><span class="hs-comment">--   runEff . execWriter @String $ do</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--     tell &quot;Hi&quot;</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--     handle (\(_::ErrorCall) -&gt; pure ((), &quot;&quot;)) $ do</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--       tell &quot; there&quot;</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--       listen $ do</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--         tell &quot;!&quot;</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--         error &quot;oops&quot;</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- &quot;Hi there!&quot;</span><span>
+</span><span id="line-82"></span><span id="local-6989586621679079568"><span id="local-6989586621679079569"><span id="local-6989586621679079570"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#listen"><span class="hs-identifier hs-type">listen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079568"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079569"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679079568"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079569"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079570"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079569"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679079570"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679079568"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-83"></span><span id="listen"><span class="annot"><span class="annottext">listen :: forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Writer w :&gt; es, Monoid w) =&gt;
+Eff es a -&gt; Eff es (a, w)
+</span><a href="Effectful.Writer.Static.Shared.html#listen"><span class="hs-identifier hs-var hs-var">listen</span></a></span></span><span> </span><span id="local-6989586621679079669"><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679079669"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO (a, w)) -&gt; Eff es (a, w)
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO (a, w)) -&gt; Eff es (a, w))
+-&gt; (Env es -&gt; IO (a, w)) -&gt; Eff es (a, w)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679079670"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079670"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-comment">-- The mask is uninterruptible because modifyMVar_ v0 in the merge function</span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-comment">-- might block and if an async exception is received while waiting, w1 will be</span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-comment">-- lost.</span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><span class="annottext">((forall a. IO a -&gt; IO a) -&gt; IO (a, w)) -&gt; IO (a, w)
+forall b. ((forall a. IO a -&gt; IO a) -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">uninterruptibleMask</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. IO a -&gt; IO a) -&gt; IO (a, w)) -&gt; IO (a, w))
+-&gt; ((forall a. IO a -&gt; IO a) -&gt; IO (a, w)) -&gt; IO (a, w)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679079671"><span class="annot"><span class="annottext">forall a. IO a -&gt; IO a
+</span><a href="#local-6989586621679079671"><span class="hs-identifier hs-var">unmask</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679079672"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079672"><span class="hs-identifier hs-var">v1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">w -&gt; IO (MVar' w)
+forall a. a -&gt; IO (MVar' a)
+</span><a href="Effectful.Internal.Utils.html#newMVar%27"><span class="hs-identifier hs-var">newMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">w
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-comment">-- Replace thread local MVar with a fresh one for isolated listening.</span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679079673"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079673"><span class="hs-identifier hs-var">v0</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Env es
+-&gt; (EffectRep (DispatchOf (Writer w)) (Writer w)
+    -&gt; IO (MVar' w, EffectRep (DispatchOf (Writer w)) (Writer w)))
+-&gt; IO (MVar' w)
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(e :&gt; es) =&gt;
+Env es
+-&gt; (EffectRep (DispatchOf e) e
+    -&gt; IO (a, EffectRep (DispatchOf e) e))
+-&gt; IO a
+</span><a href="Effectful.Internal.Env.html#stateEnv"><span class="hs-identifier hs-var">stateEnv</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079670"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">((EffectRep (DispatchOf (Writer w)) (Writer w)
+  -&gt; IO (MVar' w, EffectRep (DispatchOf (Writer w)) (Writer w)))
+ -&gt; IO (MVar' w))
+-&gt; (EffectRep (DispatchOf (Writer w)) (Writer w)
+    -&gt; IO (MVar' w, EffectRep (DispatchOf (Writer w)) (Writer w)))
+-&gt; IO (MVar' w)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span id="local-6989586621679079675"><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079675"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(MVar' w, StaticRep (Writer w))
+-&gt; IO (MVar' w, StaticRep (Writer w))
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079675"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MVar' w -&gt; StaticRep (Writer w)
+forall w. MVar' w -&gt; StaticRep (Writer w)
+</span><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079672"><span class="hs-identifier hs-var">v1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679079676"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079676"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; IO a
+forall a. IO a -&gt; IO a
+</span><a href="#local-6989586621679079671"><span class="hs-identifier hs-var">unmask</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es a -&gt; Env es -&gt; IO a
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-identifier hs-var">unEff</span></a></span><span> </span><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679079669"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079670"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; IO w -&gt; IO a
+forall a b. IO a -&gt; IO b -&gt; IO a
+</span><span class="hs-operator hs-var">`onException`</span></span><span> </span><span class="annot"><span class="annottext">Env es -&gt; MVar' w -&gt; MVar' w -&gt; IO w
+forall {b} {es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+(Writer b :&gt; es, Semigroup b) =&gt;
+Env es -&gt; MVar' b -&gt; MVar' b -&gt; IO b
+</span><a href="#local-6989586621679079678"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079670"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079673"><span class="hs-identifier hs-var">v0</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079672"><span class="hs-identifier hs-var">v1</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079676"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(w -&gt; (a, w)) -&gt; IO w -&gt; IO (a, w)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Env es -&gt; MVar' w -&gt; MVar' w -&gt; IO w
+forall {b} {es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+(Writer b :&gt; es, Semigroup b) =&gt;
+Env es -&gt; MVar' b -&gt; MVar' b -&gt; IO b
+</span><a href="#local-6989586621679079678"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079670"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079673"><span class="hs-identifier hs-var">v0</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' w
+</span><a href="#local-6989586621679079672"><span class="hs-identifier hs-var">v1</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-comment">-- Merge results accumulated in the local MVar with the mainline. If an</span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-comment">-- exception was received while listening, merge results recorded so far.</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679079678"><span class="annot"><span class="annottext">merge :: Env es -&gt; MVar' b -&gt; MVar' b -&gt; IO b
+</span><a href="#local-6989586621679079678"><span class="hs-identifier hs-var hs-var">merge</span></a></span></span><span> </span><span id="local-6989586621679079688"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079688"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span id="local-6989586621679079689"><span class="annot"><span class="annottext">MVar' b
+</span><a href="#local-6989586621679079689"><span class="hs-identifier hs-var">v0</span></a></span></span><span> </span><span id="local-6989586621679079690"><span class="annot"><span class="annottext">MVar' b
+</span><a href="#local-6989586621679079690"><span class="hs-identifier hs-var">v1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-97"></span><span>      </span><span class="annot"><span class="annottext">Env es -&gt; EffectRep (DispatchOf (Writer b)) (Writer b) -&gt; IO ()
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(e :&gt; es) =&gt;
+Env es -&gt; EffectRep (DispatchOf e) e -&gt; IO ()
+</span><a href="Effectful.Internal.Env.html#putEnv"><span class="hs-identifier hs-var">putEnv</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679079688"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">(EffectRep (DispatchOf (Writer b)) (Writer b) -&gt; IO ())
+-&gt; EffectRep (DispatchOf (Writer b)) (Writer b) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MVar' b -&gt; StaticRep (Writer b)
+forall w. MVar' w -&gt; StaticRep (Writer w)
+</span><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-var">Writer</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' b
+</span><a href="#local-6989586621679079689"><span class="hs-identifier hs-var">v0</span></a></span><span>
+</span><span id="line-98"></span><span>      </span><span id="local-6989586621679079692"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079692"><span class="hs-identifier hs-var">w1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVar' b -&gt; IO b
+forall a. MVar' a -&gt; IO a
+</span><a href="Effectful.Internal.Utils.html#readMVar%27"><span class="hs-identifier hs-var">readMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' b
+</span><a href="#local-6989586621679079690"><span class="hs-identifier hs-var">v1</span></a></span><span>
+</span><span id="line-99"></span><span>      </span><span class="annot"><span class="annottext">MVar' b -&gt; (b -&gt; IO b) -&gt; IO ()
+forall a. MVar' a -&gt; (a -&gt; IO a) -&gt; IO ()
+</span><a href="Effectful.Internal.Utils.html#modifyMVar_%27"><span class="hs-identifier hs-var">modifyMVar_'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar' b
+</span><a href="#local-6989586621679079689"><span class="hs-identifier hs-var">v0</span></a></span><span> </span><span class="annot"><span class="annottext">((b -&gt; IO b) -&gt; IO ()) -&gt; (b -&gt; IO b) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679079693"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079693"><span class="hs-identifier hs-var">w0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679079694"><span class="annot"><span class="annottext">w :: b
+</span><a href="#local-6989586621679079694"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079693"><span class="hs-identifier hs-var">w0</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079692"><span class="hs-identifier hs-var">w1</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">b -&gt; IO b
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079694"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-100"></span><span>      </span><span class="annot"><span class="annottext">b -&gt; IO b
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679079692"><span class="hs-identifier hs-var">w1</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- | Execute an action and append its output to the overall output of the</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- 'Writer', then return the final value along with a function of the recorded</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- output.</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- @'listens' f m &#8801; 'Data.Bifunctor.second' f '&lt;$&gt;' 'listen' m@</span><span>
+</span><span id="line-107"></span><span id="local-6989586621679079587"><span id="local-6989586621679079588"><span id="local-6989586621679079589"><span id="local-6989586621679079590"><span class="annot"><a href="Effectful.Writer.Static.Shared.html#listens"><span class="hs-identifier hs-type">listens</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Writer.Static.Shared.html#Writer"><span class="hs-identifier hs-type">Writer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079587"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079588"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679079587"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679079587"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679079589"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079588"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079590"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079588"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679079590"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679079589"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-108"></span><span id="listens"><span class="annot"><span class="annottext">listens :: forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) b a.
+(Writer w :&gt; es, Monoid w) =&gt;
+(w -&gt; b) -&gt; Eff es a -&gt; Eff es (a, b)
+</span><a href="Effectful.Writer.Static.Shared.html#listens"><span class="hs-identifier hs-var hs-var">listens</span></a></span></span><span> </span><span id="local-6989586621679079702"><span class="annot"><span class="annottext">w -&gt; b
+</span><a href="#local-6989586621679079702"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679079703"><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679079703"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679079704"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079704"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679079705"><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079705"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; Eff es (a, w)
+forall w (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Writer w :&gt; es, Monoid w) =&gt;
+Eff es a -&gt; Eff es (a, w)
+</span><a href="Effectful.Writer.Static.Shared.html#listen"><span class="hs-identifier hs-var">listen</span></a></span><span> </span><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679079703"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="annottext">(a, b) -&gt; Eff es (a, b)
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679079704"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">w -&gt; b
+</span><a href="#local-6989586621679079702"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679079705"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Exception (ErrorCall)</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Monad.Catch</span><span>
+</span><span id="line-115"></span></pre></body></html>

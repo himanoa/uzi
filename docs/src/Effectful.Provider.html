@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Turn an effect handler into an effectful operation.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Provider</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Example</span></span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><span class="hs-comment">-- $example</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier">Provider</span></a></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider_"><span class="hs-identifier">Provider_</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#runProvider"><span class="hs-identifier">runProvider</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#runProvider_"><span class="hs-identifier">runProvider_</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Operations</span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#provide"><span class="hs-identifier">provide</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#provide_"><span class="hs-identifier">provide_</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#provideWith"><span class="hs-identifier">provideWith</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Provider.html#provideWith_"><span class="hs-identifier">provideWith_</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Identity</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Primitive.PrimArray</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html"><span class="hs-identifier">Effectful.Dispatch.Static</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.Primitive.html"><span class="hs-identifier">Effectful.Dispatch.Static.Primitive</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html"><span class="hs-identifier">Effectful.Internal.Env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier">Env</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Utils.html"><span class="hs-identifier">Effectful.Internal.Utils</span></a></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- $example</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Monad.IO.Class</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.Dispatch.Dynamic</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful.State.Static.Local</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Data.Map.Strict as M</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Given an effect:</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--   data Write :: Effect where</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--     Write :: String -&gt; Write m ()</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--   type instance DispatchOf Write = Dynamic</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-47"></span><span class="hs-comment">--</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--   write :: Write :&gt; es =&gt; String -&gt; Eff es ()</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--   write = send . Write</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- its handler can be turned into an effectful operation with the 'Provider'</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- effect:</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--   action :: Provider_ Write FilePath :&gt; es =&gt; Eff es ()</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--   action = do</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--     provideWith_ @Write &quot;in.txt&quot; $ do</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--       write &quot;hi&quot;</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--       write &quot;there&quot;</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--     provideWith_ @Write &quot;out.txt&quot; $ do</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--       write &quot;good&quot;</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--       write &quot;bye&quot;</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- Then, given multiple interpreters:</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--   runWriteIO</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--     :: IOE :&gt; es</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--     =&gt; FilePath</span><span>
+</span><span id="line-73"></span><span class="hs-comment">--     -&gt; Eff (Write : es) a</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--     -&gt; Eff es a</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--   runWriteIO fp = interpret $ \_ -&gt; \case</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--     Write msg -&gt; liftIO . putStrLn $ fp ++ &quot;: &quot; ++ msg</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--   runWritePure</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--     :: State (M.Map FilePath [String]) :&gt; es</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--     =&gt; FilePath</span><span>
+</span><span id="line-83"></span><span class="hs-comment">--     -&gt; Eff (Write : es) a</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--     -&gt; Eff es a</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--   runWritePure fp = interpret $ \_ -&gt; \case</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--     Write msg -&gt; modify $ M.insertWith (++) fp [msg]</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- @action@ can be supplied with either of them for the appropriate behavior:</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--   runEff</span><span>
+</span><span id="line-93"></span><span class="hs-comment">--     . runProvider_ runWriteIO</span><span>
+</span><span id="line-94"></span><span class="hs-comment">--     $ action</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- in.txt: hi</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- in.txt: there</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- out.txt: good</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- out.txt: bye</span><span>
+</span><span id="line-100"></span><span class="hs-comment">--</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--   runPureEff</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--     . fmap (fmap reverse)</span><span>
+</span><span id="line-104"></span><span class="hs-comment">--     . execState @(M.Map FilePath [String]) M.empty</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--     . runProvider_ runWritePure</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--     $ action</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- fromList [(&quot;in.txt&quot;,[&quot;hi&quot;,&quot;there&quot;]),(&quot;out.txt&quot;,[&quot;good&quot;,&quot;bye&quot;])]</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | Provide a way to run a handler of @e@ with a given @input@.</span><span>
+</span><span id="line-111"></span><span class="hs-comment">--</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- /Note:/ @f@ can be used to alter the return type of the effect handler. If</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- that's unnecessary, use 'Provider_'.</span><span>
+</span><span id="line-114"></span><span class="hs-keyword">data</span><span> </span><span id="Provider"><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-var">Provider</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679078148"><span class="annot"><a href="#local-6989586621679078148"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679078149"><span class="annot"><a href="#local-6989586621679078149"><span class="hs-identifier hs-type">input</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679078150"><span class="annot"><a href="#local-6989586621679078150"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- | A restricted variant of 'Provider' with unchanged return type of the effect</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- handler.</span><span>
+</span><span id="line-118"></span><span class="hs-keyword">type</span><span> </span><span id="Provider_"><span class="annot"><a href="Effectful.Provider.html#Provider_"><span class="hs-identifier hs-var">Provider_</span></a></span></span><span> </span><span id="local-6989586621679078151"><span class="annot"><a href="#local-6989586621679078151"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679078152"><span class="annot"><a href="#local-6989586621679078152"><span class="hs-identifier hs-type">input</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078151"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078152"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Identity</span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><a href="Effectful.Internal.Env.html#DispatchOf"><span class="hs-identifier hs-var">DispatchOf</span></a></span></span><span> </span><span id="local-6989586621679078153"><span id="local-6989586621679078154"><span id="local-6989586621679078155"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078153"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078154"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078155"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Static"><span class="hs-identifier hs-type">Static</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#NoSideEffects"><span class="hs-identifier hs-type">NoSideEffects</span></a></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-var">StaticRep</span></a></span></span><span> </span><span id="local-6989586621679078158"><span id="local-6989586621679078159"><span id="local-6989586621679078160"><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078158"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078159"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078160"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>  </span><span id="local-6989586621679078026"><span id="local-6989586621679078027"><span id="local-6989586621679078029"><span id="local-6989586621679078161"><span id="Provider"><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-var">Provider</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078161"><span class="hs-identifier hs-type">handlerEs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679078028"><span class="annot"><a href="#local-6989586621679078028"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="#local-6989586621679078026"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078027"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078161"><span class="hs-identifier hs-type">handlerEs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078028"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078161"><span class="hs-identifier hs-type">handlerEs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078029"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078028"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-type">StaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078027"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078026"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078029"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="annot"><span class="hs-comment">-- | Run the 'Provider' effect with a given effect handler.</span></span><span>
+</span><span id="line-128"></span><span id="local-6989586621679077997"><span id="local-6989586621679077998"><span id="local-6989586621679077999"><span id="local-6989586621679078002"><span id="local-6989586621679078004"><span class="annot"><a href="Effectful.Provider.html#runProvider"><span class="hs-identifier hs-type">runProvider</span></a></span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679078000"><span class="annot"><a href="#local-6989586621679078000"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="#local-6989586621679077997"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077998"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077999"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078000"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077999"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078002"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078000"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The effect handler.</span></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077998"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077997"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078002"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077999"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078004"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077999"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078004"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span></span><span>
+</span><span id="line-133"></span><span id="runProvider"><span class="annot"><span class="annottext">runProvider :: forall input (e :: Effect) (es :: [Effect]) (f :: Type -&gt; Type) a.
+(forall r. input -&gt; Eff (e : es) r -&gt; Eff es (f r))
+-&gt; Eff (Provider e input f : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#runProvider"><span class="hs-identifier hs-var hs-var">runProvider</span></a></span></span><span> </span><span id="local-6989586621679078162"><span class="annot"><span class="annottext">forall r. input -&gt; Eff (e : es) r -&gt; Eff es (f r)
+</span><a href="#local-6989586621679078162"><span class="hs-identifier hs-var">run</span></a></span></span><span> </span><span id="local-6989586621679078163"><span class="annot"><span class="annottext">Eff (Provider e input f : es) a
+</span><a href="#local-6989586621679078163"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO a) -&gt; Eff es a) -&gt; (Env es -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078165"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078165"><span class="hs-identifier hs-var">es0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-134"></span><span>  </span><span class="annot"><span class="annottext">IO (Env (Provider e input f : es))
+-&gt; (Env (Provider e input f : es) -&gt; IO ())
+-&gt; (Env (Provider e input f : es) -&gt; IO a)
+-&gt; IO a
+forall a b c. IO a -&gt; (a -&gt; IO b) -&gt; (a -&gt; IO c) -&gt; IO c
+</span><a href="Effectful.Internal.Utils.html#inlineBracket"><span class="hs-identifier hs-var">inlineBracket</span></a></span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EffectRep (DispatchOf (Provider e input f)) (Provider e input f)
+-&gt; Relinker
+     (EffectRep (DispatchOf (Provider e input f))) (Provider e input f)
+-&gt; Env es
+-&gt; IO (Env (Provider e input f : es))
+forall (e :: Effect) (es :: [Effect]).
+EffectRep (DispatchOf e) e
+-&gt; Relinker (EffectRep (DispatchOf e)) e
+-&gt; Env es
+-&gt; IO (Env (e : es))
+</span><a href="Effectful.Internal.Env.html#consEnv"><span class="hs-identifier hs-var">consEnv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Env es
+-&gt; (forall r. input -&gt; Eff (e : es) r -&gt; Eff es (f r))
+-&gt; StaticRep (Provider e input f)
+forall (handlerEs :: [Effect]) input (e :: Effect)
+       (f :: Type -&gt; Type).
+Env handlerEs
+-&gt; (forall r.
+    input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r))
+-&gt; StaticRep (Provider e input f)
+</span><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-var">Provider</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078165"><span class="hs-identifier hs-var">es0</span></a></span><span> </span><span class="annot"><span class="annottext">input -&gt; Eff (e : es) r -&gt; Eff es (f r)
+forall r. input -&gt; Eff (e : es) r -&gt; Eff es (f r)
+</span><a href="#local-6989586621679078162"><span class="hs-identifier hs-var">run</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Relinker
+  (EffectRep (DispatchOf (Provider e input f))) (Provider e input f)
+Relinker StaticRep (Provider e input f)
+forall (e :: Effect) input (f :: Type -&gt; Type).
+Relinker StaticRep (Provider e input f)
+</span><a href="Effectful.Provider.html#relinkProvider"><span class="hs-identifier hs-var">relinkProvider</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078165"><span class="hs-identifier hs-var">es0</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>    </span><span class="annot"><span class="annottext">Env (Provider e input f : es) -&gt; IO ()
+forall (e :: Effect) (es :: [Effect]). Env (e : es) -&gt; IO ()
+</span><a href="Effectful.Internal.Env.html#unconsEnv"><span class="hs-identifier hs-var">unconsEnv</span></a></span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679078170"><span class="annot"><span class="annottext">Env (Provider e input f : es)
+</span><a href="#local-6989586621679078170"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff (Provider e input f : es) a
+-&gt; Env (Provider e input f : es) -&gt; IO a
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-identifier hs-var">unEff</span></a></span><span> </span><span class="annot"><span class="annottext">Eff (Provider e input f : es) a
+</span><a href="#local-6989586621679078163"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Env (Provider e input f : es)
+</span><a href="#local-6989586621679078170"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Run the 'Provider' effect with a given effect handler that doesn't change</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- its return type.</span><span>
+</span><span id="line-141"></span><span id="local-6989586621679078038"><span id="local-6989586621679078039"><span id="local-6989586621679078040"><span id="local-6989586621679078043"><span class="annot"><a href="Effectful.Provider.html#runProvider_"><span class="hs-identifier hs-type">runProvider_</span></a></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679078041"><span class="annot"><a href="#local-6989586621679078041"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="#local-6989586621679078038"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078039"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078040"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078041"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078040"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078041"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The effect handler.</span></span><span>
+</span><span id="line-144"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider_"><span class="hs-identifier hs-type">Provider_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078039"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078038"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078040"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078043"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078040"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078043"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
+</span><span id="line-146"></span><span id="runProvider_"><span class="annot"><span class="annottext">runProvider_ :: forall input (e :: Effect) (es :: [Effect]) a.
+(forall r. input -&gt; Eff (e : es) r -&gt; Eff es r)
+-&gt; Eff (Provider_ e input : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#runProvider_"><span class="hs-identifier hs-var hs-var">runProvider_</span></a></span></span><span> </span><span id="local-6989586621679078172"><span class="annot"><span class="annottext">forall r. input -&gt; Eff (e : es) r -&gt; Eff es r
+</span><a href="#local-6989586621679078172"><span class="hs-identifier hs-var">run</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall r. input -&gt; Eff (e : es) r -&gt; Eff es (Identity r))
+-&gt; Eff (Provider e input Identity : es) a -&gt; Eff es a
+forall input (e :: Effect) (es :: [Effect]) (f :: Type -&gt; Type) a.
+(forall r. input -&gt; Eff (e : es) r -&gt; Eff es (f r))
+-&gt; Eff (Provider e input f : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#runProvider"><span class="hs-identifier hs-var">runProvider</span></a></span><span> </span><span class="annot"><span class="annottext">((forall r. input -&gt; Eff (e : es) r -&gt; Eff es (Identity r))
+ -&gt; Eff (Provider e input Identity : es) a -&gt; Eff es a)
+-&gt; (forall r. input -&gt; Eff (e : es) r -&gt; Eff es (Identity r))
+-&gt; Eff (Provider e input Identity : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078174"><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078174"><span class="hs-identifier hs-var">input</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff es r -&gt; Eff es (Identity r)
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(Eff es r -&gt; Eff es (Identity r))
+-&gt; (Eff (e : es) r -&gt; Eff es r)
+-&gt; Eff (e : es) r
+-&gt; Eff es (Identity r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">input -&gt; Eff (e : es) r -&gt; Eff es r
+forall r. input -&gt; Eff (e : es) r -&gt; Eff es r
+</span><a href="#local-6989586621679078172"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078174"><span class="hs-identifier hs-var">input</span></a></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="annot"><span class="hs-comment">-- | Run the effect handler.</span></span><span>
+</span><span id="line-149"></span><span id="local-6989586621679078056"><span id="local-6989586621679078057"><span id="local-6989586621679078058"><span id="local-6989586621679078060"><span class="annot"><a href="Effectful.Provider.html#provide"><span class="hs-identifier hs-type">provide</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078056"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078057"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078058"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078056"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078058"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078060"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078058"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078057"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078060"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-150"></span><span id="provide"><span class="annot"><span class="annottext">provide :: forall (e :: Effect) (f :: Type -&gt; Type) (es :: [Effect]) a.
+(Provider e () f :&gt; es) =&gt;
+Eff (e : es) a -&gt; Eff es (f a)
+</span><a href="Effectful.Provider.html#provide"><span class="hs-identifier hs-var hs-var">provide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (e : es) a -&gt; Eff es (f a)
+forall (e :: Effect) input (f :: Type -&gt; Type) (es :: [Effect]) a.
+(Provider e input f :&gt; es) =&gt;
+input -&gt; Eff (e : es) a -&gt; Eff es (f a)
+</span><a href="Effectful.Provider.html#provideWith"><span class="hs-identifier hs-var">provideWith</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="annot"><span class="hs-comment">-- | Run the effect handler with unchanged return type.</span></span><span>
+</span><span id="line-153"></span><span id="local-6989586621679078070"><span id="local-6989586621679078071"><span id="local-6989586621679078072"><span class="annot"><a href="Effectful.Provider.html#provide_"><span class="hs-identifier hs-type">provide_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider_"><span class="hs-identifier hs-type">Provider_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078070"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078071"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078070"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078071"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078072"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078071"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078072"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-154"></span><span id="provide_"><span class="annot"><span class="annottext">provide_ :: forall (e :: Effect) (es :: [Effect]) a.
+(Provider_ e () :&gt; es) =&gt;
+Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#provide_"><span class="hs-identifier hs-var hs-var">provide_</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (e : es) a -&gt; Eff es a
+forall (e :: Effect) input (es :: [Effect]) a.
+(Provider_ e input :&gt; es) =&gt;
+input -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#provideWith_"><span class="hs-identifier hs-var">provideWith_</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="annot"><span class="hs-comment">-- | Run the effect handler with a given input.</span></span><span>
+</span><span id="line-157"></span><span id="local-6989586621679078065"><span id="local-6989586621679078066"><span id="local-6989586621679078067"><span id="local-6989586621679078068"><span id="local-6989586621679078069"><span class="annot"><a href="Effectful.Provider.html#provideWith"><span class="hs-identifier hs-type">provideWith</span></a></span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078065"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078066"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078067"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078068"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078066"><span class="hs-identifier hs-type">input</span></a></span><span>
+</span><span id="line-160"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The input to the effect handler.</span></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078065"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078068"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078069"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-162"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078068"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078067"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078069"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-163"></span><span id="provideWith"><span class="annot"><span class="annottext">provideWith :: forall (e :: Effect) input (f :: Type -&gt; Type) (es :: [Effect]) a.
+(Provider e input f :&gt; es) =&gt;
+input -&gt; Eff (e : es) a -&gt; Eff es (f a)
+</span><a href="Effectful.Provider.html#provideWith"><span class="hs-identifier hs-var hs-var">provideWith</span></a></span></span><span> </span><span id="local-6989586621679078184"><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078184"><span class="hs-identifier hs-var">input</span></a></span></span><span> </span><span id="local-6989586621679078185"><span class="annot"><span class="annottext">Eff (e : es) a
+</span><a href="#local-6989586621679078185"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO (f a)) -&gt; Eff es (f a)
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO (f a)) -&gt; Eff es (f a))
+-&gt; (Env es -&gt; IO (f a)) -&gt; Eff es (f a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078186"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078186"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-164"></span><span>  </span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span id="local-6989586621679078188"><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078188"><span class="hs-identifier hs-var">handlerEs</span></a></span></span><span> </span><span id="local-6989586621679078189"><span class="annot"><span class="annottext">forall r. input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r)
+</span><a href="#local-6989586621679078189"><span class="hs-identifier hs-var">run</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Env es
+-&gt; IO
+     (EffectRep (DispatchOf (Provider e input f)) (Provider e input f))
+forall (e :: Effect) (es :: [Effect]).
+(e :&gt; es) =&gt;
+Env es -&gt; IO (EffectRep (DispatchOf e) e)
+</span><a href="Effectful.Internal.Env.html#getEnv"><span class="hs-identifier hs-var">getEnv</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078186"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff handlerEs (f a) -&gt; Env handlerEs -&gt; IO (f a)
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-operator hs-var">`unEff`</span></a></span><span> </span><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078188"><span class="hs-identifier hs-var">handlerEs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Eff handlerEs (f a) -&gt; IO (f a))
+-&gt; ((Env (e : handlerEs) -&gt; IO a) -&gt; Eff handlerEs (f a))
+-&gt; (Env (e : handlerEs) -&gt; IO a)
+-&gt; IO (f a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">input -&gt; Eff (e : handlerEs) a -&gt; Eff handlerEs (f a)
+forall r. input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r)
+</span><a href="#local-6989586621679078189"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078184"><span class="hs-identifier hs-var">input</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff (e : handlerEs) a -&gt; Eff handlerEs (f a))
+-&gt; ((Env (e : handlerEs) -&gt; IO a) -&gt; Eff (e : handlerEs) a)
+-&gt; (Env (e : handlerEs) -&gt; IO a)
+-&gt; Eff handlerEs (f a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Env (e : handlerEs) -&gt; IO a) -&gt; Eff (e : handlerEs) a
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env (e : handlerEs) -&gt; IO a) -&gt; IO (f a))
+-&gt; (Env (e : handlerEs) -&gt; IO a) -&gt; IO (f a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078191"><span class="annot"><span class="annottext">Env (e : handlerEs)
+</span><a href="#local-6989586621679078191"><span class="hs-identifier hs-var">eHandlerEs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><span class="annottext">Eff (e : es) a -&gt; Env (e : es) -&gt; IO a
+forall (es :: [Effect]) a. Eff es a -&gt; Env es -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-identifier hs-var">unEff</span></a></span><span> </span><span class="annot"><span class="annottext">Eff (e : es) a
+</span><a href="#local-6989586621679078185"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="annot"><span class="annottext">(Env (e : es) -&gt; IO a) -&gt; IO (Env (e : es)) -&gt; IO a
+forall (m :: Type -&gt; Type) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Env (e : handlerEs) -&gt; Env es -&gt; IO (Env (e : es))
+forall (e :: Effect) (handlerEs :: [Effect]) (es :: [Effect]).
+Env (e : handlerEs) -&gt; Env es -&gt; IO (Env (e : es))
+</span><a href="Effectful.Provider.html#copyRef"><span class="hs-identifier hs-var">copyRef</span></a></span><span> </span><span class="annot"><span class="annottext">Env (e : handlerEs)
+</span><a href="#local-6989586621679078191"><span class="hs-identifier hs-var">eHandlerEs</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679078186"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- | Run the effect handler that doesn't change its return type with a given</span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- input.</span><span>
+</span><span id="line-170"></span><span id="local-6989586621679078076"><span id="local-6989586621679078077"><span id="local-6989586621679078078"><span id="local-6989586621679078079"><span class="annot"><a href="Effectful.Provider.html#provideWith_"><span class="hs-identifier hs-type">provideWith_</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Provider.html#Provider_"><span class="hs-identifier hs-type">Provider_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078076"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078077"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078078"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-172"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078077"><span class="hs-identifier hs-type">input</span></a></span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The input to the effect handler.</span></span><span>
+</span><span id="line-174"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078076"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078078"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078079"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-175"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078078"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078079"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
+</span><span id="line-176"></span><span id="provideWith_"><span class="annot"><span class="annottext">provideWith_ :: forall (e :: Effect) input (es :: [Effect]) a.
+(Provider_ e input :&gt; es) =&gt;
+input -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Provider.html#provideWith_"><span class="hs-identifier hs-var hs-var">provideWith_</span></a></span></span><span> </span><span id="local-6989586621679078196"><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078196"><span class="hs-identifier hs-var">input</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eff es (Identity a) -&gt; Eff es a
+forall (es :: [Effect]) a. Eff es (Identity a) -&gt; Eff es a
+</span><a href="#local-6989586621679078197"><span class="hs-identifier hs-var">adapt</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es (Identity a) -&gt; Eff es a)
+-&gt; (Eff (e : es) a -&gt; Eff es (Identity a))
+-&gt; Eff (e : es) a
+-&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">input -&gt; Eff (e : es) a -&gt; Eff es (Identity a)
+forall (e :: Effect) input (f :: Type -&gt; Type) (es :: [Effect]) a.
+(Provider e input f :&gt; es) =&gt;
+input -&gt; Eff (e : es) a -&gt; Eff es (f a)
+</span><a href="Effectful.Provider.html#provideWith"><span class="hs-identifier hs-var">provideWith</span></a></span><span> </span><span class="annot"><span class="annottext">input
+</span><a href="#local-6989586621679078196"><span class="hs-identifier hs-var">input</span></a></span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-178"></span><span>    </span><span id="local-6989586621679078099"><span id="local-6989586621679078100"><span class="annot"><a href="#local-6989586621679078197"><span class="hs-identifier hs-type">adapt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078099"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Identity</span></span><span> </span><span class="annot"><a href="#local-6989586621679078100"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078099"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078100"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-179"></span><span>    </span><span id="local-6989586621679078197"><span class="annot"><span class="annottext">adapt :: forall (es :: [Effect]) a. Eff es (Identity a) -&gt; Eff es a
+</span><a href="#local-6989586621679078197"><span class="hs-identifier hs-var hs-var">adapt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eff es (Identity a) -&gt; Eff es a
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-182"></span><span class="hs-comment">-- Helpers</span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span id="local-6989586621679078031"><span id="local-6989586621679078032"><span id="local-6989586621679078033"><span class="annot"><a href="Effectful.Provider.html#relinkProvider"><span class="hs-identifier hs-type">relinkProvider</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Relinker"><span class="hs-identifier hs-type">Relinker</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-type">StaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078031"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078032"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078033"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-185"></span><span id="relinkProvider"><span class="annot"><span class="annottext">relinkProvider :: forall (e :: Effect) input (f :: Type -&gt; Type).
+Relinker StaticRep (Provider e input f)
+</span><a href="Effectful.Provider.html#relinkProvider"><span class="hs-identifier hs-var hs-var">relinkProvider</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall (es :: [Effect]). Env es -&gt; IO (Env es))
+ -&gt; StaticRep (Provider e input f)
+ -&gt; IO (StaticRep (Provider e input f)))
+-&gt; Relinker StaticRep (Provider e input f)
+forall (a :: Effect -&gt; Type) (b :: Effect).
+((forall (es :: [Effect]). Env es -&gt; IO (Env es))
+ -&gt; a b -&gt; IO (a b))
+-&gt; Relinker a b
+</span><a href="Effectful.Internal.Env.html#Relinker"><span class="hs-identifier hs-var">Relinker</span></a></span><span> </span><span class="annot"><span class="annottext">(((forall (es :: [Effect]). Env es -&gt; IO (Env es))
+  -&gt; StaticRep (Provider e input f)
+  -&gt; IO (StaticRep (Provider e input f)))
+ -&gt; Relinker StaticRep (Provider e input f))
+-&gt; ((forall (es :: [Effect]). Env es -&gt; IO (Env es))
+    -&gt; StaticRep (Provider e input f)
+    -&gt; IO (StaticRep (Provider e input f)))
+-&gt; Relinker StaticRep (Provider e input f)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078200"><span class="annot"><span class="annottext">forall (es :: [Effect]). Env es -&gt; IO (Env es)
+</span><a href="#local-6989586621679078200"><span class="hs-identifier hs-var">relink</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-type">Provider</span></a></span><span> </span><span id="local-6989586621679078204"><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078204"><span class="hs-identifier hs-var">handlerEs</span></a></span></span><span> </span><span id="local-6989586621679078205"><span class="annot"><span class="annottext">forall r. input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r)
+</span><a href="#local-6989586621679078205"><span class="hs-identifier hs-var">run</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-186"></span><span>  </span><span id="local-6989586621679078206"><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078206"><span class="hs-identifier hs-var">newHandlerEs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Env handlerEs -&gt; IO (Env handlerEs)
+forall (es :: [Effect]). Env es -&gt; IO (Env es)
+</span><a href="#local-6989586621679078200"><span class="hs-identifier hs-var">relink</span></a></span><span> </span><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078204"><span class="hs-identifier hs-var">handlerEs</span></a></span><span>
+</span><span id="line-187"></span><span>  </span><span class="annot"><span class="annottext">StaticRep (Provider e input f)
+-&gt; IO (StaticRep (Provider e input f))
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(StaticRep (Provider e input f)
+ -&gt; IO (StaticRep (Provider e input f)))
+-&gt; StaticRep (Provider e input f)
+-&gt; IO (StaticRep (Provider e input f))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Env handlerEs
+-&gt; (forall r.
+    input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r))
+-&gt; StaticRep (Provider e input f)
+forall (handlerEs :: [Effect]) input (e :: Effect)
+       (f :: Type -&gt; Type).
+Env handlerEs
+-&gt; (forall r.
+    input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r))
+-&gt; StaticRep (Provider e input f)
+</span><a href="Effectful.Provider.html#Provider"><span class="hs-identifier hs-var">Provider</span></a></span><span> </span><span class="annot"><span class="annottext">Env handlerEs
+</span><a href="#local-6989586621679078206"><span class="hs-identifier hs-var">newHandlerEs</span></a></span><span> </span><span class="annot"><span class="annottext">input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r)
+forall r. input -&gt; Eff (e : handlerEs) r -&gt; Eff handlerEs (f r)
+</span><a href="#local-6989586621679078205"><span class="hs-identifier hs-var">run</span></a></span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span id="local-6989586621679078092"><span id="local-6989586621679078093"><span id="local-6989586621679078094"><span class="annot"><a href="Effectful.Provider.html#copyRef"><span class="hs-identifier hs-type">copyRef</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078092"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078093"><span class="hs-identifier hs-type">handlerEs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078094"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078092"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078094"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-190"></span><span id="copyRef"><span class="annot"><span class="annottext">copyRef :: forall (e :: Effect) (handlerEs :: [Effect]) (es :: [Effect]).
+Env (e : handlerEs) -&gt; Env es -&gt; IO (Env (e : es))
+</span><a href="Effectful.Provider.html#copyRef"><span class="hs-identifier hs-var hs-var">copyRef</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span id="local-6989586621679078240"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078240"><span class="hs-identifier hs-var">hoffset</span></a></span></span><span> </span><span id="local-6989586621679078241"><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078241"><span class="hs-identifier hs-var">hrefs</span></a></span></span><span> </span><span id="local-6989586621679078242"><span class="annot"><span class="annottext">IORef' Storage
+</span><a href="#local-6989586621679078242"><span class="hs-identifier hs-var">hstorage</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-type">Env</span></a></span><span> </span><span id="local-6989586621679078243"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078243"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span id="local-6989586621679078244"><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078244"><span class="hs-identifier hs-var">refs0</span></a></span></span><span> </span><span id="local-6989586621679078245"><span class="annot"><span class="annottext">IORef' Storage
+</span><a href="#local-6989586621679078245"><span class="hs-identifier hs-var">storage</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-191"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
+forall (f :: Type -&gt; Type). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
+</span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IORef' Storage
+</span><a href="#local-6989586621679078242"><span class="hs-identifier hs-var">hstorage</span></a></span><span> </span><span class="annot"><span class="annottext">IORef' Storage -&gt; IORef' Storage -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">IORef' Storage
+</span><a href="#local-6989586621679078245"><span class="hs-identifier hs-var">storage</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-192"></span><span>    </span><span class="annot"><span class="annottext">[Char] -&gt; IO ()
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;storages do not match&quot;</span></span><span>
+</span><span id="line-193"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679078249"><span class="annot"><span class="annottext">size :: Int
+</span><a href="#local-6989586621679078249"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PrimArray Int -&gt; Int
+forall a. Prim a =&gt; PrimArray a -&gt; Int
+</span><span class="hs-identifier hs-var">sizeofPrimArray</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078244"><span class="hs-identifier hs-var">refs0</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078243"><span class="hs-identifier hs-var">offset</span></a></span><span>
+</span><span id="line-194"></span><span>  </span><span id="local-6989586621679078251"><span class="annot"><span class="annottext">MutablePrimArray RealWorld Int
+</span><a href="#local-6989586621679078251"><span class="hs-identifier hs-var">mrefs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO (MutablePrimArray (PrimState IO) Int)
+forall (m :: Type -&gt; Type) a.
+(PrimMonad m, Prim a) =&gt;
+Int -&gt; m (MutablePrimArray (PrimState m) a)
+</span><span class="hs-identifier hs-var">newPrimArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078249"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-195"></span><span>  </span><span class="annot"><span class="annottext">MutablePrimArray (PrimState IO) Int
+-&gt; Int -&gt; PrimArray Int -&gt; Int -&gt; Int -&gt; IO ()
+forall (m :: Type -&gt; Type) a.
+(PrimMonad m, Prim a) =&gt;
+MutablePrimArray (PrimState m) a
+-&gt; Int -&gt; PrimArray a -&gt; Int -&gt; Int -&gt; m ()
+</span><span class="hs-identifier hs-var">copyPrimArray</span></span><span> </span><span class="annot"><span class="annottext">MutablePrimArray RealWorld Int
+MutablePrimArray (PrimState IO) Int
+</span><a href="#local-6989586621679078251"><span class="hs-identifier hs-var">mrefs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078244"><span class="hs-identifier hs-var">refs0</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078243"><span class="hs-identifier hs-var">offset</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078249"><span class="hs-identifier hs-var">size</span></a></span><span>
+</span><span id="line-196"></span><span>  </span><span class="annot"><span class="annottext">MutablePrimArray (PrimState IO) Int -&gt; Int -&gt; Int -&gt; IO ()
+forall a (m :: Type -&gt; Type).
+(Prim a, PrimMonad m) =&gt;
+MutablePrimArray (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writePrimArray</span></span><span> </span><span class="annot"><span class="annottext">MutablePrimArray RealWorld Int
+MutablePrimArray (PrimState IO) Int
+</span><a href="#local-6989586621679078251"><span class="hs-identifier hs-var">mrefs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; IO ()) -&gt; Int -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int -&gt; Int -&gt; Int
+forall a. Prim a =&gt; PrimArray a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">indexPrimArray</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078241"><span class="hs-identifier hs-var">hrefs</span></a></span><span>  </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078240"><span class="hs-identifier hs-var">hoffset</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span class="annot"><span class="annottext">MutablePrimArray (PrimState IO) Int -&gt; Int -&gt; Int -&gt; IO ()
+forall a (m :: Type -&gt; Type).
+(Prim a, PrimMonad m) =&gt;
+MutablePrimArray (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writePrimArray</span></span><span> </span><span class="annot"><span class="annottext">MutablePrimArray RealWorld Int
+MutablePrimArray (PrimState IO) Int
+</span><a href="#local-6989586621679078251"><span class="hs-identifier hs-var">mrefs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; IO ()) -&gt; Int -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int -&gt; Int -&gt; Int
+forall a. Prim a =&gt; PrimArray a -&gt; Int -&gt; a
+</span><span class="hs-identifier hs-var">indexPrimArray</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078241"><span class="hs-identifier hs-var">hrefs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679078240"><span class="hs-identifier hs-var">hoffset</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-198"></span><span>  </span><span id="local-6989586621679078257"><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078257"><span class="hs-identifier hs-var">refs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MutablePrimArray (PrimState IO) Int -&gt; IO (PrimArray Int)
+forall (m :: Type -&gt; Type) a.
+PrimMonad m =&gt;
+MutablePrimArray (PrimState m) a -&gt; m (PrimArray a)
+</span><span class="hs-identifier hs-var">unsafeFreezePrimArray</span></span><span> </span><span class="annot"><span class="annottext">MutablePrimArray RealWorld Int
+MutablePrimArray (PrimState IO) Int
+</span><a href="#local-6989586621679078251"><span class="hs-identifier hs-var">mrefs</span></a></span><span>
+</span><span id="line-199"></span><span>  </span><span class="annot"><span class="annottext">Env (e : es) -&gt; IO (Env (e : es))
+forall a. a -&gt; IO a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Env (e : es) -&gt; IO (Env (e : es)))
+-&gt; Env (e : es) -&gt; IO (Env (e : es))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; PrimArray Int -&gt; IORef' Storage -&gt; Env (e : es)
+forall (es :: [Effect]).
+Int -&gt; PrimArray Int -&gt; IORef' Storage -&gt; Env es
+</span><a href="Effectful.Internal.Env.html#Env"><span class="hs-identifier hs-var">Env</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">PrimArray Int
+</span><a href="#local-6989586621679078257"><span class="hs-identifier hs-var">refs</span></a></span><span> </span><span class="annot"><span class="annottext">IORef' Storage
+</span><a href="#local-6989586621679078245"><span class="hs-identifier hs-var">storage</span></a></span><span>
+</span><span id="line-200"></span></pre></body></html>

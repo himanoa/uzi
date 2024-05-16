@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.UserName</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">newtype</span><span> </span><span id="UserName"><span class="annot"><a href="Data.Discord.UserName.html#UserName"><span class="hs-identifier hs-var">UserName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UserName"><span class="annot"><a href="Data.Discord.UserName.html#UserName"><span class="hs-identifier hs-var">UserName</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679303869"><span id="local-6989586621679303875"><span id="local-6989586621679303879"><span class="annot"><span class="annottext">Int -&gt; UserName -&gt; ShowS
+[UserName] -&gt; ShowS
+UserName -&gt; String
+(Int -&gt; UserName -&gt; ShowS)
+-&gt; (UserName -&gt; String) -&gt; ([UserName] -&gt; ShowS) -&gt; Show UserName
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; UserName -&gt; ShowS
+showsPrec :: Int -&gt; UserName -&gt; ShowS
+$cshow :: UserName -&gt; String
+show :: UserName -&gt; String
+$cshowList :: [UserName] -&gt; ShowS
+showList :: [UserName] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303883"><span id="local-6989586621679303888"><span class="annot"><span class="annottext">UserName -&gt; UserName -&gt; Bool
+(UserName -&gt; UserName -&gt; Bool)
+-&gt; (UserName -&gt; UserName -&gt; Bool) -&gt; Eq UserName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: UserName -&gt; UserName -&gt; Bool
+== :: UserName -&gt; UserName -&gt; Bool
+$c/= :: UserName -&gt; UserName -&gt; Bool
+/= :: UserName -&gt; UserName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679303894"><span id="local-6989586621679303899"><span class="annot"><span class="annottext">Value -&gt; Parser [UserName]
+Value -&gt; Parser UserName
+(Value -&gt; Parser UserName)
+-&gt; (Value -&gt; Parser [UserName]) -&gt; FromJSON UserName
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser UserName
+parseJSON :: Value -&gt; Parser UserName
+$cparseJSONList :: Value -&gt; Parser [UserName]
+parseJSONList :: Value -&gt; Parser [UserName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303905"><span id="local-6989586621679303910"><span id="local-6989586621679303914"><span id="local-6989586621679303918"><span class="annot"><span class="annottext">[UserName] -&gt; Value
+[UserName] -&gt; Encoding
+UserName -&gt; Value
+UserName -&gt; Encoding
+(UserName -&gt; Value)
+-&gt; (UserName -&gt; Encoding)
+-&gt; ([UserName] -&gt; Value)
+-&gt; ([UserName] -&gt; Encoding)
+-&gt; ToJSON UserName
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: UserName -&gt; Value
+toJSON :: UserName -&gt; Value
+$ctoEncoding :: UserName -&gt; Encoding
+toEncoding :: UserName -&gt; Encoding
+$ctoJSONList :: [UserName] -&gt; Value
+toJSONList :: [UserName] -&gt; Value
+$ctoEncodingList :: [UserName] -&gt; Encoding
+toEncodingList :: [UserName] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-13"></span></pre></body></html>

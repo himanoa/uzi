@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Response.ReadyEventResponse</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">makeLenses</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ReceiveEventOperationCode.html"><span class="hs-identifier">Data.Discord.ReceiveEventOperationCode</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.User.html"><span class="hs-identifier">Data.Discord.User</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">newtype</span><span> </span><span id="ReadyEventResponse"><span class="annot"><a href="Data.Discord.Response.ReadyEventResponse.html#ReadyEventResponse"><span class="hs-identifier hs-var">ReadyEventResponse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReadyEventResponse"><span class="annot"><a href="Data.Discord.Response.ReadyEventResponse.html#ReadyEventResponse"><span class="hs-identifier hs-var">ReadyEventResponse</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_user"><span class="annot"><span class="annottext">ReadyEventResponse -&gt; User
+</span><a href="Data.Discord.Response.ReadyEventResponse.html#_user"><span class="hs-identifier hs-var hs-var">_user</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.User.html#User"><span class="hs-identifier hs-type">User</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679304517"><span id="local-6989586621679304523"><span id="local-6989586621679304527"><span class="annot"><span class="annottext">Int -&gt; ReadyEventResponse -&gt; ShowS
+[ReadyEventResponse] -&gt; ShowS
+ReadyEventResponse -&gt; String
+(Int -&gt; ReadyEventResponse -&gt; ShowS)
+-&gt; (ReadyEventResponse -&gt; String)
+-&gt; ([ReadyEventResponse] -&gt; ShowS)
+-&gt; Show ReadyEventResponse
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReadyEventResponse -&gt; ShowS
+showsPrec :: Int -&gt; ReadyEventResponse -&gt; ShowS
+$cshow :: ReadyEventResponse -&gt; String
+show :: ReadyEventResponse -&gt; String
+$cshowList :: [ReadyEventResponse] -&gt; ShowS
+showList :: [ReadyEventResponse] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679304531"><span id="local-6989586621679304533"><span class="annot"><span class="annottext">(forall x. ReadyEventResponse -&gt; Rep ReadyEventResponse x)
+-&gt; (forall x. Rep ReadyEventResponse x -&gt; ReadyEventResponse)
+-&gt; Generic ReadyEventResponse
+forall x. Rep ReadyEventResponse x -&gt; ReadyEventResponse
+forall x. ReadyEventResponse -&gt; Rep ReadyEventResponse x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. ReadyEventResponse -&gt; Rep ReadyEventResponse x
+from :: forall x. ReadyEventResponse -&gt; Rep ReadyEventResponse x
+$cto :: forall x. Rep ReadyEventResponse x -&gt; ReadyEventResponse
+to :: forall x. Rep ReadyEventResponse x -&gt; ReadyEventResponse
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679304537"><span id="local-6989586621679304542"><span class="annot"><span class="annottext">ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool
+(ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool)
+-&gt; (ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool)
+-&gt; Eq ReadyEventResponse
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool
+== :: ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool
+$c/= :: ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool
+/= :: ReadyEventResponse -&gt; ReadyEventResponse -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span id="user"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">ReadyEventResponse</span></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679304556"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.ReadyEventResponse.html#ReadyEventResponse"><span class="hs-identifier hs-type">ReadyEventResponse</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>  </span><span id="local-6989586621679304583"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser ReadyEventResponse
+</span><a href="#local-6989586621679304583"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser ReadyEventResponse)
+-&gt; Value
+-&gt; Parser ReadyEventResponse
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;HelloEventResponse&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser ReadyEventResponse)
+ -&gt; Value -&gt; Parser ReadyEventResponse)
+-&gt; (Object -&gt; Parser ReadyEventResponse)
+-&gt; Value
+-&gt; Parser ReadyEventResponse
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679304586"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304586"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-21"></span><span>    </span><span id="local-6989586621679304587"><span class="annot"><span class="annottext">ReceiveEventOperationCode
+</span><a href="#local-6989586621679304587"><span class="hs-identifier hs-var">operationCode</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.ReceiveEventOperationCode.html#ReceiveEventOperationCode"><span class="hs-identifier hs-type">ReceiveEventOperationCode</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser ReceiveEventOperationCode)
+-&gt; Parser Value -&gt; Parser ReceiveEventOperationCode
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304586"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;op&quot;</span></span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ReceiveEventOperationCode
+</span><a href="#local-6989586621679304587"><span class="hs-identifier hs-var">operationCode</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-23"></span><span>      </span><span class="annot"><span class="annottext">ReceiveEventOperationCode
+</span><a href="Data.Discord.ReceiveEventOperationCode.html#Ready"><span class="hs-identifier hs-var">Ready</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-24"></span><span>        </span><span id="local-6989586621679304591"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304591"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304586"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Object
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;d&quot;</span></span><span>
+</span><span id="line-25"></span><span>        </span><span id="local-6989586621679304592"><span class="annot"><span class="annottext">User
+</span><a href="#local-6989586621679304592"><span class="hs-identifier hs-var">userObj</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.User.html#User"><span class="hs-identifier hs-type">User</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser User) -&gt; Parser Value -&gt; Parser User
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304591"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;user&quot;</span></span><span>
+</span><span id="line-26"></span><span>        </span><span class="annot"><span class="annottext">ReadyEventResponse -&gt; Parser ReadyEventResponse
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.ReadyEventResponse.html#ReadyEventResponse"><span class="hs-identifier hs-type">ReadyEventResponse</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_user :: User
+</span><a href="Data.Discord.Response.ReadyEventResponse.html#_user"><span class="hs-identifier hs-var">_user</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">User
+</span><a href="#local-6989586621679304592"><span class="hs-identifier hs-var">userObj</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-27"></span><span>      </span><span class="annot"><span class="annottext">ReceiveEventOperationCode
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser ReadyEventResponse -&gt; Parser ReadyEventResponse
+forall a. String -&gt; Parser a -&gt; Parser a
+</span><span class="hs-identifier hs-var">prependFailure</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Not supported op code&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Value -&gt; Parser ReadyEventResponse
+forall a. String -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">typeMismatch</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;op&quot;</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span></pre></body></html>

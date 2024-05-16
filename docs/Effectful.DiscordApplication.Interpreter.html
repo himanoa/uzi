@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Module: Effectful.DiscordApplication.Effect</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Description: Application Id&#12434;&#21462;&#24471;&#12377;&#12427;Effect&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12377;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- UziBot&#33258;&#36523;&#12398;Application Id&#12434;&#21462;&#24471;&#12377;&#12427;Effect&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12377;</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.DiscordApplication.Interpreter</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#applicationId"><span class="hs-identifier">applicationId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#runDiscordApplication"><span class="hs-identifier">runDiscordApplication</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.html"><span class="hs-identifier">Effectful.DiscordApiTokenReader</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Effect.html"><span class="hs-identifier">Effectful.DiscordApplication.Effect</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">interpret</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Internal.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unsafeEff_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Req.html"><span class="hs-identifier">Effectful.Req</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.HTTP.Req</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="FromEnvironmentError"><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#FromEnvironmentError"><span class="hs-identifier hs-var">FromEnvironmentError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DiscordApiTokenIsUndefined"><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#DiscordApiTokenIsUndefined"><span class="hs-identifier hs-var">DiscordApiTokenIsUndefined</span></a></span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679308591"><span id="local-6989586621679308593"><span id="local-6989586621679308597"><span class="annot"><span class="annottext">Int -&gt; FromEnvironmentError -&gt; ShowS
+[FromEnvironmentError] -&gt; ShowS
+FromEnvironmentError -&gt; String
+(Int -&gt; FromEnvironmentError -&gt; ShowS)
+-&gt; (FromEnvironmentError -&gt; String)
+-&gt; ([FromEnvironmentError] -&gt; ShowS)
+-&gt; Show FromEnvironmentError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+showsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+$cshow :: FromEnvironmentError -&gt; String
+show :: FromEnvironmentError -&gt; String
+$cshowList :: [FromEnvironmentError] -&gt; ShowS
+showList :: [FromEnvironmentError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679308605"><span id="local-6989586621679308609"><span id="local-6989586621679308612"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#FromEnvironmentError"><span class="hs-identifier hs-type">FromEnvironmentError</span></a></span></span></span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | DiscordAPI&#12398;&#12507;&#12473;&#12488;&#37096;&#20998;&#12434;&#36820;&#12377;</span></span><span>
+</span><span id="line-37"></span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#host"><span class="hs-identifier hs-type">host</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-38"></span><span id="host"><span class="annot"><span class="annottext">host :: Text
+</span><a href="Effectful.DiscordApplication.Interpreter.html#host"><span class="hs-identifier hs-var hs-var">host</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;discord.com&quot;</span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- | DiscordAPI&#12398;version&#12434;&#36820;&#12377;</span></span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#version"><span class="hs-identifier hs-type">version</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-42"></span><span id="version"><span class="annot"><span class="annottext">version :: Text
+</span><a href="Effectful.DiscordApplication.Interpreter.html#version"><span class="hs-identifier hs-var hs-var">version</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;v10&quot;</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">newtype</span><span> </span><span id="Application"><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-var">Application</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Application"><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-var">Application</span></a></span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_id"><span class="annot"><span class="annottext">Application -&gt; ApplicationId
+</span><a href="Effectful.DiscordApplication.Interpreter.html#_id"><span class="hs-identifier hs-var hs-var">_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Effect.html#ApplicationId"><span class="hs-identifier hs-type">ApplicationId</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679308620"><span id="local-6989586621679308626"><span id="local-6989586621679308630"><span class="annot"><span class="annottext">Int -&gt; Application -&gt; ShowS
+[Application] -&gt; ShowS
+Application -&gt; String
+(Int -&gt; Application -&gt; ShowS)
+-&gt; (Application -&gt; String)
+-&gt; ([Application] -&gt; ShowS)
+-&gt; Show Application
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Application -&gt; ShowS
+showsPrec :: Int -&gt; Application -&gt; ShowS
+$cshow :: Application -&gt; String
+show :: Application -&gt; String
+$cshowList :: [Application] -&gt; ShowS
+showList :: [Application] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679308633"><span id="local-6989586621679308638"><span class="annot"><span class="annottext">Application -&gt; Application -&gt; Bool
+(Application -&gt; Application -&gt; Bool)
+-&gt; (Application -&gt; Application -&gt; Bool) -&gt; Eq Application
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Application -&gt; Application -&gt; Bool
+== :: Application -&gt; Application -&gt; Bool
+$c/= :: Application -&gt; Application -&gt; Bool
+/= :: Application -&gt; Application -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679308645"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-type">Application</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679308655"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser Application
+</span><a href="#local-6989586621679308655"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser Application) -&gt; Value -&gt; Parser Application
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Application&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser Application) -&gt; Value -&gt; Parser Application)
+-&gt; (Object -&gt; Parser Application) -&gt; Value -&gt; Parser Application
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679308658"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679308658"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679308658"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser ApplicationId
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;id&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Parser ApplicationId
+-&gt; (ApplicationId -&gt; Application) -&gt; Parser Application
+forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; (a -&gt; b) -&gt; f b
+</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679308661"><span class="annot"><span class="annottext">ApplicationId
+</span><a href="#local-6989586621679308661"><span class="hs-identifier hs-var">parsed</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-type">Application</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_id :: ApplicationId
+</span><a href="Effectful.DiscordApplication.Interpreter.html#_id"><span class="hs-identifier hs-var">_id</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ApplicationId
+</span><a href="#local-6989586621679308661"><span class="hs-identifier hs-var">parsed</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#applicationId"><span class="hs-identifier hs-type">applicationId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-type">Application</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.DiscordApplication.Effect.html#ApplicationId"><span class="hs-identifier hs-type">ApplicationId</span></a></span><span>
+</span><span id="line-54"></span><span id="applicationId"><span class="annot"><span class="annottext">applicationId :: Application -&gt; ApplicationId
+</span><a href="Effectful.DiscordApplication.Interpreter.html#applicationId"><span class="hs-identifier hs-var hs-var">applicationId</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-type">Application</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_id :: Application -&gt; ApplicationId
+</span><a href="Effectful.DiscordApplication.Interpreter.html#_id"><span class="hs-identifier hs-var">_id</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679308662"><span class="annot"><span class="annottext">ApplicationId
+</span><a href="#local-6989586621679308662"><span class="hs-identifier hs-var">app_id</span></a></span></span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ApplicationId
+</span><a href="#local-6989586621679308662"><span class="hs-identifier hs-var">app_id</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- | 'Data.Effectful.DiscordApplication' Effect&#12434;&#23455;&#34892;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--  &#12371;&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12399;API&#12395;&#12450;&#12463;&#12475;&#12473;&#12375;&#12390;&#12289;&#33258;&#36523;&#12398;Application Id&#12434;&#21462;&#24471;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-59"></span><span id="local-6989586621679308526"><span id="local-6989586621679308530"><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#runDiscordApplication"><span class="hs-identifier hs-type">runDiscordApplication</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308526"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-type">Request</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679308526"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApplication.Effect.html#DiscordApplication"><span class="hs-identifier hs-type">DiscordApplication</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679308526"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679308530"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679308526"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679308530"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-60"></span><span id="runDiscordApplication"><span class="annot"><span class="annottext">runDiscordApplication :: forall (es :: [Effect]) a.
+(DiscordApiTokenReader :&gt; es, Request :&gt; es) =&gt;
+Eff (DiscordApplication : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordApplication.Interpreter.html#runDiscordApplication"><span class="hs-identifier hs-var hs-var">runDiscordApplication</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler DiscordApplication es
+-&gt; Eff (DiscordApplication : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler DiscordApplication es
+ -&gt; Eff (DiscordApplication : es) a -&gt; Eff es a)
+-&gt; EffectHandler DiscordApplication es
+-&gt; Eff (DiscordApplication : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">DiscordApplication (Eff localEs) a
+</span><a href="Effectful.DiscordApplication.Effect.html#GetApplication"><span class="hs-identifier hs-var">GetApplication</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679308695"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679308695"><span class="hs-identifier hs-var">token</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es Text
+forall (es :: [Effect]).
+(DiscordApiTokenReader :&gt; es) =&gt;
+Eff es Text
+</span><a href="Effectful.DiscordApiTokenReader.Effect.html#getToken"><span class="hs-identifier hs-var">getToken</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679308697"><span class="annot"><span class="annottext">pr :: Proxy (JsonResponse Application)
+</span><a href="#local-6989586621679308697"><span class="hs-identifier hs-var hs-var">pr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Proxy (JsonResponse a)
+</span><span class="hs-identifier hs-var">jsonResponse</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Effectful.DiscordApplication.Interpreter.html#Application"><span class="hs-identifier hs-type">Application</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>    </span><span id="local-6989586621679308699"><span class="annot"><span class="annottext">JsonResponse Application
+</span><a href="#local-6989586621679308699"><span class="hs-identifier hs-var">response</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-66"></span><span>      </span><span class="annot"><span class="annottext">GET
+-&gt; Url 'Https
+-&gt; NoReqBody
+-&gt; Proxy (JsonResponse Application)
+-&gt; Option 'Https
+-&gt; Eff es (JsonResponse Application)
+forall (es :: [Effect]) method body response (scheme :: Scheme).
+(Request :&gt; es, HttpMethod method, HttpBody body,
+ HttpResponse response,
+ HttpBodyAllowed (AllowsBody method) (ProvidesBody body)) =&gt;
+method
+-&gt; Url scheme
+-&gt; body
+-&gt; Proxy response
+-&gt; Option scheme
+-&gt; Eff es response
+</span><a href="Effectful.Req.html#request"><span class="hs-identifier hs-var">request</span></a></span><span> </span><span class="annot"><span class="annottext">GET
+</span><span class="hs-identifier hs-var">GET</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Url 'Https
+</span><span class="hs-identifier hs-var">https</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="Effectful.DiscordApplication.Interpreter.html#host"><span class="hs-identifier hs-var">host</span></a></span><span> </span><span class="annot"><span class="annottext">Url 'Https -&gt; Text -&gt; Url 'Https
+forall (scheme :: Scheme). Url scheme -&gt; Text -&gt; Url scheme
+</span><span class="hs-operator hs-var">/:</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;api&quot;</span></span><span> </span><span class="annot"><span class="annottext">Url 'Https -&gt; Text -&gt; Url 'Https
+forall (scheme :: Scheme). Url scheme -&gt; Text -&gt; Url scheme
+</span><span class="hs-operator hs-var">/:</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="Effectful.DiscordApplication.Interpreter.html#version"><span class="hs-identifier hs-var">version</span></a></span><span> </span><span class="annot"><span class="annottext">Url 'Https -&gt; Text -&gt; Url 'Https
+forall (scheme :: Scheme). Url scheme -&gt; Text -&gt; Url scheme
+</span><span class="hs-operator hs-var">/:</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;applications/@me&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NoReqBody
+</span><span class="hs-identifier hs-var">NoReqBody</span></span><span> </span><span class="annot"><span class="annottext">Proxy (JsonResponse Application)
+</span><a href="#local-6989586621679308697"><span class="hs-identifier hs-var">pr</span></a></span><span>
+</span><span id="line-67"></span><span>        </span><span class="annot"><span class="annottext">(Option 'Https -&gt; Eff es (JsonResponse Application))
+-&gt; Option 'Https -&gt; Eff es (JsonResponse Application)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; Option 'Https
+forall (scheme :: Scheme).
+ByteString -&gt; ByteString -&gt; Option scheme
+</span><span class="hs-identifier hs-var">header</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;Authorization&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;Bot &quot;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; ByteString
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; ByteString
+</span><span class="hs-identifier hs-var">T.encodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679308695"><span class="hs-identifier hs-var">token</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">(Application -&gt; a) -&gt; Eff es Application -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; Eff es a -&gt; Eff es b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Application -&gt; a
+Application -&gt; ApplicationId
+</span><a href="Effectful.DiscordApplication.Interpreter.html#applicationId"><span class="hs-identifier hs-var">applicationId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IO Application -&gt; Eff es Application
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO Application -&gt; Eff es Application)
+-&gt; (JsonResponse Application -&gt; IO Application)
+-&gt; JsonResponse Application
+-&gt; Eff es Application
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">JsonResponse Application -&gt; IO Application
+forall a. FromJSON a =&gt; JsonResponse a -&gt; IO a
+</span><a href="Effectful.Req.html#getResponseBodyAsJsonResponse"><span class="hs-identifier hs-var">getResponseBodyAsJsonResponse</span></a></span><span> </span><span class="annot"><span class="annottext">(JsonResponse Application -&gt; Eff es Application)
+-&gt; JsonResponse Application -&gt; Eff es Application
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">JsonResponse Application
+</span><a href="#local-6989586621679308699"><span class="hs-identifier hs-var">response</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span></pre></body></html>

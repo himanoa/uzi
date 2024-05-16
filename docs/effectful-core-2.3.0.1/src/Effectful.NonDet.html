@@ -1,0 +1,499 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Provider of the t'Control.Applicative.Alternative' and</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- t'Control.Monad.MonadPlus' instance for 'Eff'.</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.NonDet</span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier">NonDet</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.NonDet.html#OnEmptyPolicy"><span class="hs-identifier">OnEmptyPolicy</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.NonDet.html#runNonDet"><span class="hs-identifier">runNonDet</span></a></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Utils</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.NonDet.html#emptyEff"><span class="hs-identifier">emptyEff</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.NonDet.html#sumEff"><span class="hs-identifier">sumEff</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Re-exports</span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Alternative</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">HasCallStack</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">CallStack</span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">getCallStack</span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">prettyCallStack</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Dynamic.html"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html"><span class="hs-identifier">Effectful.Dispatch.Static</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.Primitive.html"><span class="hs-identifier">Effectful.Dispatch.Static.Primitive</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Error.Static.html"><span class="hs-identifier">Effectful.Error.Static</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html"><span class="hs-identifier">Effectful.Internal.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#LocalEnv"><span class="hs-identifier">LocalEnv</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier">NonDet</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- | Policy of dealing with modifications to __thread local__ state in the</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- environment in branches that end up calling the 'Empty' operation.</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- /Note:/ 'OnEmptyKeep' is significantly faster as there is no need to back up</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- the environment on each call to ':&lt;|&gt;:'.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- @since 2.2.0.0</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="OnEmptyPolicy"><span class="annot"><a href="Effectful.NonDet.html#OnEmptyPolicy"><span class="hs-identifier hs-var">OnEmptyPolicy</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="OnEmptyKeep"><span class="annot"><a href="Effectful.NonDet.html#OnEmptyKeep"><span class="hs-identifier hs-var">OnEmptyKeep</span></a></span></span><span>     </span><span class="annot"><span class="hs-comment">-- ^ Keep modifications on 'Empty'.</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OnEmptyRollback"><span class="annot"><a href="Effectful.NonDet.html#OnEmptyRollback"><span class="hs-identifier hs-var">OnEmptyRollback</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Rollback modifications on 'Empty'.</span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077843"><span id="local-6989586621679077845"><span class="annot"><span class="annottext">OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+(OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool) -&gt; Eq OnEmptyPolicy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+== :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+$c/= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+/= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077850"><span id="local-6989586621679077852"><span class="annot"><span class="annottext">(forall x. OnEmptyPolicy -&gt; Rep OnEmptyPolicy x)
+-&gt; (forall x. Rep OnEmptyPolicy x -&gt; OnEmptyPolicy)
+-&gt; Generic OnEmptyPolicy
+forall x. Rep OnEmptyPolicy x -&gt; OnEmptyPolicy
+forall x. OnEmptyPolicy -&gt; Rep OnEmptyPolicy x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. OnEmptyPolicy -&gt; Rep OnEmptyPolicy x
+from :: forall x. OnEmptyPolicy -&gt; Rep OnEmptyPolicy x
+$cto :: forall x. Rep OnEmptyPolicy x -&gt; OnEmptyPolicy
+to :: forall x. Rep OnEmptyPolicy x -&gt; OnEmptyPolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077858"><span id="local-6989586621679077860"><span id="local-6989586621679077862"><span id="local-6989586621679077866"><span id="local-6989586621679077869"><span id="local-6989586621679077872"><span id="local-6989586621679077875"><span class="annot"><span class="annottext">Eq OnEmptyPolicy
+Eq OnEmptyPolicy =&gt;
+(OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Ordering)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy)
+-&gt; (OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy)
+-&gt; Ord OnEmptyPolicy
+OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Ordering
+OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Ordering
+compare :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Ordering
+$c&lt; :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+&lt; :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+$c&lt;= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+&lt;= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+$c&gt; :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+&gt; :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+$c&gt;= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+&gt;= :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; Bool
+$cmax :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy
+max :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy
+$cmin :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy
+min :: OnEmptyPolicy -&gt; OnEmptyPolicy -&gt; OnEmptyPolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077879"><span id="local-6989586621679077881"><span id="local-6989586621679077885"><span class="annot"><span class="annottext">Int -&gt; OnEmptyPolicy -&gt; ShowS
+[OnEmptyPolicy] -&gt; ShowS
+OnEmptyPolicy -&gt; String
+(Int -&gt; OnEmptyPolicy -&gt; ShowS)
+-&gt; (OnEmptyPolicy -&gt; String)
+-&gt; ([OnEmptyPolicy] -&gt; ShowS)
+-&gt; Show OnEmptyPolicy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; OnEmptyPolicy -&gt; ShowS
+showsPrec :: Int -&gt; OnEmptyPolicy -&gt; ShowS
+$cshow :: OnEmptyPolicy -&gt; String
+show :: OnEmptyPolicy -&gt; String
+$cshowList :: [OnEmptyPolicy] -&gt; ShowS
+showList :: [OnEmptyPolicy] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | Run the 'NonDet' effect with a given 'OnEmptyPolicy'.</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- /Note:/ ':&lt;|&gt;:' executes the second computation if (and only if) the first</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- computation calls 'Empty'.</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- @since 2.2.0.0</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679077708"><span id="local-6989586621679077709"><span class="annot"><a href="Effectful.NonDet.html#runNonDet"><span class="hs-identifier hs-type">runNonDet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.NonDet.html#OnEmptyPolicy"><span class="hs-identifier hs-type">OnEmptyPolicy</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier hs-type">NonDet</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077708"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077709"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077708"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CallStack</span></span><span> </span><span class="annot"><a href="#local-6989586621679077709"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-54"></span><span id="runNonDet"><span class="annot"><span class="annottext">runNonDet :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+OnEmptyPolicy -&gt; Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+</span><a href="Effectful.NonDet.html#runNonDet"><span class="hs-identifier hs-var hs-var">runNonDet</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">OnEmptyPolicy
+</span><a href="Effectful.NonDet.html#OnEmptyKeep"><span class="hs-identifier hs-var">OnEmptyKeep</span></a></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+</span><a href="Effectful.NonDet.html#runNonDetKeep"><span class="hs-identifier hs-var">runNonDetKeep</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">OnEmptyPolicy
+</span><a href="Effectful.NonDet.html#OnEmptyRollback"><span class="hs-identifier hs-var">OnEmptyRollback</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+</span><a href="Effectful.NonDet.html#runNonDetRollback"><span class="hs-identifier hs-var">runNonDetRollback</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679077713"><span id="local-6989586621679077714"><span class="annot"><a href="Effectful.NonDet.html#runNonDetKeep"><span class="hs-identifier hs-type">runNonDetKeep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier hs-type">NonDet</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077713"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077714"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077713"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CallStack</span></span><span> </span><span class="annot"><a href="#local-6989586621679077714"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-59"></span><span id="runNonDetKeep"><span class="annot"><span class="annottext">runNonDetKeep :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+</span><a href="Effectful.NonDet.html#runNonDetKeep"><span class="hs-identifier hs-var hs-var">runNonDetKeep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Eff (Error () : es) a -&gt; Eff es (Either CallStack a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, NonDet :&gt; localEs) =&gt;
+    LocalEnv localEs (Error () : es)
+    -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+-&gt; Eff (NonDet : es) a
+-&gt; Eff es (Either CallStack a)
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) b.
+(DispatchOf e ~ 'Dynamic) =&gt;
+(Eff handlerEs a -&gt; Eff es b)
+-&gt; EffectHandler e handlerEs -&gt; Eff (e : es) a -&gt; Eff es b
+</span><a href="Effectful.Dispatch.Dynamic.html#reinterpret"><span class="hs-identifier hs-var">reinterpret</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Either (CallStack, ()) a -&gt; Either CallStack a)
+-&gt; Eff es (Either (CallStack, ()) a) -&gt; Eff es (Either CallStack a)
+forall a b. (a -&gt; b) -&gt; Eff es a -&gt; Eff es b
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Either (CallStack, ()) a -&gt; Either CallStack a
+forall cs e a. Either (cs, e) a -&gt; Either cs a
+</span><a href="Effectful.NonDet.html#noError"><span class="hs-identifier hs-var">noError</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es (Either (CallStack, ()) a) -&gt; Eff es (Either CallStack a))
+-&gt; (Eff (Error () : es) a -&gt; Eff es (Either (CallStack, ()) a))
+-&gt; Eff (Error () : es) a
+-&gt; Eff es (Either CallStack a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (Error e : es) a -&gt; Eff es (Either (CallStack, e) a)
+</span><a href="Effectful.Error.Static.html#runError"><span class="hs-identifier hs-var">runError</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+  (HasCallStack, NonDet :&gt; localEs) =&gt;
+  LocalEnv localEs (Error () : es)
+  -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+ -&gt; Eff (NonDet : es) a -&gt; Eff es (Either CallStack a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, NonDet :&gt; localEs) =&gt;
+    LocalEnv localEs (Error () : es)
+    -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+-&gt; Eff (NonDet : es) a
+-&gt; Eff es (Either CallStack a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077915"><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077915"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">NonDet (Eff localEs) a
+</span><a href="Effectful.Internal.Monad.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (Error () : es) a
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, Error e :&gt; es) =&gt;
+e -&gt; Eff es a
+</span><a href="Effectful.Error.Static.html#throwError"><span class="hs-identifier hs-var">throwError</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679077917"><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077917"><span class="hs-identifier hs-var">m1</span></a></span></span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#%3A%3C%7C%3E%3A"><span class="hs-operator hs-type">:&lt;|&gt;:</span></a></span><span> </span><span id="local-6989586621679077918"><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077918"><span class="hs-identifier hs-var">m2</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+-&gt; ((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+    -&gt; Eff (Error () : es) a)
+-&gt; Eff (Error () : es) a
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, SharedSuffix es handlerEs) =&gt;
+LocalEnv localEs handlerEs
+-&gt; ((forall r. Eff localEs r -&gt; Eff es r) -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Dynamic.html#localSeqUnlift"><span class="hs-identifier hs-var">localSeqUnlift</span></a></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077915"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">(((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+  -&gt; Eff (Error () : es) a)
+ -&gt; Eff (Error () : es) a)
+-&gt; ((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+    -&gt; Eff (Error () : es) a)
+-&gt; Eff (Error () : es) a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077920"><span class="annot"><span class="annottext">forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077920"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679077921"><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679077921"><span class="hs-identifier hs-var">mr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe a)
+-&gt; Eff (Error () : es) a -&gt; Eff (Error () : es) (Maybe a)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Eff localEs a -&gt; Eff (Error () : es) a
+forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077920"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077917"><span class="hs-identifier hs-var">m1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (Error () : es) (Maybe a)
+-&gt; (CallStack -&gt; () -&gt; Eff (Error () : es) (Maybe a))
+-&gt; Eff (Error () : es) (Maybe a)
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Error e :&gt; es) =&gt;
+Eff es a -&gt; (CallStack -&gt; e -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.Error.Static.html#catchError"><span class="hs-operator hs-var">`catchError`</span></a></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">CallStack
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Eff (Error () : es) (Maybe a)
+forall a. a -&gt; Eff (Error () : es) a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679077921"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-64"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077924"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679077924"><span class="hs-identifier hs-var">r</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff (Error () : es) a
+forall a. a -&gt; Eff (Error () : es) a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679077924"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff localEs a -&gt; Eff (Error () : es) a
+forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077920"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077918"><span class="hs-identifier hs-var">m2</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679077925"><span id="local-6989586621679077926"><span class="annot"><a href="Effectful.NonDet.html#runNonDetRollback"><span class="hs-identifier hs-type">runNonDetRollback</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier hs-type">NonDet</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679077925"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077926"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077925"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CallStack</span></span><span> </span><span class="annot"><a href="#local-6989586621679077926"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-68"></span><span id="runNonDetRollback"><span class="annot"><span class="annottext">runNonDetRollback :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (NonDet : es) a -&gt; Eff es (Either CallStack a)
+</span><a href="Effectful.NonDet.html#runNonDetRollback"><span class="hs-identifier hs-var hs-var">runNonDetRollback</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Eff (Error () : es) a -&gt; Eff es (Either CallStack a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, NonDet :&gt; localEs) =&gt;
+    LocalEnv localEs (Error () : es)
+    -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+-&gt; Eff (NonDet : es) a
+-&gt; Eff es (Either CallStack a)
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) b.
+(DispatchOf e ~ 'Dynamic) =&gt;
+(Eff handlerEs a -&gt; Eff es b)
+-&gt; EffectHandler e handlerEs -&gt; Eff (e : es) a -&gt; Eff es b
+</span><a href="Effectful.Dispatch.Dynamic.html#reinterpret"><span class="hs-identifier hs-var">reinterpret</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Either (CallStack, ()) a -&gt; Either CallStack a)
+-&gt; Eff es (Either (CallStack, ()) a) -&gt; Eff es (Either CallStack a)
+forall a b. (a -&gt; b) -&gt; Eff es a -&gt; Eff es b
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Either (CallStack, ()) a -&gt; Either CallStack a
+forall cs e a. Either (cs, e) a -&gt; Either cs a
+</span><a href="Effectful.NonDet.html#noError"><span class="hs-identifier hs-var">noError</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es (Either (CallStack, ()) a) -&gt; Eff es (Either CallStack a))
+-&gt; (Eff (Error () : es) a -&gt; Eff es (Either (CallStack, ()) a))
+-&gt; Eff (Error () : es) a
+-&gt; Eff es (Either CallStack a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+Eff (Error e : es) a -&gt; Eff es (Either (CallStack, e) a)
+</span><a href="Effectful.Error.Static.html#runError"><span class="hs-identifier hs-var">runError</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+  (HasCallStack, NonDet :&gt; localEs) =&gt;
+  LocalEnv localEs (Error () : es)
+  -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+ -&gt; Eff (NonDet : es) a -&gt; Eff es (Either CallStack a))
+-&gt; (forall {a} {localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]}.
+    (HasCallStack, NonDet :&gt; localEs) =&gt;
+    LocalEnv localEs (Error () : es)
+    -&gt; NonDet (Eff localEs) a -&gt; Eff (Error () : es) a)
+-&gt; Eff (NonDet : es) a
+-&gt; Eff es (Either CallStack a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077945"><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077945"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="annottext">NonDet (Eff localEs) a
+</span><a href="Effectful.Internal.Monad.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Eff (Error () : es) a
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, Error e :&gt; es) =&gt;
+e -&gt; Eff es a
+</span><a href="Effectful.Error.Static.html#throwError"><span class="hs-identifier hs-var">throwError</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679077946"><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077946"><span class="hs-identifier hs-var">m1</span></a></span></span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#%3A%3C%7C%3E%3A"><span class="hs-operator hs-type">:&lt;|&gt;:</span></a></span><span> </span><span id="local-6989586621679077947"><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077947"><span class="hs-identifier hs-var">m2</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679077948"><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077948"><span class="hs-identifier hs-var">backupEnv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+-&gt; Eff (Error () : es) (LocalEnv localEs (Error () : es))
+forall (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+LocalEnv localEs handlerEs -&gt; Eff es (LocalEnv localEs handlerEs)
+</span><a href="Effectful.NonDet.html#cloneLocalEnv"><span class="hs-identifier hs-var">cloneLocalEnv</span></a></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077945"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+-&gt; ((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+    -&gt; Eff (Error () : es) a)
+-&gt; Eff (Error () : es) a
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, SharedSuffix es handlerEs) =&gt;
+LocalEnv localEs handlerEs
+-&gt; ((forall r. Eff localEs r -&gt; Eff es r) -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Dynamic.html#localSeqUnlift"><span class="hs-identifier hs-var">localSeqUnlift</span></a></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077945"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">(((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+  -&gt; Eff (Error () : es) a)
+ -&gt; Eff (Error () : es) a)
+-&gt; ((forall {r}. Eff localEs r -&gt; Eff (Error () : es) r)
+    -&gt; Eff (Error () : es) a)
+-&gt; Eff (Error () : es) a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077950"><span class="annot"><span class="annottext">forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077950"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-73"></span><span>      </span><span id="local-6989586621679077951"><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679077951"><span class="hs-identifier hs-var">mr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe a)
+-&gt; Eff (Error () : es) a -&gt; Eff (Error () : es) (Maybe a)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Eff localEs a -&gt; Eff (Error () : es) a
+forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077950"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077946"><span class="hs-identifier hs-var">m1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (Error () : es) (Maybe a)
+-&gt; (CallStack -&gt; () -&gt; Eff (Error () : es) (Maybe a))
+-&gt; Eff (Error () : es) (Maybe a)
+forall e (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(Error e :&gt; es) =&gt;
+Eff es a -&gt; (CallStack -&gt; e -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.Error.Static.html#catchError"><span class="hs-operator hs-var">`catchError`</span></a></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">CallStack
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-74"></span><span>        </span><span class="hs-comment">-- If m1 failed, roll back the environment.</span><span>
+</span><span id="line-75"></span><span>        </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+-&gt; LocalEnv localEs (Error () : es) -&gt; Eff (Error () : es) ()
+forall (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+LocalEnv localEs handlerEs
+-&gt; LocalEnv localEs handlerEs -&gt; Eff es ()
+</span><a href="Effectful.NonDet.html#restoreLocalEnv"><span class="hs-identifier hs-var">restoreLocalEnv</span></a></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077945"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs (Error () : es)
+</span><a href="#local-6989586621679077948"><span class="hs-identifier hs-var">backupEnv</span></a></span><span>
+</span><span id="line-76"></span><span>        </span><span class="annot"><span class="annottext">Maybe a -&gt; Eff (Error () : es) (Maybe a)
+forall a. a -&gt; Eff (Error () : es) a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-77"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679077951"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-78"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077953"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679077953"><span class="hs-identifier hs-var">r</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff (Error () : es) a
+forall a. a -&gt; Eff (Error () : es) a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679077953"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Eff localEs a -&gt; Eff (Error () : es) a
+forall {r}. Eff localEs r -&gt; Eff (Error () : es) r
+</span><a href="#local-6989586621679077950"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">Eff localEs a
+</span><a href="#local-6989586621679077947"><span class="hs-identifier hs-var">m2</span></a></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- | Specialized version of 'empty' with the 'HasCallStack' constraint for</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- tracking purposes.</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- @since 2.2.0.0</span><span>
+</span><span id="line-87"></span><span id="local-6989586621679077789"><span id="local-6989586621679077790"><span class="annot"><a href="Effectful.NonDet.html#emptyEff"><span class="hs-identifier hs-type">emptyEff</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier hs-type">NonDet</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077789"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077789"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077790"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-88"></span><span id="emptyEff"><span class="annot"><span class="annottext">emptyEff :: forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, NonDet :&gt; es) =&gt;
+Eff es a
+</span><a href="Effectful.NonDet.html#emptyEff"><span class="hs-identifier hs-var hs-var">emptyEff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; Eff es a) -&gt; Eff es a
+forall a. HasCallStack =&gt; (HasCallStack =&gt; a) -&gt; a
+</span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">((HasCallStack =&gt; Eff es a) -&gt; Eff es a)
+-&gt; (HasCallStack =&gt; Eff es a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonDet (Eff es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#send"><span class="hs-identifier hs-var">send</span></a></span><span> </span><span class="annot"><span class="annottext">NonDet (Eff es) a
+forall (a :: Type -&gt; Type) b. NonDet a b
+</span><a href="Effectful.Internal.Monad.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | Specialized version of 'asum' with the 'HasCallStack' constraint for</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- tracking purposes.</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- @since 2.2.0.0</span><span>
+</span><span id="line-94"></span><span id="local-6989586621679077799"><span id="local-6989586621679077800"><span id="local-6989586621679077801"><span class="annot"><a href="Effectful.NonDet.html#sumEff"><span class="hs-identifier hs-type">sumEff</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679077799"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#NonDet"><span class="hs-identifier hs-type">NonDet</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077800"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077799"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077800"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077801"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077800"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077801"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-95"></span><span id="sumEff"><span class="annot"><span class="annottext">sumEff :: forall (t :: Type -&gt; Type) (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       a.
+(HasCallStack, Foldable t, NonDet :&gt; es) =&gt;
+t (Eff es a) -&gt; Eff es a
+</span><a href="Effectful.NonDet.html#sumEff"><span class="hs-identifier hs-var hs-var">sumEff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; Eff es a -&gt; Eff es a)
+-&gt; Eff es a -&gt; t (Eff es a) -&gt; Eff es a
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+forall (t :: Type -&gt; Type) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; Eff es a -&gt; Eff es a
+forall a. Eff es a -&gt; Eff es a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">(&lt;|&gt;)</span></span><span> </span><span class="annot"><span class="annottext">Eff es a
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(HasCallStack, NonDet :&gt; es) =&gt;
+Eff es a
+</span><a href="Effectful.NonDet.html#emptyEff"><span class="hs-identifier hs-var">emptyEff</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- Internal helpers</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span id="local-6989586621679077739"><span id="local-6989586621679077740"><span id="local-6989586621679077741"><span class="annot"><a href="Effectful.NonDet.html#noError"><span class="hs-identifier hs-type">noError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077739"><span class="hs-identifier hs-type">cs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679077740"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679077741"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679077739"><span class="hs-identifier hs-type">cs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077741"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-101"></span><span id="noError"><span class="annot"><span class="annottext">noError :: forall cs e a. Either (cs, e) a -&gt; Either cs a
+</span><a href="Effectful.NonDet.html#noError"><span class="hs-identifier hs-var hs-var">noError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((cs, e) -&gt; Either cs a)
+-&gt; (a -&gt; Either cs a) -&gt; Either (cs, e) a -&gt; Either cs a
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">cs -&gt; Either cs a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(cs -&gt; Either cs a) -&gt; ((cs, e) -&gt; cs) -&gt; (cs, e) -&gt; Either cs a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(cs, e) -&gt; cs
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either cs a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679077782"><span id="local-6989586621679077783"><span id="local-6989586621679077784"><span class="annot"><a href="Effectful.NonDet.html#cloneLocalEnv"><span class="hs-identifier hs-type">cloneLocalEnv</span></a></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#LocalEnv"><span class="hs-identifier hs-type">LocalEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077782"><span class="hs-identifier hs-type">localEs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077783"><span class="hs-identifier hs-type">handlerEs</span></a></span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077784"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Internal.Monad.html#LocalEnv"><span class="hs-identifier hs-type">LocalEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077782"><span class="hs-identifier hs-type">localEs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077783"><span class="hs-identifier hs-type">handlerEs</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-106"></span><span id="cloneLocalEnv"><span class="annot"><span class="annottext">cloneLocalEnv :: forall (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+LocalEnv localEs handlerEs -&gt; Eff es (LocalEnv localEs handlerEs)
+</span><a href="Effectful.NonDet.html#cloneLocalEnv"><span class="hs-identifier hs-var hs-var">cloneLocalEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eff es (Env localEs) -&gt; Eff es (LocalEnv localEs handlerEs)
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(Eff es (Env localEs) -&gt; Eff es (LocalEnv localEs handlerEs))
+-&gt; (LocalEnv localEs handlerEs -&gt; Eff es (Env localEs))
+-&gt; LocalEnv localEs handlerEs
+-&gt; Eff es (LocalEnv localEs handlerEs)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IO (Env localEs) -&gt; Eff es (Env localEs)
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="annot"><span class="annottext">(IO (Env localEs) -&gt; Eff es (Env localEs))
+-&gt; (LocalEnv localEs handlerEs -&gt; IO (Env localEs))
+-&gt; LocalEnv localEs handlerEs
+-&gt; Eff es (Env localEs)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Env localEs -&gt; IO (Env localEs)
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+Env es -&gt; IO (Env es)
+</span><a href="Effectful.Internal.Env.html#cloneEnv"><span class="hs-identifier hs-var">cloneEnv</span></a></span><span> </span><span class="annot"><span class="annottext">(Env localEs -&gt; IO (Env localEs))
+-&gt; (LocalEnv localEs handlerEs -&gt; Env localEs)
+-&gt; LocalEnv localEs handlerEs
+-&gt; IO (Env localEs)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs handlerEs -&gt; Env localEs
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679077786"><span id="local-6989586621679077787"><span id="local-6989586621679077788"><span class="annot"><a href="Effectful.NonDet.html#restoreLocalEnv"><span class="hs-identifier hs-type">restoreLocalEnv</span></a></span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#LocalEnv"><span class="hs-identifier hs-type">LocalEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077786"><span class="hs-identifier hs-type">localEs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077787"><span class="hs-identifier hs-type">handlerEs</span></a></span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#LocalEnv"><span class="hs-identifier hs-type">LocalEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077786"><span class="hs-identifier hs-type">localEs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077787"><span class="hs-identifier hs-type">handlerEs</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077788"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-112"></span><span id="restoreLocalEnv"><span class="annot"><span class="annottext">restoreLocalEnv :: forall (localEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (handlerEs :: [(Type -&gt; Type) -&gt; Type -&gt; Type])
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+LocalEnv localEs handlerEs
+-&gt; LocalEnv localEs handlerEs -&gt; Eff es ()
+</span><a href="Effectful.NonDet.html#restoreLocalEnv"><span class="hs-identifier hs-var hs-var">restoreLocalEnv</span></a></span></span><span> </span><span id="local-6989586621679077987"><span class="annot"><span class="annottext">LocalEnv localEs handlerEs
+</span><a href="#local-6989586621679077987"><span class="hs-identifier hs-var">dest</span></a></span></span><span> </span><span id="local-6989586621679077988"><span class="annot"><span class="annottext">LocalEnv localEs handlerEs
+</span><a href="#local-6989586621679077988"><span class="hs-identifier hs-var">src</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]). IO a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier hs-var">unsafeEff_</span></a></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ()) -&gt; IO () -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Env localEs -&gt; Env localEs -&gt; IO ()
+forall (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+Env es -&gt; Env es -&gt; IO ()
+</span><a href="Effectful.Internal.Env.html#restoreEnv"><span class="hs-identifier hs-var">restoreEnv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalEnv localEs handlerEs -&gt; Env localEs
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs handlerEs
+</span><a href="#local-6989586621679077987"><span class="hs-identifier hs-var">dest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalEnv localEs handlerEs -&gt; Env localEs
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">LocalEnv localEs handlerEs
+</span><a href="#local-6989586621679077988"><span class="hs-identifier hs-var">src</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span></pre></body></html>

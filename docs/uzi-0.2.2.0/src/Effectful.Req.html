@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE AllowAmbiguousTypes #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Req</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.Req.html#request"><span class="hs-identifier">request</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier">Request</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Effectful.Req.html#runRequest"><span class="hs-identifier">runRequest</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Effectful.Req.html#getResponseBodyAsJsonResponse"><span class="hs-identifier">getResponseBodyAsJsonResponse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Internal.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unsafeEff_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.HTTP.Req</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">R</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="Request"><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-var">Request</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Effect</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679307685"><span id="local-6989586621679307687"><span id="local-6989586621679307734"><span id="local-6989586621679307735"><span id="local-6989586621679307736"><span id="Req"><span class="annot"><a href="Effectful.Req.html#Req"><span class="hs-identifier hs-var">Req</span></a></span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">R.HttpMethod</span></span><span> </span><span class="annot"><a href="#local-6989586621679307734"><span class="hs-identifier hs-type">method</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">R.HttpBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307735"><span class="hs-identifier hs-type">body</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">R.HttpResponse</span></span><span> </span><span class="annot"><a href="#local-6989586621679307685"><span class="hs-identifier hs-type">response</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">R.HttpBodyAllowed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">R.AllowsBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307734"><span class="hs-identifier hs-type">method</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">R.ProvidesBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307735"><span class="hs-identifier hs-type">body</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="#local-6989586621679307734"><span class="hs-identifier hs-type">method</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.Url</span></span><span> </span><span class="annot"><a href="#local-6989586621679307736"><span class="hs-identifier hs-type">scheme</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><a href="#local-6989586621679307735"><span class="hs-identifier hs-type">body</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679307685"><span class="hs-identifier hs-type">response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.Option</span></span><span> </span><span class="annot"><a href="#local-6989586621679307736"><span class="hs-identifier hs-type">scheme</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-type">Request</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307687"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307685"><span class="hs-identifier hs-type">response</span></a></span></span></span></span></span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><span class="hs-identifier hs-var">DispatchOf</span></span></span><span> </span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-type">Request</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dynamic</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679307652"><span id="local-6989586621679307654"><span id="local-6989586621679307656"><span id="local-6989586621679307658"><span id="local-6989586621679307663"><span class="annot"><a href="Effectful.Req.html#request"><span class="hs-identifier hs-type">request</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-type">Request</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679307652"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.HttpMethod</span></span><span> </span><span class="annot"><a href="#local-6989586621679307654"><span class="hs-identifier hs-type">method</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.HttpBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307656"><span class="hs-identifier hs-type">body</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.HttpResponse</span></span><span> </span><span class="annot"><a href="#local-6989586621679307658"><span class="hs-identifier hs-type">response</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">R.HttpBodyAllowed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">R.AllowsBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307654"><span class="hs-identifier hs-type">method</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">R.ProvidesBody</span></span><span> </span><span class="annot"><a href="#local-6989586621679307656"><span class="hs-identifier hs-type">body</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="#local-6989586621679307654"><span class="hs-identifier hs-type">method</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">R.Url</span></span><span> </span><span class="annot"><a href="#local-6989586621679307663"><span class="hs-identifier hs-type">scheme</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><a href="#local-6989586621679307656"><span class="hs-identifier hs-type">body</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679307658"><span class="hs-identifier hs-type">response</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">R.Option</span></span><span> </span><span class="annot"><a href="#local-6989586621679307663"><span class="hs-identifier hs-type">scheme</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307652"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307658"><span class="hs-identifier hs-type">response</span></a></span></span></span></span></span></span><span>
+</span><span id="line-52"></span><span id="request"><span class="annot"><span class="annottext">request :: forall (es :: [Effect]) method body response (scheme :: Scheme).
+(Request :&gt; es, HttpMethod method, HttpBody body,
+ HttpResponse response,
+ HttpBodyAllowed (AllowsBody method) (ProvidesBody body)) =&gt;
+method
+-&gt; Url scheme
+-&gt; body
+-&gt; Proxy response
+-&gt; Option scheme
+-&gt; Eff es response
+</span><a href="Effectful.Req.html#request"><span class="hs-identifier hs-var hs-var">request</span></a></span></span><span> </span><span id="local-6989586621679307752"><span class="annot"><span class="annottext">method
+</span><a href="#local-6989586621679307752"><span class="hs-identifier hs-var">method</span></a></span></span><span> </span><span id="local-6989586621679307753"><span class="annot"><span class="annottext">Url scheme
+</span><a href="#local-6989586621679307753"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span id="local-6989586621679307754"><span class="annot"><span class="annottext">body
+</span><a href="#local-6989586621679307754"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621679307755"><span class="annot"><span class="annottext">Proxy response
+</span><a href="#local-6989586621679307755"><span class="hs-identifier hs-var">response</span></a></span></span><span> </span><span id="local-6989586621679307756"><span class="annot"><span class="annottext">Option scheme
+</span><a href="#local-6989586621679307756"><span class="hs-identifier hs-var">scheme</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request (Eff es) response -&gt; Eff es response
+forall (e :: Effect) (es :: [Effect]) a.
+(HasCallStack, DispatchOf e ~ 'Dynamic, e :&gt; es) =&gt;
+e (Eff es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">send</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">method
+-&gt; Url scheme
+-&gt; body
+-&gt; Proxy response
+-&gt; Option scheme
+-&gt; Request (Eff es) response
+forall method body response (scheme :: Scheme) (m :: * -&gt; *).
+(HttpMethod method, HttpBody body, HttpResponse response,
+ HttpBodyAllowed (AllowsBody method) (ProvidesBody body)) =&gt;
+method
+-&gt; Url scheme
+-&gt; body
+-&gt; Proxy response
+-&gt; Option scheme
+-&gt; Request m response
+</span><a href="Effectful.Req.html#Req"><span class="hs-identifier hs-var">Req</span></a></span><span> </span><span class="annot"><span class="annottext">method
+</span><a href="#local-6989586621679307752"><span class="hs-identifier hs-var">method</span></a></span><span> </span><span class="annot"><span class="annottext">Url scheme
+</span><a href="#local-6989586621679307753"><span class="hs-identifier hs-var">url</span></a></span><span> </span><span class="annot"><span class="annottext">body
+</span><a href="#local-6989586621679307754"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy response
+</span><a href="#local-6989586621679307755"><span class="hs-identifier hs-var">response</span></a></span><span> </span><span class="annot"><span class="annottext">Option scheme
+</span><a href="#local-6989586621679307756"><span class="hs-identifier hs-var">scheme</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span id="local-6989586621679307688"><span id="local-6989586621679307689"><span class="annot"><a href="Effectful.Req.html#runRequest"><span class="hs-identifier hs-type">runRequest</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.Req.html#Request"><span class="hs-identifier hs-type">Request</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679307688"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679307689"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679307688"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679307689"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-55"></span><span id="runRequest"><span class="annot"><span class="annottext">runRequest :: forall (es :: [Effect]) a. Eff (Request : es) a -&gt; Eff es a
+</span><a href="Effectful.Req.html#runRequest"><span class="hs-identifier hs-var hs-var">runRequest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler Request es -&gt; Eff (Request : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler Request es -&gt; Eff (Request : es) a -&gt; Eff es a)
+-&gt; EffectHandler Request es -&gt; Eff (Request : es) a -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><a href="Effectful.Req.html#Req"><span class="hs-identifier hs-type">Req</span></a></span><span> </span><span id="local-6989586621679307775"><span class="annot"><span class="annottext">method
+</span><a href="#local-6989586621679307775"><span class="hs-identifier hs-var">method</span></a></span></span><span> </span><span id="local-6989586621679307776"><span class="annot"><span class="annottext">Url scheme
+</span><a href="#local-6989586621679307776"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span id="local-6989586621679307777"><span class="annot"><span class="annottext">body
+</span><a href="#local-6989586621679307777"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621679307778"><span class="annot"><span class="annottext">Proxy a
+</span><a href="#local-6989586621679307778"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679307779"><span class="annot"><span class="annottext">Option scheme
+</span><a href="#local-6989586621679307779"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; Eff es a
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; Eff es a) -&gt; (Req a -&gt; IO a) -&gt; Req a -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">HttpConfig -&gt; Req a -&gt; IO a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; HttpConfig -&gt; Req a -&gt; m a
+</span><span class="hs-identifier hs-var">R.runReq</span></span><span> </span><span class="annot"><span class="annottext">HttpConfig
+</span><span class="hs-identifier hs-var">R.defaultHttpConfig</span></span><span> </span><span class="annot"><span class="annottext">(Req a -&gt; Eff es a) -&gt; Req a -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">method -&gt; Url scheme -&gt; body -&gt; Proxy a -&gt; Option scheme -&gt; Req a
+forall (m :: * -&gt; *) method body response (scheme :: Scheme).
+(MonadHttp m, HttpMethod method, HttpBody body,
+ HttpResponse response,
+ HttpBodyAllowed (AllowsBody method) (ProvidesBody body)) =&gt;
+method
+-&gt; Url scheme
+-&gt; body
+-&gt; Proxy response
+-&gt; Option scheme
+-&gt; m response
+</span><span class="hs-identifier hs-var">R.req</span></span><span> </span><span class="annot"><span class="annottext">method
+</span><a href="#local-6989586621679307775"><span class="hs-identifier hs-var">method</span></a></span><span> </span><span class="annot"><span class="annottext">Url scheme
+</span><a href="#local-6989586621679307776"><span class="hs-identifier hs-var">url</span></a></span><span> </span><span class="annot"><span class="annottext">body
+</span><a href="#local-6989586621679307777"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy a
+</span><a href="#local-6989586621679307778"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Option scheme
+</span><a href="#local-6989586621679307779"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679307721"><span class="annot"><a href="Effectful.Req.html#getResponseBodyAsJsonResponse"><span class="hs-identifier hs-type">getResponseBodyAsJsonResponse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679307721"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">R.JsonResponse</span></span><span> </span><span class="annot"><a href="#local-6989586621679307721"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679307721"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-60"></span><span id="getResponseBodyAsJsonResponse"><span class="annot"><span class="annottext">getResponseBodyAsJsonResponse :: forall a. FromJSON a =&gt; JsonResponse a -&gt; IO a
+</span><a href="Effectful.Req.html#getResponseBodyAsJsonResponse"><span class="hs-identifier hs-var hs-var">getResponseBodyAsJsonResponse</span></a></span></span><span> </span><span id="local-6989586621679307789"><span class="annot"><span class="annottext">JsonResponse a
+</span><a href="#local-6989586621679307789"><span class="hs-identifier hs-var">resp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; IO a
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; IO a) -&gt; a -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">JsonResponse a -&gt; HttpResponseBody (JsonResponse a)
+forall response.
+HttpResponse response =&gt;
+response -&gt; HttpResponseBody response
+</span><span class="hs-identifier hs-var">R.responseBody</span></span><span> </span><span class="annot"><span class="annottext">JsonResponse a
+</span><a href="#local-6989586621679307789"><span class="hs-identifier hs-var">resp</span></a></span><span>
+</span><span id="line-61"></span></pre></body></html>

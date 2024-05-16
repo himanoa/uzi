@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- |</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- Module: Data.Uzi.HeartbeatInterval</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Description: Discord&#12395;&#36865;&#12427;Heartbeat&#12398;&#38291;&#38548;&#12395;&#12388;&#12356;&#12390;&#12398;&#23450;&#32681;</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Discord&#12398;&#12495;&#12540;&#12488;&#12499;&#12540;&#12488;&#12522;&#12463;&#12456;&#12473;&#12488;&#12434;&#36865;&#12427;&#38291;&#38548;&#12434;&#20445;&#23384;&#12377;&#12427;&#12383;&#12417;&#12398;&#12487;&#12540;&#12479;&#27083;&#36896;&#12434;&#23450;&#32681;&#12375;&#12383;&#12514;&#12472;&#12517;&#12540;&#12523;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- &#12495;&#12540;&#12488;&#12499;&#12540;&#12488;&#12398;&#38291;&#38548;&#12399; DiscordGatewayAPI&#12398;HelloEvent&#12395;&#12424;&#12387;&#12390;&#21463;&#20449;&#12375;&#12289;'State HeartbeatInterval' &#12395;&#20445;&#23384;&#12375;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- State HeartbeatInterval &#12434;&#35501;&#12415;&#12371;&#12435;&#12391;&#38291;&#38548;&#36890;&#12426;&#12395;Heartbeat&#12522;&#12463;&#12456;&#12473;&#12488;&#12434;&#36865;&#12427;&#12398;&#12399; 'Lib.sendHeartbeat' &#12391;&#12377;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- DiscordAPI&#20596;&#12398;&#12489;&#12461;&#12517;&#12513;&#12531;&#12488;: https://discord.com/developers/docs/topics/voice-connections#heartbeating</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Uzi.HeartbeatInterval</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier">HeartbeatInterval</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#coerceHeartbeatInterval"><span class="hs-identifier">coerceHeartbeatInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#makeHeartbeatInterval"><span class="hs-identifier">makeHeartbeatInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | Discord&#12398;&#12495;&#12540;&#12488;&#12499;&#12540;&#12488;&#12522;&#12463;&#12456;&#12473;&#12488;&#12434;&#36865;&#12427;&#38291;&#38548;&#12434;&#20445;&#23384;&#12377;&#12427;&#12383;&#12417;&#12398;&#12487;&#12540;&#12479;&#27083;&#36896;&#12391;&#12377;</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">newtype</span><span> </span><span id="HeartbeatInterval"><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-var">HeartbeatInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HeartbeatInterval"><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-var">HeartbeatInterval</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305227"><span id="local-6989586621679305233"><span id="local-6989586621679305237"><span class="annot"><span class="annottext">Int -&gt; HeartbeatInterval -&gt; ShowS
+[HeartbeatInterval] -&gt; ShowS
+HeartbeatInterval -&gt; String
+(Int -&gt; HeartbeatInterval -&gt; ShowS)
+-&gt; (HeartbeatInterval -&gt; String)
+-&gt; ([HeartbeatInterval] -&gt; ShowS)
+-&gt; Show HeartbeatInterval
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; HeartbeatInterval -&gt; ShowS
+showsPrec :: Int -&gt; HeartbeatInterval -&gt; ShowS
+$cshow :: HeartbeatInterval -&gt; String
+show :: HeartbeatInterval -&gt; String
+$cshowList :: [HeartbeatInterval] -&gt; ShowS
+showList :: [HeartbeatInterval] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305241"><span id="local-6989586621679305246"><span class="annot"><span class="annottext">HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool
+(HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool)
+-&gt; (HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool)
+-&gt; Eq HeartbeatInterval
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool
+== :: HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool
+$c/= :: HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool
+/= :: HeartbeatInterval -&gt; HeartbeatInterval -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#coerceHeartbeatInterval"><span class="hs-identifier hs-type">coerceHeartbeatInterval</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-30"></span><span id="coerceHeartbeatInterval"><span class="annot"><span class="annottext">coerceHeartbeatInterval :: HeartbeatInterval -&gt; Int
+</span><a href="Data.Uzi.HeartbeatInterval.html#coerceHeartbeatInterval"><span class="hs-identifier hs-var hs-var">coerceHeartbeatInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HeartbeatInterval -&gt; Int
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#makeHeartbeatInterval"><span class="hs-identifier hs-type">makeHeartbeatInterval</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><span class="hs-comment">-- | HeartbeatInterval&#12398;&#12511;&#12522;&#31186;</span></span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-type">HeartbeatInterval</span></a></span><span>
+</span><span id="line-36"></span><span id="makeHeartbeatInterval"><span class="annot"><span class="annottext">makeHeartbeatInterval :: Int -&gt; HeartbeatInterval
+</span><a href="Data.Uzi.HeartbeatInterval.html#makeHeartbeatInterval"><span class="hs-identifier hs-var hs-var">makeHeartbeatInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; HeartbeatInterval
+</span><a href="Data.Uzi.HeartbeatInterval.html#HeartbeatInterval"><span class="hs-identifier hs-var">HeartbeatInterval</span></a></span><span>
+</span><span id="line-37"></span></pre></body></html>

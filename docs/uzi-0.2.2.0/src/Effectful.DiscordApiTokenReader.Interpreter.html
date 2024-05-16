@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module: Effectful.DiscordApiTokenReader.Effect</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description: UziBot&#12364;&#20351;&#12358;Discord&#12398;&#12450;&#12463;&#12475;&#12473;&#12488;&#12540;&#12463;&#12531;&#12434;&#21462;&#24471;&#12377;&#12427;Effect&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12377;</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- UziBot&#12364;&#20351;&#12358;Discord&#12398;&#12450;&#12463;&#12475;&#12473;&#12488;&#12540;&#12463;&#12531;&#12434;&#21462;&#24471;&#12377;&#12427;Effect&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12377;</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.DiscordApiTokenReader.Interpreter</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String.Conversions</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ConvertibleStrings</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">convertString</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html"><span class="hs-identifier">Effectful.DiscordApiTokenReader.Effect</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Dynamic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">interpret</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Environment</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">data</span><span> </span><span id="FromEnvironmentError"><span class="annot"><a href="Effectful.DiscordApiTokenReader.Interpreter.html#FromEnvironmentError"><span class="hs-identifier hs-var">FromEnvironmentError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DiscordApiTokenIsUndefined"><span class="annot"><a href="Effectful.DiscordApiTokenReader.Interpreter.html#DiscordApiTokenIsUndefined"><span class="hs-identifier hs-var">DiscordApiTokenIsUndefined</span></a></span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679306018"><span id="local-6989586621679306020"><span id="local-6989586621679306024"><span class="annot"><span class="annottext">Int -&gt; FromEnvironmentError -&gt; ShowS
+[FromEnvironmentError] -&gt; ShowS
+FromEnvironmentError -&gt; String
+(Int -&gt; FromEnvironmentError -&gt; ShowS)
+-&gt; (FromEnvironmentError -&gt; String)
+-&gt; ([FromEnvironmentError] -&gt; ShowS)
+-&gt; Show FromEnvironmentError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+showsPrec :: Int -&gt; FromEnvironmentError -&gt; ShowS
+$cshow :: FromEnvironmentError -&gt; String
+show :: FromEnvironmentError -&gt; String
+$cshowList :: [FromEnvironmentError] -&gt; ShowS
+showList :: [FromEnvironmentError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679306032"><span id="local-6989586621679306036"><span id="local-6989586621679306039"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Interpreter.html#FromEnvironmentError"><span class="hs-identifier hs-type">FromEnvironmentError</span></a></span></span></span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | 'Data.Effectful.DiscordApiTokenReader' Effect&#12434;&#23455;&#34892;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--  &#12371;&#12398;&#12452;&#12531;&#12479;&#12503;&#12522;&#12479;&#12391;&#12399;&#29872;&#22659;&#22793;&#25968; UZI_DISCORD_API_TOKEN &#12395;&#20837;&#12387;&#12383;DiscordAPiToken&#12434;&#21462;&#24471;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-29"></span><span id="local-6989586621679305972"><span id="local-6989586621679305975"><span class="annot"><a href="Effectful.DiscordApiTokenReader.Interpreter.html#runDiscordApiTokenReader"><span class="hs-identifier hs-type">runDiscordApiTokenReader</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Environment</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679305972"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.DiscordApiTokenReader.Effect.html#DiscordApiTokenReader"><span class="hs-identifier hs-type">DiscordApiTokenReader</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679305972"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679305975"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679305972"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679305975"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-30"></span><span id="runDiscordApiTokenReader"><span class="annot"><span class="annottext">runDiscordApiTokenReader :: forall (es :: [Effect]) a.
+(Environment :&gt; es) =&gt;
+Eff (DiscordApiTokenReader : es) a -&gt; Eff es a
+</span><a href="Effectful.DiscordApiTokenReader.Interpreter.html#runDiscordApiTokenReader"><span class="hs-identifier hs-var hs-var">runDiscordApiTokenReader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EffectHandler DiscordApiTokenReader es
+-&gt; Eff (DiscordApiTokenReader : es) a -&gt; Eff es a
+forall (e :: Effect) (es :: [Effect]) a.
+(DispatchOf e ~ 'Dynamic) =&gt;
+EffectHandler e es -&gt; Eff (e : es) a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">interpret</span></span><span> </span><span class="annot"><span class="annottext">(EffectHandler DiscordApiTokenReader es
+ -&gt; Eff (DiscordApiTokenReader : es) a -&gt; Eff es a)
+-&gt; EffectHandler DiscordApiTokenReader es
+-&gt; Eff (DiscordApiTokenReader : es) a
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">LocalEnv localEs es
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><span class="annottext">DiscordApiTokenReader (Eff localEs) a
+</span><a href="Effectful.DiscordApiTokenReader.Effect.html#GetToken"><span class="hs-identifier hs-var">GetToken</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; Eff es (Maybe String)
+forall (es :: [Effect]).
+(Environment :&gt; es) =&gt;
+String -&gt; Eff es (Maybe String)
+</span><span class="hs-identifier hs-var">lookupEnv</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UZI_DISCORD_API_TOKEN&quot;</span></span><span> </span><span class="annot"><span class="annottext">Eff es (Maybe String) -&gt; (Maybe String -&gt; Eff es a) -&gt; Eff es a
+forall a b. Eff es a -&gt; (a -&gt; Eff es b) -&gt; Eff es b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679306060"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679306060"><span class="hs-identifier hs-var">token</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eff es a
+forall a. a -&gt; Eff es a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Eff es a) -&gt; (String -&gt; a) -&gt; String -&gt; Eff es a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; a
+forall a b. ConvertibleStrings a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">convertString</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Eff es a) -&gt; String -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679306060"><span class="hs-identifier hs-var">token</span></a></span><span>
+</span><span id="line-34"></span><span>      </span><span class="annot"><span class="annottext">Maybe String
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FromEnvironmentError -&gt; Eff es a
+forall a e. Exception e =&gt; e -&gt; a
+</span><span class="hs-identifier hs-var">throw</span></span><span> </span><span class="annot"><span class="annottext">FromEnvironmentError
+</span><a href="Effectful.DiscordApiTokenReader.Interpreter.html#DiscordApiTokenIsUndefined"><span class="hs-identifier hs-var">DiscordApiTokenIsUndefined</span></a></span><span>
+</span><span id="line-35"></span></pre></body></html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE OverloadedRecordDot #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Internal</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens.TH</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FromJSON</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">data</span><span> </span><span id="PayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#PayloadStructure"><span class="hs-identifier hs-var">PayloadStructure</span></a></span></span><span> </span><span id="local-6989586621679297793"><span class="annot"><a href="#local-6989586621679297793"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#PayloadStructure"><span class="hs-identifier hs-var">PayloadStructure</span></a></span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3Aop%3APayloadStructure"><span class="annot"><span class="annottext">forall d. PayloadStructure d -&gt; Int
+</span><a href="Data.Discord.Internal.html#%24sel%3Aop%3APayloadStructure"><span class="hs-identifier hs-var hs-var">op</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span id="%24sel%3Ad%3APayloadStructure"><span class="annot"><span class="annottext">forall d. PayloadStructure d -&gt; d
+</span><a href="Data.Discord.Internal.html#%24sel%3Ad%3APayloadStructure"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679297793"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span id="%24sel%3At%3APayloadStructure"><span class="annot"><span class="annottext">forall d. PayloadStructure d -&gt; String
+</span><a href="Data.Discord.Internal.html#%24sel%3At%3APayloadStructure"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679298029"><span id="local-6989586621679298031"><span class="annot"><span class="annottext">(forall x. PayloadStructure d -&gt; Rep (PayloadStructure d) x)
+-&gt; (forall x. Rep (PayloadStructure d) x -&gt; PayloadStructure d)
+-&gt; Generic (PayloadStructure d)
+forall x. Rep (PayloadStructure d) x -&gt; PayloadStructure d
+forall x. PayloadStructure d -&gt; Rep (PayloadStructure d) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall d x. Rep (PayloadStructure d) x -&gt; PayloadStructure d
+forall d x. PayloadStructure d -&gt; Rep (PayloadStructure d) x
+$cfrom :: forall d x. PayloadStructure d -&gt; Rep (PayloadStructure d) x
+from :: forall x. PayloadStructure d -&gt; Rep (PayloadStructure d) x
+$cto :: forall d x. Rep (PayloadStructure d) x -&gt; PayloadStructure d
+to :: forall x. Rep (PayloadStructure d) x -&gt; PayloadStructure d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PayloadStructure</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span id="local-6989586621679298036"><span id="local-6989586621679298043"><span id="local-6989586621679298046"><span id="local-6989586621679298049"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679297936"><span class="annot"><a href="#local-6989586621679297936"><span class="hs-keyword hs-type">anyclass</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679297936"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Internal.html#PayloadStructure"><span class="hs-identifier hs-type">PayloadStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679297936"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679298167"><span id="local-6989586621679298174"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679298004"><span class="annot"><a href="#local-6989586621679298004"><span class="hs-keyword hs-type">anyclass</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679298004"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Internal.html#PayloadStructure"><span class="hs-identifier hs-type">PayloadStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679298004"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span id="local-6989586621679298009"><span id="local-6989586621679298258"><span id="local-6989586621679298268"><span id="local-6989586621679298272"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679298009"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Internal.html#PayloadStructure"><span class="hs-identifier hs-type">PayloadStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679298009"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="SendEventPayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#SendEventPayloadStructure"><span class="hs-identifier hs-var">SendEventPayloadStructure</span></a></span></span><span> </span><span id="local-6989586621679298010"><span class="annot"><a href="#local-6989586621679298010"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SendEventPayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#SendEventPayloadStructure"><span class="hs-identifier hs-var">SendEventPayloadStructure</span></a></span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3Aop%3ASendEventPayloadStructure"><span class="annot"><span class="annottext">forall d. SendEventPayloadStructure d -&gt; Int
+</span><a href="Data.Discord.Internal.html#%24sel%3Aop%3ASendEventPayloadStructure"><span class="hs-identifier hs-var hs-var">op</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>    </span><span id="%24sel%3Ad%3ASendEventPayloadStructure"><span class="annot"><span class="annottext">forall d. SendEventPayloadStructure d -&gt; d
+</span><a href="Data.Discord.Internal.html#%24sel%3Ad%3ASendEventPayloadStructure"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679298010"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>    </span><span id="%24sel%3At%3ASendEventPayloadStructure"><span class="annot"><span class="annottext">forall d. SendEventPayloadStructure d -&gt; String
+</span><a href="Data.Discord.Internal.html#%24sel%3At%3ASendEventPayloadStructure"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679298281"><span id="local-6989586621679298283"><span class="annot"><span class="annottext">(forall x.
+ SendEventPayloadStructure d -&gt; Rep (SendEventPayloadStructure d) x)
+-&gt; (forall x.
+    Rep (SendEventPayloadStructure d) x -&gt; SendEventPayloadStructure d)
+-&gt; Generic (SendEventPayloadStructure d)
+forall x.
+Rep (SendEventPayloadStructure d) x -&gt; SendEventPayloadStructure d
+forall x.
+SendEventPayloadStructure d -&gt; Rep (SendEventPayloadStructure d) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall d x.
+Rep (SendEventPayloadStructure d) x -&gt; SendEventPayloadStructure d
+forall d x.
+SendEventPayloadStructure d -&gt; Rep (SendEventPayloadStructure d) x
+$cfrom :: forall d x.
+SendEventPayloadStructure d -&gt; Rep (SendEventPayloadStructure d) x
+from :: forall x.
+SendEventPayloadStructure d -&gt; Rep (SendEventPayloadStructure d) x
+$cto :: forall d x.
+Rep (SendEventPayloadStructure d) x -&gt; SendEventPayloadStructure d
+to :: forall x.
+Rep (SendEventPayloadStructure d) x -&gt; SendEventPayloadStructure d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">SendEventPayloadStructure</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">data</span><span> </span><span id="ReceiveEventPayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#ReceiveEventPayloadStructure"><span class="hs-identifier hs-var">ReceiveEventPayloadStructure</span></a></span></span><span> </span><span id="local-6989586621679298017"><span class="annot"><a href="#local-6989586621679298017"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReceiveEventPayloadStructure"><span class="annot"><a href="Data.Discord.Internal.html#ReceiveEventPayloadStructure"><span class="hs-identifier hs-var">ReceiveEventPayloadStructure</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3Aop%3AReceiveEventPayloadStructure"><span class="annot"><span class="annottext">forall d. ReceiveEventPayloadStructure d -&gt; Int
+</span><a href="Data.Discord.Internal.html#%24sel%3Aop%3AReceiveEventPayloadStructure"><span class="hs-identifier hs-var hs-var">op</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>    </span><span id="%24sel%3Ad%3AReceiveEventPayloadStructure"><span class="annot"><span class="annottext">forall d. ReceiveEventPayloadStructure d -&gt; d
+</span><a href="Data.Discord.Internal.html#%24sel%3Ad%3AReceiveEventPayloadStructure"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679298017"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>    </span><span id="%24sel%3At%3AReceiveEventPayloadStructure"><span class="annot"><span class="annottext">forall d. ReceiveEventPayloadStructure d -&gt; String
+</span><a href="Data.Discord.Internal.html#%24sel%3At%3AReceiveEventPayloadStructure"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679298290"><span id="local-6989586621679298292"><span class="annot"><span class="annottext">(forall x.
+ ReceiveEventPayloadStructure d
+ -&gt; Rep (ReceiveEventPayloadStructure d) x)
+-&gt; (forall x.
+    Rep (ReceiveEventPayloadStructure d) x
+    -&gt; ReceiveEventPayloadStructure d)
+-&gt; Generic (ReceiveEventPayloadStructure d)
+forall x.
+Rep (ReceiveEventPayloadStructure d) x
+-&gt; ReceiveEventPayloadStructure d
+forall x.
+ReceiveEventPayloadStructure d
+-&gt; Rep (ReceiveEventPayloadStructure d) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall d x.
+Rep (ReceiveEventPayloadStructure d) x
+-&gt; ReceiveEventPayloadStructure d
+forall d x.
+ReceiveEventPayloadStructure d
+-&gt; Rep (ReceiveEventPayloadStructure d) x
+$cfrom :: forall d x.
+ReceiveEventPayloadStructure d
+-&gt; Rep (ReceiveEventPayloadStructure d) x
+from :: forall x.
+ReceiveEventPayloadStructure d
+-&gt; Rep (ReceiveEventPayloadStructure d) x
+$cto :: forall d x.
+Rep (ReceiveEventPayloadStructure d) x
+-&gt; ReceiveEventPayloadStructure d
+to :: forall x.
+Rep (ReceiveEventPayloadStructure d) x
+-&gt; ReceiveEventPayloadStructure d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">ReceiveEventPayloadStructure</span><span>
+</span><span id="line-46"></span></pre></body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE OverloadedRecordDot #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.SendOperation</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens.TH</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FromJSON</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">data</span><span> </span><span id="SendOperation"><span class="annot"><a href="Data.Discord.SendOperation.html#SendOperation"><span class="hs-identifier hs-var">SendOperation</span></a></span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Identify"><span class="annot"><a href="Data.Discord.SendOperation.html#Identify"><span class="hs-identifier hs-var">Identify</span></a></span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Resume"><span class="annot"><a href="Data.Discord.SendOperation.html#Resume"><span class="hs-identifier hs-var">Resume</span></a></span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Heartbeat"><span class="annot"><a href="Data.Discord.SendOperation.html#Heartbeat"><span class="hs-identifier hs-var">Heartbeat</span></a></span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="RequestGuildMembers"><span class="annot"><a href="Data.Discord.SendOperation.html#RequestGuildMembers"><span class="hs-identifier hs-var">RequestGuildMembers</span></a></span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UpdateVoiceState"><span class="annot"><a href="Data.Discord.SendOperation.html#UpdateVoiceState"><span class="hs-identifier hs-var">UpdateVoiceState</span></a></span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UpdatePresence"><span class="annot"><a href="Data.Discord.SendOperation.html#UpdatePresence"><span class="hs-identifier hs-var">UpdatePresence</span></a></span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679303439"><span id="local-6989586621679303441"><span id="local-6989586621679303445"><span class="annot"><span class="annottext">Int -&gt; SendOperation -&gt; ShowS
+[SendOperation] -&gt; ShowS
+SendOperation -&gt; String
+(Int -&gt; SendOperation -&gt; ShowS)
+-&gt; (SendOperation -&gt; String)
+-&gt; ([SendOperation] -&gt; ShowS)
+-&gt; Show SendOperation
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; SendOperation -&gt; ShowS
+showsPrec :: Int -&gt; SendOperation -&gt; ShowS
+$cshow :: SendOperation -&gt; String
+show :: SendOperation -&gt; String
+$cshowList :: [SendOperation] -&gt; ShowS
+showList :: [SendOperation] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303449"><span id="local-6989586621679303451"><span class="annot"><span class="annottext">(forall x. SendOperation -&gt; Rep SendOperation x)
+-&gt; (forall x. Rep SendOperation x -&gt; SendOperation)
+-&gt; Generic SendOperation
+forall x. Rep SendOperation x -&gt; SendOperation
+forall x. SendOperation -&gt; Rep SendOperation x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. SendOperation -&gt; Rep SendOperation x
+from :: forall x. SendOperation -&gt; Rep SendOperation x
+$cto :: forall x. Rep SendOperation x -&gt; SendOperation
+to :: forall x. Rep SendOperation x -&gt; SendOperation
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679303455"><span id="local-6989586621679303462"><span id="local-6989586621679303465"><span id="local-6989586621679303468"><span class="annot"><span class="annottext">[SendOperation] -&gt; Value
+[SendOperation] -&gt; Encoding
+SendOperation -&gt; Value
+SendOperation -&gt; Encoding
+(SendOperation -&gt; Value)
+-&gt; (SendOperation -&gt; Encoding)
+-&gt; ([SendOperation] -&gt; Value)
+-&gt; ([SendOperation] -&gt; Encoding)
+-&gt; ToJSON SendOperation
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: SendOperation -&gt; Value
+toJSON :: SendOperation -&gt; Value
+$ctoEncoding :: SendOperation -&gt; Encoding
+toEncoding :: SendOperation -&gt; Encoding
+$ctoJSONList :: [SendOperation] -&gt; Value
+toJSONList :: [SendOperation] -&gt; Value
+$ctoEncodingList :: [SendOperation] -&gt; Encoding
+toEncodingList :: [SendOperation] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303640"><span id="local-6989586621679303647"><span class="annot"><span class="annottext">Value -&gt; Parser [SendOperation]
+Value -&gt; Parser SendOperation
+(Value -&gt; Parser SendOperation)
+-&gt; (Value -&gt; Parser [SendOperation]) -&gt; FromJSON SendOperation
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser SendOperation
+parseJSON :: Value -&gt; Parser SendOperation
+$cparseJSONList :: Value -&gt; Parser [SendOperation]
+parseJSONList :: Value -&gt; Parser [SendOperation]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Get operationCode</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode Identify</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode Resume</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- 6</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode Heartbeat</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- 1</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode RequestGuildMembers</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- 8</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode UpdateVoiceState</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- 4</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- &gt;&gt;&gt; operationCode UpdatePresence</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- 3</span><span>
+</span><span id="line-37"></span><span class="annot"><a href="Data.Discord.SendOperation.html#operationCode"><span class="hs-identifier hs-type">operationCode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.SendOperation.html#SendOperation"><span class="hs-identifier hs-type">SendOperation</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-38"></span><span id="operationCode"><span class="annot"><span class="annottext">operationCode :: SendOperation -&gt; Int
+</span><a href="Data.Discord.SendOperation.html#operationCode"><span class="hs-identifier hs-var hs-var">operationCode</span></a></span></span><span> </span><span id="local-6989586621679303780"><span class="annot"><span class="annottext">SendOperation
+</span><a href="#local-6989586621679303780"><span class="hs-identifier hs-var">code</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="#local-6989586621679303780"><span class="hs-identifier hs-var">code</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#Identify"><span class="hs-identifier hs-var">Identify</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#Resume"><span class="hs-identifier hs-var">Resume</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">6</span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#Heartbeat"><span class="hs-identifier hs-var">Heartbeat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#RequestGuildMembers"><span class="hs-identifier hs-var">RequestGuildMembers</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">8</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#UpdateVoiceState"><span class="hs-identifier hs-var">UpdateVoiceState</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">SendOperation
+</span><a href="Data.Discord.SendOperation.html#UpdatePresence"><span class="hs-identifier hs-var">UpdatePresence</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">SendOperation</span><span>
+</span><span id="line-47"></span></pre></body></html>

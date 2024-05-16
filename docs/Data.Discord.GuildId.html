@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.GuildId</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">newtype</span><span> </span><span id="GuildId"><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-var">GuildId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GuildId"><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-var">GuildId</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679297738"><span id="local-6989586621679297743"><span class="annot"><span class="annottext">GuildId -&gt; GuildId -&gt; Bool
+(GuildId -&gt; GuildId -&gt; Bool)
+-&gt; (GuildId -&gt; GuildId -&gt; Bool) -&gt; Eq GuildId
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: GuildId -&gt; GuildId -&gt; Bool
+== :: GuildId -&gt; GuildId -&gt; Bool
+$c/= :: GuildId -&gt; GuildId -&gt; Bool
+/= :: GuildId -&gt; GuildId -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679297749"><span id="local-6989586621679297754"><span class="annot"><span class="annottext">Value -&gt; Parser [GuildId]
+Value -&gt; Parser GuildId
+(Value -&gt; Parser GuildId)
+-&gt; (Value -&gt; Parser [GuildId]) -&gt; FromJSON GuildId
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser GuildId
+parseJSON :: Value -&gt; Parser GuildId
+$cparseJSONList :: Value -&gt; Parser [GuildId]
+parseJSONList :: Value -&gt; Parser [GuildId]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297760"><span id="local-6989586621679297765"><span id="local-6989586621679297769"><span id="local-6989586621679297773"><span class="annot"><span class="annottext">[GuildId] -&gt; Value
+[GuildId] -&gt; Encoding
+GuildId -&gt; Value
+GuildId -&gt; Encoding
+(GuildId -&gt; Value)
+-&gt; (GuildId -&gt; Encoding)
+-&gt; ([GuildId] -&gt; Value)
+-&gt; ([GuildId] -&gt; Encoding)
+-&gt; ToJSON GuildId
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: GuildId -&gt; Value
+toJSON :: GuildId -&gt; Value
+$ctoEncoding :: GuildId -&gt; Encoding
+toEncoding :: GuildId -&gt; Encoding
+$ctoJSONList :: [GuildId] -&gt; Value
+toJSONList :: [GuildId] -&gt; Value
+$ctoEncodingList :: [GuildId] -&gt; Encoding
+toEncodingList :: [GuildId] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297779"><span id="local-6989586621679297784"><span id="local-6989586621679297788"><span class="annot"><span class="annottext">Int -&gt; GuildId -&gt; ShowS
+[GuildId] -&gt; ShowS
+GuildId -&gt; String
+(Int -&gt; GuildId -&gt; ShowS)
+-&gt; (GuildId -&gt; String) -&gt; ([GuildId] -&gt; ShowS) -&gt; Show GuildId
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; GuildId -&gt; ShowS
+showsPrec :: Int -&gt; GuildId -&gt; ShowS
+$cshow :: GuildId -&gt; String
+show :: GuildId -&gt; String
+$cshowList :: [GuildId] -&gt; ShowS
+showList :: [GuildId] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-13"></span></pre></body></html>

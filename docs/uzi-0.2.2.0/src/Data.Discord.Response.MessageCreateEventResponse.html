@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE RecordWildCards #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Response.MessageCreateEventResponse</span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier">MessageCreateEventResponse</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#channelId"><span class="hs-identifier">channelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#content"><span class="hs-identifier">content</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#mentions"><span class="hs-identifier">mentions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#member"><span class="hs-identifier">member</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#isBot"><span class="hs-identifier">isBot</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#guildId"><span class="hs-identifier">guildId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#makeMessageCreateEventResponse"><span class="hs-identifier">makeMessageCreateEventResponse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Content.html"><span class="hs-identifier">Data.Discord.Content</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.GuildId.html"><span class="hs-identifier">Data.Discord.GuildId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier">GuildId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Member.html"><span class="hs-identifier">Data.Discord.Member</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Mention.html"><span class="hs-identifier">Data.Discord.Mention</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">data</span><span> </span><span id="MessageCreateEventResponse"><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-var">MessageCreateEventResponse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MessageCreateEventResponse"><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-var">MessageCreateEventResponse</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_channelId"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; ChannelId
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_channelId"><span class="hs-identifier hs-var hs-var">_channelId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>    </span><span id="_content"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; Content
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_content"><span class="hs-identifier hs-var hs-var">_content</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Content.html#Content"><span class="hs-identifier hs-type">Content</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>    </span><span id="_mentions"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; [Mention]
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_mentions"><span class="hs-identifier hs-var hs-var">_mentions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>    </span><span id="_member"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; Member
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_member"><span class="hs-identifier hs-var hs-var">_member</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Member.html#Member"><span class="hs-identifier hs-type">Member</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>    </span><span id="_isBot"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; Bool
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_isBot"><span class="hs-identifier hs-var hs-var">_isBot</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>    </span><span id="_guildId"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; GuildId
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_guildId"><span class="hs-identifier hs-var hs-var">_guildId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-type">GuildId</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679304824"><span id="local-6989586621679304841"><span id="local-6989586621679304845"><span class="annot"><span class="annottext">Int -&gt; MessageCreateEventResponse -&gt; ShowS
+[MessageCreateEventResponse] -&gt; ShowS
+MessageCreateEventResponse -&gt; String
+(Int -&gt; MessageCreateEventResponse -&gt; ShowS)
+-&gt; (MessageCreateEventResponse -&gt; String)
+-&gt; ([MessageCreateEventResponse] -&gt; ShowS)
+-&gt; Show MessageCreateEventResponse
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; MessageCreateEventResponse -&gt; ShowS
+showsPrec :: Int -&gt; MessageCreateEventResponse -&gt; ShowS
+$cshow :: MessageCreateEventResponse -&gt; String
+show :: MessageCreateEventResponse -&gt; String
+$cshowList :: [MessageCreateEventResponse] -&gt; ShowS
+showList :: [MessageCreateEventResponse] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679304850"><span id="local-6989586621679304865"><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool
+(MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool)
+-&gt; (MessageCreateEventResponse
+    -&gt; MessageCreateEventResponse -&gt; Bool)
+-&gt; Eq MessageCreateEventResponse
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool
+== :: MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool
+$c/= :: MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool
+/= :: MessageCreateEventResponse -&gt; MessageCreateEventResponse -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="channelId"><span id="content"><span id="mentions"><span id="member"><span id="isBot"><span id="guildId"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">MessageCreateEventResponse</span></span></span></span></span></span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#makeMessageCreateEventResponse"><span class="hs-identifier hs-type">makeMessageCreateEventResponse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Content.html#Content"><span class="hs-identifier hs-type">Content</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Member.html#Member"><span class="hs-identifier hs-type">Member</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-type">GuildId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-type">MessageCreateEventResponse</span></a></span><span>
+</span><span id="line-41"></span><span id="makeMessageCreateEventResponse"><span class="annot"><span class="annottext">makeMessageCreateEventResponse :: ChannelId
+-&gt; Content
+-&gt; [Mention]
+-&gt; Member
+-&gt; Bool
+-&gt; GuildId
+-&gt; MessageCreateEventResponse
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#makeMessageCreateEventResponse"><span class="hs-identifier hs-var hs-var">makeMessageCreateEventResponse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelId
+-&gt; Content
+-&gt; [Mention]
+-&gt; Member
+-&gt; Bool
+-&gt; GuildId
+-&gt; MessageCreateEventResponse
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-var">MessageCreateEventResponse</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679304932"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-type">MessageCreateEventResponse</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621679304987"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser MessageCreateEventResponse
+</span><a href="#local-6989586621679304987"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser MessageCreateEventResponse)
+-&gt; Value
+-&gt; Parser MessageCreateEventResponse
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;MessageCreateEventResponse&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser MessageCreateEventResponse)
+ -&gt; Value -&gt; Parser MessageCreateEventResponse)
+-&gt; (Object -&gt; Parser MessageCreateEventResponse)
+-&gt; Value
+-&gt; Parser MessageCreateEventResponse
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679304990"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304990"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679304991"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304990"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Object
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;d&quot;</span></span><span>
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679304993"><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679304993"><span class="hs-identifier hs-var">_channelId</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser ChannelId) -&gt; Parser Value -&gt; Parser ChannelId
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;channel_id&quot;</span></span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679304995"><span class="annot"><span class="annottext">Content
+</span><a href="#local-6989586621679304995"><span class="hs-identifier hs-var">_content</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.Content.html#Content"><span class="hs-identifier hs-type">Content</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser Content) -&gt; Parser Value -&gt; Parser Content
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;content&quot;</span></span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679304996"><span class="annot"><span class="annottext">[Mention]
+</span><a href="#local-6989586621679304996"><span class="hs-identifier hs-var">_mentions</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">[</span><span class="annot"><a href="Data.Discord.Mention.html#Mention"><span class="hs-identifier hs-type">Mention</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser [Mention]) -&gt; Parser Value -&gt; Parser [Mention]
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;mentions&quot;</span></span><span>
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679304997"><span class="annot"><span class="annottext">Member
+</span><a href="#local-6989586621679304997"><span class="hs-identifier hs-var">_member</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.Member.html#Member"><span class="hs-identifier hs-type">Member</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser Member) -&gt; Parser Value -&gt; Parser Member
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;member&quot;</span></span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679304998"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304998"><span class="hs-identifier hs-var">_author</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Object
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;author&quot;</span></span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679304999"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679304999"><span class="hs-identifier hs-var">_isBot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe Bool -&gt; Bool
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Bool -&gt; Bool) -&gt; Parser (Maybe Bool) -&gt; Parser Bool
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304998"><span class="hs-identifier hs-var">_author</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser (Maybe Bool)
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser (Maybe a)
+</span><span class="hs-operator hs-var">.:?</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;bot&quot;</span></span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679305003"><span class="annot"><span class="annottext">GuildId
+</span><a href="#local-6989586621679305003"><span class="hs-identifier hs-var">_guildId</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Discord.GuildId.html#GuildId"><span class="hs-identifier hs-type">GuildId</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser GuildId) -&gt; Parser Value -&gt; Parser GuildId
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679304991"><span class="hs-identifier hs-var">dataSection</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser Value
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;guild_id&quot;</span></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">MessageCreateEventResponse -&gt; Parser MessageCreateEventResponse
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><a href="Data.Discord.Response.MessageCreateEventResponse.html#MessageCreateEventResponse"><span class="hs-identifier hs-type">MessageCreateEventResponse</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">Bool
+[Mention]
+ChannelId
+Content
+GuildId
+Member
+_channelId :: ChannelId
+_content :: Content
+_mentions :: [Mention]
+_member :: Member
+_isBot :: Bool
+_guildId :: GuildId
+_channelId :: ChannelId
+_content :: Content
+_mentions :: [Mention]
+_member :: Member
+_isBot :: Bool
+_guildId :: GuildId
+</span><a href="Data.Discord.Response.MessageCreateEventResponse.html#_channelId"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-54"></span></pre></body></html>

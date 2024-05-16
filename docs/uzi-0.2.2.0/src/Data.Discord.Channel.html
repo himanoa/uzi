@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Channel</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">makeLenses</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Casing</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Casing</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">prependFailure</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">typeMismatch</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html"><span class="hs-identifier">Data.Discord.ChannelName</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Scientific</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">data</span><span> </span><span id="ChannelType"><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-var">ChannelType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GuildText"><span class="annot"><a href="Data.Discord.Channel.html#GuildText"><span class="hs-identifier hs-var">GuildText</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="GuildVoice"><span class="annot"><a href="Data.Discord.Channel.html#GuildVoice"><span class="hs-identifier hs-var">GuildVoice</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="GuildCategory"><span class="annot"><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">GuildCategory</span></a></span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296850"><span id="local-6989586621679296852"><span id="local-6989586621679296856"><span class="annot"><span class="annottext">Int -&gt; ChannelType -&gt; ShowS
+[ChannelType] -&gt; ShowS
+ChannelType -&gt; String
+(Int -&gt; ChannelType -&gt; ShowS)
+-&gt; (ChannelType -&gt; String)
+-&gt; ([ChannelType] -&gt; ShowS)
+-&gt; Show ChannelType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ChannelType -&gt; ShowS
+showsPrec :: Int -&gt; ChannelType -&gt; ShowS
+$cshow :: ChannelType -&gt; String
+show :: ChannelType -&gt; String
+$cshowList :: [ChannelType] -&gt; ShowS
+showList :: [ChannelType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296860"><span id="local-6989586621679296862"><span class="annot"><span class="annottext">ChannelType -&gt; ChannelType -&gt; Bool
+(ChannelType -&gt; ChannelType -&gt; Bool)
+-&gt; (ChannelType -&gt; ChannelType -&gt; Bool) -&gt; Eq ChannelType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ChannelType -&gt; ChannelType -&gt; Bool
+== :: ChannelType -&gt; ChannelType -&gt; Bool
+$c/= :: ChannelType -&gt; ChannelType -&gt; Bool
+/= :: ChannelType -&gt; ChannelType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296867"><span id="local-6989586621679296869"><span class="annot"><span class="annottext">(forall x. ChannelType -&gt; Rep ChannelType x)
+-&gt; (forall x. Rep ChannelType x -&gt; ChannelType)
+-&gt; Generic ChannelType
+forall x. Rep ChannelType x -&gt; ChannelType
+forall x. ChannelType -&gt; Rep ChannelType x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. ChannelType -&gt; Rep ChannelType x
+from :: forall x. ChannelType -&gt; Rep ChannelType x
+$cto :: forall x. Rep ChannelType x -&gt; ChannelType
+to :: forall x. Rep ChannelType x -&gt; ChannelType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296874"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-type">ChannelType</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621679296901"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser ChannelType
+</span><a href="#local-6989586621679296901"><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Scientific -&gt; Parser ChannelType)
+-&gt; Value
+-&gt; Parser ChannelType
+forall a. String -&gt; (Scientific -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withScientific</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ChannelType&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Scientific -&gt; Parser ChannelType) -&gt; Value -&gt; Parser ChannelType)
+-&gt; (Scientific -&gt; Parser ChannelType)
+-&gt; Value
+-&gt; Parser ChannelType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679296904"><span class="annot"><span class="annottext">Scientific
+</span><a href="#local-6989586621679296904"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">forall i. (Integral i, Bounded i) =&gt; Scientific -&gt; Maybe i
+</span><span class="hs-identifier hs-var">toBoundedInteger</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><a href="#local-6989586621679296904"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; Parser ChannelType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildText"><span class="hs-identifier hs-var">GuildText</span></a></span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; Parser ChannelType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildVoice"><span class="hs-identifier hs-var">GuildVoice</span></a></span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; Parser ChannelType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">GuildCategory</span></a></span><span>
+</span><span id="line-26"></span><span>    </span><span id="local-6989586621679296906"><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679296906"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser ChannelType -&gt; Parser ChannelType
+forall a. String -&gt; Parser a -&gt; Parser a
+</span><span class="hs-identifier hs-var">prependFailure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Not supported type &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679296906"><span class="hs-identifier hs-var">value</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Value -&gt; Parser ChannelType
+forall a. String -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">typeMismatch</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Opcode&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scientific -&gt; Value
+</span><span class="hs-identifier hs-var">Number</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><a href="#local-6989586621679296904"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296911"><span id="local-6989586621679296915"><span id="local-6989586621679296918"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-type">ChannelType</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>  </span><span id="local-6989586621679296925"><span class="annot"><span class="annottext">toJSON :: ChannelType -&gt; Value
+</span><a href="#local-6989586621679296925"><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildText"><span class="hs-identifier hs-var">GuildText</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Value
+</span><span class="hs-identifier hs-var">Number</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildVoice"><span class="hs-identifier hs-var">GuildVoice</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Value
+</span><span class="hs-identifier hs-var">Number</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">GuildCategory</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Value
+</span><span class="hs-identifier hs-var">Number</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><span class="hs-number">4</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">newtype</span><span> </span><span id="ChannelPosition"><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-var">ChannelPosition</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ChannelPosition"><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-var">ChannelPosition</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296929"><span id="local-6989586621679296935"><span id="local-6989586621679296939"><span class="annot"><span class="annottext">Int -&gt; ChannelPosition -&gt; ShowS
+[ChannelPosition] -&gt; ShowS
+ChannelPosition -&gt; String
+(Int -&gt; ChannelPosition -&gt; ShowS)
+-&gt; (ChannelPosition -&gt; String)
+-&gt; ([ChannelPosition] -&gt; ShowS)
+-&gt; Show ChannelPosition
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ChannelPosition -&gt; ShowS
+showsPrec :: Int -&gt; ChannelPosition -&gt; ShowS
+$cshow :: ChannelPosition -&gt; String
+show :: ChannelPosition -&gt; String
+$cshowList :: [ChannelPosition] -&gt; ShowS
+showList :: [ChannelPosition] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296942"><span id="local-6989586621679296947"><span class="annot"><span class="annottext">ChannelPosition -&gt; ChannelPosition -&gt; Bool
+(ChannelPosition -&gt; ChannelPosition -&gt; Bool)
+-&gt; (ChannelPosition -&gt; ChannelPosition -&gt; Bool)
+-&gt; Eq ChannelPosition
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ChannelPosition -&gt; ChannelPosition -&gt; Bool
+== :: ChannelPosition -&gt; ChannelPosition -&gt; Bool
+$c/= :: ChannelPosition -&gt; ChannelPosition -&gt; Bool
+/= :: ChannelPosition -&gt; ChannelPosition -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296952"><span id="local-6989586621679296957"><span class="annot"><span class="annottext">Value -&gt; Parser [ChannelPosition]
+Value -&gt; Parser ChannelPosition
+(Value -&gt; Parser ChannelPosition)
+-&gt; (Value -&gt; Parser [ChannelPosition]) -&gt; FromJSON ChannelPosition
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser ChannelPosition
+parseJSON :: Value -&gt; Parser ChannelPosition
+$cparseJSONList :: Value -&gt; Parser [ChannelPosition]
+parseJSONList :: Value -&gt; Parser [ChannelPosition]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679296962"><span id="local-6989586621679296967"><span id="local-6989586621679296971"><span id="local-6989586621679296975"><span class="annot"><span class="annottext">[ChannelPosition] -&gt; Value
+[ChannelPosition] -&gt; Encoding
+ChannelPosition -&gt; Value
+ChannelPosition -&gt; Encoding
+(ChannelPosition -&gt; Value)
+-&gt; (ChannelPosition -&gt; Encoding)
+-&gt; ([ChannelPosition] -&gt; Value)
+-&gt; ([ChannelPosition] -&gt; Encoding)
+-&gt; ToJSON ChannelPosition
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: ChannelPosition -&gt; Value
+toJSON :: ChannelPosition -&gt; Value
+$ctoEncoding :: ChannelPosition -&gt; Encoding
+toEncoding :: ChannelPosition -&gt; Encoding
+$ctoJSONList :: [ChannelPosition] -&gt; Value
+toJSONList :: [ChannelPosition] -&gt; Value
+$ctoEncodingList :: [ChannelPosition] -&gt; Encoding
+toEncodingList :: [ChannelPosition] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><a href="Data.Discord.Channel.html#coerceChannelPosition"><span class="hs-identifier hs-type">coerceChannelPosition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-type">ChannelPosition</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-39"></span><span id="coerceChannelPosition"><span class="annot"><span class="annottext">coerceChannelPosition :: ChannelPosition -&gt; Integer
+</span><a href="Data.Discord.Channel.html#coerceChannelPosition"><span class="hs-identifier hs-var hs-var">coerceChannelPosition</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelPosition -&gt; Integer
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Data.Discord.Channel.html#channelTypeFromInteger"><span class="hs-identifier hs-type">channelTypeFromInteger</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-type">ChannelType</span></a></span><span>
+</span><span id="line-42"></span><span id="channelTypeFromInteger"><span class="annot"><span class="annottext">channelTypeFromInteger :: Int -&gt; Maybe ChannelType
+</span><a href="Data.Discord.Channel.html#channelTypeFromInteger"><span class="hs-identifier hs-var hs-var">channelTypeFromInteger</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; Maybe ChannelType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildText"><span class="hs-identifier hs-var">GuildText</span></a></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Data.Discord.Channel.html#channelTypeFromInteger"><span class="hs-identifier hs-var">channelTypeFromInteger</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; Maybe ChannelType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">GuildCategory</span></a></span><span>
+</span><span id="line-44"></span><span class="annot"><a href="Data.Discord.Channel.html#channelTypeFromInteger"><span class="hs-identifier hs-var">channelTypeFromInteger</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ChannelType
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="Channel"><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-var">Channel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Channel"><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-var">Channel</span></a></span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="__id"><span class="annot"><span class="annottext">Channel -&gt; ChannelId
+</span><a href="Data.Discord.Channel.html#__id"><span class="hs-identifier hs-var hs-var">__id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>    </span><span id="__type"><span class="annot"><span class="annottext">Channel -&gt; ChannelType
+</span><a href="Data.Discord.Channel.html#__type"><span class="hs-identifier hs-var hs-var">__type</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-type">ChannelType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>    </span><span id="__position"><span class="annot"><span class="annottext">Channel -&gt; ChannelPosition
+</span><a href="Data.Discord.Channel.html#__position"><span class="hs-identifier hs-var hs-var">__position</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-type">ChannelPosition</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>    </span><span id="__name"><span class="annot"><span class="annottext">Channel -&gt; ChannelName
+</span><a href="Data.Discord.Channel.html#__name"><span class="hs-identifier hs-var hs-var">__name</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-type">ChannelName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>    </span><span id="__parentId"><span class="annot"><span class="annottext">Channel -&gt; Maybe ChannelId
+</span><a href="Data.Discord.Channel.html#__parentId"><span class="hs-identifier hs-var hs-var">__parentId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296988"><span id="local-6989586621679296998"><span id="local-6989586621679297002"><span class="annot"><span class="annottext">Int -&gt; Channel -&gt; ShowS
+[Channel] -&gt; ShowS
+Channel -&gt; String
+(Int -&gt; Channel -&gt; ShowS)
+-&gt; (Channel -&gt; String) -&gt; ([Channel] -&gt; ShowS) -&gt; Show Channel
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Channel -&gt; ShowS
+showsPrec :: Int -&gt; Channel -&gt; ShowS
+$cshow :: Channel -&gt; String
+show :: Channel -&gt; String
+$cshowList :: [Channel] -&gt; ShowS
+showList :: [Channel] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297005"><span id="local-6989586621679297015"><span class="annot"><span class="annottext">Channel -&gt; Channel -&gt; Bool
+(Channel -&gt; Channel -&gt; Bool)
+-&gt; (Channel -&gt; Channel -&gt; Bool) -&gt; Eq Channel
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Channel -&gt; Channel -&gt; Bool
+== :: Channel -&gt; Channel -&gt; Bool
+$c/= :: Channel -&gt; Channel -&gt; Bool
+/= :: Channel -&gt; Channel -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679297019"><span id="local-6989586621679297021"><span class="annot"><span class="annottext">(forall x. Channel -&gt; Rep Channel x)
+-&gt; (forall x. Rep Channel x -&gt; Channel) -&gt; Generic Channel
+forall x. Rep Channel x -&gt; Channel
+forall x. Channel -&gt; Rep Channel x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. Channel -&gt; Rep Channel x
+from :: forall x. Channel -&gt; Rep Channel x
+$cto :: forall x. Rep Channel x -&gt; Channel
+to :: forall x. Rep Channel x -&gt; Channel
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679297025"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679297144"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser Channel
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Value -&gt; Parser Channel
+forall a.
+(Generic a, GFromJSON Zero (Rep a)) =&gt;
+Options -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">genericParseJSON</span></span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="hs-identifier hs-var">fieldLabelModifier</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">drop</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Casing.snakeCase</span></span><span class="hs-special">}</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679297153"><span id="local-6989586621679297157"><span id="local-6989586621679297160"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679297297"><span class="annot"><span class="annottext">toJSON :: Channel -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Channel -&gt; Value
+forall a.
+(Generic a, GToJSON' Value Zero (Rep a)) =&gt;
+Options -&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">genericToJSON</span></span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="hs-identifier hs-var">fieldLabelModifier</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">drop</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Casing.snakeCase</span></span><span class="hs-special">}</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="_id"><span id="_name"><span id="_parentId"><span id="_position"><span id="_type"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Channel</span></span></span></span></span></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="annot"><a href="Data.Discord.Channel.html#makeChannel"><span class="hs-identifier hs-type">makeChannel</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelType"><span class="hs-identifier hs-type">ChannelType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#ChannelPosition"><span class="hs-identifier hs-type">ChannelPosition</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-type">ChannelName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">ChannelId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span>
+</span><span id="line-64"></span><span id="makeChannel"><span class="annot"><span class="annottext">makeChannel :: ChannelId
+-&gt; ChannelType
+-&gt; ChannelPosition
+-&gt; ChannelName
+-&gt; Maybe ChannelId
+-&gt; Channel
+</span><a href="Data.Discord.Channel.html#makeChannel"><span class="hs-identifier hs-var hs-var">makeChannel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChannelId
+-&gt; ChannelType
+-&gt; ChannelPosition
+-&gt; ChannelName
+-&gt; Maybe ChannelId
+-&gt; Channel
+</span><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-var">Channel</span></a></span><span>
+</span><span id="line-65"></span></pre></body></html>

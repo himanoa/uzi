@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Support for access to a mutable value of a particular type.</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- The value is thread local. If you want it to be shared between threads, use</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- &quot;Effectful.State.Static.Shared&quot;.</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- /Note:/ unlike the 'Control.Monad.Trans.State.StateT' monad transformer from</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- the @transformers@ library, the 'State' effect doesn't discard state updates</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- when an exception is received:</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- &gt;&gt;&gt; import qualified Control.Monad.Trans.State.Strict as S</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--   (`S.execStateT` &quot;Hi&quot;) . handle (\(_::ErrorCall) -&gt; pure ()) $ do</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--     S.modify (++ &quot; there!&quot;)</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--     error &quot;oops&quot;</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- &quot;Hi&quot;</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--   runEff . execState &quot;Hi&quot; . handle (\(_::ErrorCall) -&gt; pure ()) $ do</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--     modify (++ &quot; there!&quot;)</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--     error &quot;oops&quot;</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- &quot;Hi there!&quot;</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.State.Static.Local</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Effect</span></span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier">State</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Handlers</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#runState"><span class="hs-identifier">runState</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#evalState"><span class="hs-identifier">evalState</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#execState"><span class="hs-identifier">execState</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Operations</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#get"><span class="hs-identifier">get</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#gets"><span class="hs-identifier">gets</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#put"><span class="hs-identifier">put</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#state"><span class="hs-identifier">state</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#modify"><span class="hs-identifier">modify</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#stateM"><span class="hs-identifier">stateM</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#modifyM"><span class="hs-identifier">modifyM</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.html"><span class="hs-identifier">Effectful</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html"><span class="hs-identifier">Effectful.Dispatch.Static</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="annot"><span class="hs-comment">-- | Provide access to a strict (WHNF), thread local, mutable value of type @s@.</span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">data</span><span> </span><span id="State"><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span></span><span> </span><span id="local-6989586621679078650"><span class="annot"><a href="#local-6989586621679078650"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="DispatchOf"><span class="annot"><a href="Effectful.Internal.Env.html#DispatchOf"><span class="hs-identifier hs-var">DispatchOf</span></a></span></span><span> </span><span id="local-6989586621679078652"><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078652"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#Static"><span class="hs-identifier hs-type">Static</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#NoSideEffects"><span class="hs-identifier hs-type">NoSideEffects</span></a></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">newtype</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StaticRep"><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier hs-var">StaticRep</span></a></span></span><span> </span><span id="local-6989586621679078560"><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078560"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="State"><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679078560"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Run the 'State' effect with the given initial state and return the final</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- value along with the final state.</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679078535"><span id="local-6989586621679078537"><span id="local-6989586621679078538"><span class="annot"><a href="Effectful.State.Static.Local.html#runState"><span class="hs-identifier hs-type">runState</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679078535"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ The initial state.</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078535"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078537"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078538"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078537"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078538"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679078535"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-59"></span><span id="runState"><span class="annot"><span class="annottext">runState :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+s -&gt; Eff (State s : es) a -&gt; Eff es (a, s)
+</span><a href="Effectful.State.Static.Local.html#runState"><span class="hs-identifier hs-var hs-var">runState</span></a></span></span><span> </span><span id="local-6989586621679078661"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078661"><span class="hs-identifier hs-var">s0</span></a></span></span><span> </span><span id="local-6989586621679078662"><span class="annot"><span class="annottext">Eff (State s : es) a
+</span><a href="#local-6989586621679078662"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679078663"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078663"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span id="local-6989586621679078664"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078664"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StaticRep (State s)
+-&gt; Eff (State s : es) a -&gt; Eff es (a, StaticRep (State s))
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es (a, StaticRep e)
+</span><a href="Effectful.Internal.Monad.html#runStaticRep"><span class="hs-identifier hs-var">runStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078661"><span class="hs-identifier hs-var">s0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (State s : es) a
+</span><a href="#local-6989586621679078662"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">(a, s) -&gt; Eff es (a, s)
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078663"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078664"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- | Run the 'State' effect with the given initial state and return the final</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- value, discarding the final state.</span><span>
+</span><span id="line-65"></span><span id="local-6989586621679078563"><span id="local-6989586621679078564"><span id="local-6989586621679078565"><span class="annot"><a href="Effectful.State.Static.Local.html#evalState"><span class="hs-identifier hs-type">evalState</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679078563"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ The initial state.</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078563"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078564"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078565"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078564"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078565"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-69"></span><span id="evalState"><span class="annot"><span class="annottext">evalState :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+s -&gt; Eff (State s : es) a -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#evalState"><span class="hs-identifier hs-var hs-var">evalState</span></a></span></span><span> </span><span id="local-6989586621679078670"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078670"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StaticRep (State s) -&gt; Eff (State s : es) a -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#evalStaticRep"><span class="hs-identifier hs-var">evalStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078670"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | Run the 'State' effect with the given initial state and return the final</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- state, discarding the final value.</span><span>
+</span><span id="line-73"></span><span id="local-6989586621679078573"><span id="local-6989586621679078574"><span id="local-6989586621679078575"><span class="annot"><a href="Effectful.State.Static.Local.html#execState"><span class="hs-identifier hs-type">execState</span></a></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679078573"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ The initial state.</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078573"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621679078574"><span class="hs-identifier hs-type">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679078575"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078574"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078573"><span class="hs-identifier hs-type">s</span></a></span></span></span></span><span>
+</span><span id="line-77"></span><span id="execState"><span class="annot"><span class="annottext">execState :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+s -&gt; Eff (State s : es) a -&gt; Eff es s
+</span><a href="Effectful.State.Static.Local.html#execState"><span class="hs-identifier hs-var hs-var">execState</span></a></span></span><span> </span><span id="local-6989586621679078678"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078678"><span class="hs-identifier hs-var">s0</span></a></span></span><span> </span><span id="local-6989586621679078679"><span class="annot"><span class="annottext">Eff (State s : es) a
+</span><a href="#local-6989586621679078679"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span id="local-6989586621679078680"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078680"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StaticRep (State s)
+-&gt; Eff (State s : es) a -&gt; Eff es (StaticRep (State s))
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, MaybeIOE sideEffects es) =&gt;
+StaticRep e -&gt; Eff (e : es) a -&gt; Eff es (StaticRep e)
+</span><a href="Effectful.Internal.Monad.html#execStaticRep"><span class="hs-identifier hs-var">execStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078678"><span class="hs-identifier hs-var">s0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Eff (State s : es) a
+</span><a href="#local-6989586621679078679"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><span class="annottext">s -&gt; Eff es s
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078680"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><span class="hs-comment">-- | Fetch the current value of the state.</span></span><span>
+</span><span id="line-82"></span><span id="local-6989586621679078583"><span id="local-6989586621679078584"><span class="annot"><a href="Effectful.State.Static.Local.html#get"><span class="hs-identifier hs-type">get</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078583"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078584"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078584"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078583"><span class="hs-identifier hs-type">s</span></a></span></span></span><span>
+</span><span id="line-83"></span><span id="get"><span class="annot"><span class="annottext">get :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(State s :&gt; es) =&gt;
+Eff es s
+</span><a href="Effectful.State.Static.Local.html#get"><span class="hs-identifier hs-var hs-var">get</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span id="local-6989586621679078688"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078688"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Eff es (StaticRep (State s))
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+Eff es (StaticRep e)
+</span><a href="Effectful.Internal.Monad.html#getStaticRep"><span class="hs-identifier hs-var">getStaticRep</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="annot"><span class="annottext">s -&gt; Eff es s
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078688"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- | Get a function of the current state.</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- @'gets' f &#8801; f '&lt;$&gt;' 'get'@</span><span>
+</span><span id="line-90"></span><span id="local-6989586621679078591"><span id="local-6989586621679078592"><span id="local-6989586621679078593"><span class="annot"><a href="Effectful.State.Static.Local.html#gets"><span class="hs-identifier hs-type">gets</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078591"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078592"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078591"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078593"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to apply to the state.</span></span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078592"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078593"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-94"></span><span id="gets"><span class="annot"><span class="annottext">gets :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(State s :&gt; es) =&gt;
+(s -&gt; a) -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#gets"><span class="hs-identifier hs-var hs-var">gets</span></a></span></span><span> </span><span id="local-6989586621679078695"><span class="annot"><span class="annottext">s -&gt; a
+</span><a href="#local-6989586621679078695"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; a
+</span><a href="#local-6989586621679078695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(s -&gt; a) -&gt; Eff es s -&gt; Eff es a
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Eff es s
+forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(State s :&gt; es) =&gt;
+Eff es s
+</span><a href="Effectful.State.Static.Local.html#get"><span class="hs-identifier hs-var">get</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="annot"><span class="hs-comment">-- | Set the current state to the given value.</span></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679078601"><span id="local-6989586621679078602"><span class="annot"><a href="Effectful.State.Static.Local.html#put"><span class="hs-identifier hs-type">put</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078601"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078602"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078601"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078602"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-98"></span><span id="put"><span class="annot"><span class="annottext">put :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(State s :&gt; es) =&gt;
+s -&gt; Eff es ()
+</span><a href="Effectful.State.Static.Local.html#put"><span class="hs-identifier hs-var hs-var">put</span></a></span></span><span> </span><span id="local-6989586621679078700"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078700"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StaticRep (State s) -&gt; Eff es ()
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+StaticRep e -&gt; Eff es ()
+</span><a href="Effectful.Internal.Monad.html#putStaticRep"><span class="hs-identifier hs-var">putStaticRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078700"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="annot"><span class="hs-comment">-- | Apply the function to the current state and return a value.</span></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679078608"><span id="local-6989586621679078609"><span id="local-6989586621679078610"><span class="annot"><a href="Effectful.State.Static.Local.html#state"><span class="hs-identifier hs-type">state</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078608"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078609"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078608"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078610"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679078608"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to modify the state.</span></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078609"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078610"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-105"></span><span id="state"><span class="annot"><span class="annottext">state :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(State s :&gt; es) =&gt;
+(s -&gt; (a, s)) -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#state"><span class="hs-identifier hs-var hs-var">state</span></a></span></span><span> </span><span id="local-6989586621679078706"><span class="annot"><span class="annottext">s -&gt; (a, s)
+</span><a href="#local-6989586621679078706"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(StaticRep (State s) -&gt; (a, StaticRep (State s))) -&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+(StaticRep e -&gt; (a, StaticRep e)) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#stateStaticRep"><span class="hs-identifier hs-var">stateStaticRep</span></a></span><span> </span><span class="annot"><span class="annottext">((StaticRep (State s) -&gt; (a, StaticRep (State s))) -&gt; Eff es a)
+-&gt; (StaticRep (State s) -&gt; (a, StaticRep (State s))) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span id="local-6989586621679078708"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078708"><span class="hs-identifier hs-var">s0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679078709"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078709"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078710"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078710"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; (a, s)
+</span><a href="#local-6989586621679078706"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078708"><span class="hs-identifier hs-var">s0</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078709"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078710"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Apply the function to the current state.</span><span>
+</span><span id="line-108"></span><span class="hs-comment">--</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- @'modify' f &#8801; 'state' (\\s -&gt; ((), f s))@</span><span>
+</span><span id="line-110"></span><span id="local-6989586621679078621"><span id="local-6989586621679078622"><span class="annot"><a href="Effectful.State.Static.Local.html#modify"><span class="hs-identifier hs-type">modify</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078621"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078622"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078621"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679078621"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to modify the state.</span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078622"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-114"></span><span id="modify"><span class="annot"><span class="annottext">modify :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(State s :&gt; es) =&gt;
+(s -&gt; s) -&gt; Eff es ()
+</span><a href="Effectful.State.Static.Local.html#modify"><span class="hs-identifier hs-var hs-var">modify</span></a></span></span><span> </span><span id="local-6989586621679078713"><span class="annot"><span class="annottext">s -&gt; s
+</span><a href="#local-6989586621679078713"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(s -&gt; ((), s)) -&gt; Eff es ()
+forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(State s :&gt; es) =&gt;
+(s -&gt; (a, s)) -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#state"><span class="hs-identifier hs-var">state</span></a></span><span> </span><span class="annot"><span class="annottext">((s -&gt; ((), s)) -&gt; Eff es ()) -&gt; (s -&gt; ((), s)) -&gt; Eff es ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679078714"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078714"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s -&gt; s
+</span><a href="#local-6989586621679078713"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078714"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="annot"><span class="hs-comment">-- | Apply the monadic function to the current state and return a value.</span></span><span>
+</span><span id="line-117"></span><span id="local-6989586621679078625"><span id="local-6989586621679078626"><span id="local-6989586621679078627"><span class="annot"><a href="Effectful.State.Static.Local.html#stateM"><span class="hs-identifier hs-type">stateM</span></a></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078625"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078626"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078625"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078626"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078627"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679078625"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The function to modify the state.</span></span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078626"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078627"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-121"></span><span id="stateM"><span class="annot"><span class="annottext">stateM :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(State s :&gt; es) =&gt;
+(s -&gt; Eff es (a, s)) -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#stateM"><span class="hs-identifier hs-var hs-var">stateM</span></a></span></span><span> </span><span id="local-6989586621679078721"><span class="annot"><span class="annottext">s -&gt; Eff es (a, s)
+</span><a href="#local-6989586621679078721"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(StaticRep (State s) -&gt; Eff es (a, StaticRep (State s)))
+-&gt; Eff es a
+forall (e :: (Type -&gt; Type) -&gt; Type -&gt; Type)
+       (sideEffects :: SideEffects)
+       (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(DispatchOf e ~ 'Static sideEffects, e :&gt; es) =&gt;
+(StaticRep e -&gt; Eff es (a, StaticRep e)) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#stateStaticRepM"><span class="hs-identifier hs-var">stateStaticRepM</span></a></span><span> </span><span class="annot"><span class="annottext">((StaticRep (State s) -&gt; Eff es (a, StaticRep (State s)))
+ -&gt; Eff es a)
+-&gt; (StaticRep (State s) -&gt; Eff es (a, StaticRep (State s)))
+-&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span id="local-6989586621679078723"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078723"><span class="hs-identifier hs-var">s0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-122"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679078724"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078724"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078725"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078725"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">s -&gt; Eff es (a, s)
+</span><a href="#local-6989586621679078721"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078723"><span class="hs-identifier hs-var">s0</span></a></span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="annottext">(a, StaticRep (State s)) -&gt; Eff es (a, StaticRep (State s))
+forall a. a -&gt; Eff es a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679078724"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s -&gt; StaticRep (State s)
+forall s. s -&gt; StaticRep (State s)
+</span><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-var">State</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078725"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- | Apply the monadic function to the current state.</span><span>
+</span><span id="line-126"></span><span class="hs-comment">--</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- @'modifyM' f &#8801; 'stateM' (\\s -&gt; ((), ) '&lt;$&gt;' f s)@</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679078635"><span id="local-6989586621679078636"><span class="annot"><a href="Effectful.State.Static.Local.html#modifyM"><span class="hs-identifier hs-type">modifyM</span></a></span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.State.Static.Local.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078635"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Effectful.Internal.Effect.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078636"><span class="hs-identifier hs-type">es</span></a></span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679078635"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078636"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078635"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ The monadic function to modify the state.</span></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078636"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-132"></span><span id="modifyM"><span class="annot"><span class="annottext">modifyM :: forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]).
+(State s :&gt; es) =&gt;
+(s -&gt; Eff es s) -&gt; Eff es ()
+</span><a href="Effectful.State.Static.Local.html#modifyM"><span class="hs-identifier hs-var hs-var">modifyM</span></a></span></span><span> </span><span id="local-6989586621679078729"><span class="annot"><span class="annottext">s -&gt; Eff es s
+</span><a href="#local-6989586621679078729"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(s -&gt; Eff es ((), s)) -&gt; Eff es ()
+forall s (es :: [(Type -&gt; Type) -&gt; Type -&gt; Type]) a.
+(State s :&gt; es) =&gt;
+(s -&gt; Eff es (a, s)) -&gt; Eff es a
+</span><a href="Effectful.State.Static.Local.html#stateM"><span class="hs-identifier hs-var">stateM</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679078730"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078730"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(s -&gt; ((), s)) -&gt; Eff es s -&gt; Eff es ((), s)
+forall (f :: Type -&gt; Type) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">s -&gt; Eff es s
+</span><a href="#local-6989586621679078729"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679078730"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Exception (ErrorCall)</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Monad.Catch</span><span>
+</span><span id="line-137"></span></pre></body></html>

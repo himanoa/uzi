@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Aeson.Casing.Internal</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- | Creates an Aeson options object that drops a specific number of characters</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- from the front of a field name, then applies a casing function.</span><span>
+</span><span id="line-8"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#aesonDrop"><span class="hs-identifier hs-type">aesonDrop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Options</span></span><span>
+</span><span id="line-9"></span><span id="aesonDrop"><span class="annot"><span class="annottext">aesonDrop :: Int -&gt; (String -&gt; String) -&gt; Options
+</span><a href="Data.Aeson.Casing.Internal.html#aesonDrop"><span class="hs-identifier hs-var hs-var">aesonDrop</span></a></span></span><span> </span><span id="local-6989586621679043631"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679043631"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679043632"><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="#local-6989586621679043632"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span><span>
+</span><span id="line-10"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="hs-identifier hs-var">fieldLabelModifier</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679043632"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">drop</span></span><span> </span><span class="annot"><a href="#local-6989586621679043631"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- | Creates an Aeson options object that drops the field name prefix from a</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- field, then applies a casing function. We assume a convention of the prefix</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- always being lower case, and the first letter of the actual field name being</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- uppercase. This accommodated for field names in GHC 7.8 and below.</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- &gt; data Person = Person</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- &gt;        { personFirstName :: Text</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt;        , personLastName  :: Text</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- &gt;        } deriving (Generic)</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- &gt; data Dog = Dog</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- &gt;        { dogFirstName :: Text</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- &gt;        } deriving (Generic)</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- In the above cases, dog and person are always dropped from the JSON field</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- names.</span><span>
+</span><span id="line-28"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#aesonPrefix"><span class="hs-identifier hs-type">aesonPrefix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Options</span></span><span>
+</span><span id="line-29"></span><span id="aesonPrefix"><span class="annot"><span class="annottext">aesonPrefix :: (String -&gt; String) -&gt; Options
+</span><a href="Data.Aeson.Casing.Internal.html#aesonPrefix"><span class="hs-identifier hs-var hs-var">aesonPrefix</span></a></span></span><span> </span><span id="local-6989586621679043638"><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="#local-6989586621679043638"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span><span>
+</span><span id="line-30"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="hs-identifier hs-var">fieldLabelModifier</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679043638"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropFPrefix"><span class="hs-identifier hs-type">dropFPrefix</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">----</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- | Snake casing, where the words are always lower case and separated by an</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- underscore.</span><span>
+</span><span id="line-36"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#snakeCase"><span class="hs-identifier hs-type">snakeCase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-37"></span><span id="snakeCase"><span class="annot"><span class="annottext">snakeCase :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#snakeCase"><span class="hs-identifier hs-var hs-var">snakeCase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#symbCase"><span class="hs-identifier hs-var">symbCase</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'_'</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- | Train casing, where the words are always lower case and separated by</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- a hyphen</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#trainCase"><span class="hs-identifier hs-type">trainCase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-43"></span><span id="trainCase"><span class="annot"><span class="annottext">trainCase :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#trainCase"><span class="hs-identifier hs-var hs-var">trainCase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#symbCase"><span class="hs-identifier hs-var">symbCase</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'-'</span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- | Camel casing, where the words are separated by the first letter of each</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- word being a capital. However, the first letter of the field is never a</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- capital.</span><span>
+</span><span id="line-48"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#camelCase"><span class="hs-identifier hs-type">camelCase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-49"></span><span id="camelCase"><span class="annot"><span class="annottext">camelCase :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#camelCase"><span class="hs-identifier hs-var hs-var">camelCase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Char) -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var">applyFirst</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toLower</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Pascal casing, where the words are separated by the first letter of each</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- word being a capital. The first letter of the field is always a capital.</span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#pascalCase"><span class="hs-identifier hs-type">pascalCase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-54"></span><span id="pascalCase"><span class="annot"><span class="annottext">pascalCase :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#pascalCase"><span class="hs-identifier hs-var hs-var">pascalCase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Char) -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var">applyFirst</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toUpper</span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">----</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="annot"><span class="hs-comment">-- | Generic casing for symbol separated names</span></span><span>
+</span><span id="line-59"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#symbCase"><span class="hs-identifier hs-type">symbCase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span id="symbCase"><span class="annot"><span class="annottext">symbCase :: Char -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#symbCase"><span class="hs-identifier hs-var hs-var">symbCase</span></a></span></span><span> </span><span id="local-6989586621679043648"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043648"><span class="hs-identifier hs-var">sym</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="#local-6989586621679043649"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; String) -&gt; (String -&gt; String) -&gt; String -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Char) -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var">applyFirst</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toLower</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679043649"><span class="annot"><span class="annottext">u :: String -&gt; String
+</span><a href="#local-6989586621679043649"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>                       </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span>        </span><span class="annot"><a href="#local-6989586621679043649"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679043650"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043650"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679043651"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043651"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isUpper</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043650"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043648"><span class="hs-identifier hs-var">sym</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toLower</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043650"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="#local-6989586621679043649"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043651"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-63"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043650"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="#local-6989586621679043649"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043651"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-type">applyFirst</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-66"></span><span id="applyFirst"><span class="annot"><span class="annottext">applyFirst :: (Char -&gt; Char) -&gt; String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var hs-var">applyFirst</span></a></span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-67"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var">applyFirst</span></a></span><span> </span><span id="local-6989586621679043653"><span class="annot"><span class="annottext">Char -&gt; Char
+</span><a href="#local-6989586621679043653"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679043654"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043654"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">]</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><a href="#local-6989586621679043653"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043654"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-68"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#applyFirst"><span class="hs-identifier hs-var">applyFirst</span></a></span><span> </span><span id="local-6989586621679043655"><span class="annot"><span class="annottext">Char -&gt; Char
+</span><a href="#local-6989586621679043655"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679043656"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043656"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679043657"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043657"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><a href="#local-6989586621679043655"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043656"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043657"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropFPrefix"><span class="hs-identifier hs-type">dropFPrefix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-71"></span><span id="dropFPrefix"><span class="annot"><span class="annottext">dropFPrefix :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#dropFPrefix"><span class="hs-identifier hs-var hs-var">dropFPrefix</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>                 </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropFPrefix"><span class="hs-identifier hs-var">dropFPrefix</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679043658"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043658"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679043659"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043659"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isUpper</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043658"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043658"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043659"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-73"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#dropFPrefix"><span class="hs-identifier hs-var">dropFPrefix</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043659"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropCPrefix"><span class="hs-identifier hs-type">dropCPrefix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-76"></span><span id="dropCPrefix"><span class="annot"><span class="annottext">dropCPrefix :: String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#dropCPrefix"><span class="hs-identifier hs-var hs-var">dropCPrefix</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-77"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropCPrefix"><span class="hs-identifier hs-var">dropCPrefix</span></a></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679043661"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043661"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043661"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-78"></span><span class="annot"><a href="Data.Aeson.Casing.Internal.html#dropCPrefix"><span class="hs-identifier hs-var">dropCPrefix</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679043662"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043662"><span class="hs-identifier hs-var">x0</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679043663"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043663"><span class="hs-identifier hs-var">x1</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679043664"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043664"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isLower</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043663"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043662"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043663"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043664"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-79"></span><span>                       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+</span><a href="Data.Aeson.Casing.Internal.html#dropCPrefix"><span class="hs-identifier hs-var">dropCPrefix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679043663"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; String
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679043664"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span></pre></body></html>

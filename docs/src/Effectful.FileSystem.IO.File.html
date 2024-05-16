@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Lifted &quot;UnliftIO.IO.File&quot;.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.FileSystem.IO.File</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFile"><span class="hs-identifier">writeBinaryFile</span></a></span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileAtomic"><span class="hs-identifier">writeBinaryFileAtomic</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurable"><span class="hs-identifier">writeBinaryFileDurable</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurableAtomic"><span class="hs-identifier">writeBinaryFileDurableAtomic</span></a></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFile"><span class="hs-identifier">withBinaryFile</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileAtomic"><span class="hs-identifier">withBinaryFileAtomic</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurable"><span class="hs-identifier">withBinaryFileDurable</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurableAtomic"><span class="hs-identifier">withBinaryFileDurableAtomic</span></a></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.File.html#ensureFileDurable"><span class="hs-identifier">ensureFileDurable</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Handle</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">IOMode</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO.IO.File</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">U</span></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html"><span class="hs-identifier">Effectful.FileSystem.Effect</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.writeBinaryFile'.</span></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679081895"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFile"><span class="hs-identifier hs-type">writeBinaryFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081895"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081895"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-26"></span><span id="writeBinaryFile"><span class="annot"><span class="annottext">writeBinaryFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.File.html#writeBinaryFile"><span class="hs-identifier hs-var hs-var">writeBinaryFile</span></a></span></span><span> </span><span id="local-6989586621679081949"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081949"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+forall (m :: Type -&gt; Type).
+MonadIO m =&gt;
+FilePath -&gt; ByteString -&gt; m ()
+</span><span class="hs-identifier hs-var">U.writeBinaryFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081949"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.writeBinaryFileAtomic'.</span></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679081953"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileAtomic"><span class="hs-identifier hs-type">writeBinaryFileAtomic</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081953"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081953"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-30"></span><span id="writeBinaryFileAtomic"><span class="annot"><span class="annottext">writeBinaryFileAtomic :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileAtomic"><span class="hs-identifier hs-var hs-var">writeBinaryFileAtomic</span></a></span></span><span> </span><span id="local-6989586621679081956"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081956"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+forall (m :: Type -&gt; Type).
+MonadIO m =&gt;
+FilePath -&gt; ByteString -&gt; m ()
+</span><span class="hs-identifier hs-var">U.writeBinaryFileAtomic</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081956"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.writeBinaryFileDurable'.</span></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679081958"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurable"><span class="hs-identifier hs-type">writeBinaryFileDurable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081958"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081958"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-34"></span><span id="writeBinaryFileDurable"><span class="annot"><span class="annottext">writeBinaryFileDurable :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurable"><span class="hs-identifier hs-var hs-var">writeBinaryFileDurable</span></a></span></span><span> </span><span id="local-6989586621679081961"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081961"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+forall (m :: Type -&gt; Type).
+MonadIO m =&gt;
+FilePath -&gt; ByteString -&gt; m ()
+</span><span class="hs-identifier hs-var">U.writeBinaryFileDurable</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081961"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.writeBinaryFileDurableAtomic'.</span></span><span>
+</span><span id="line-37"></span><span id="local-6989586621679081963"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurableAtomic"><span class="hs-identifier hs-type">writeBinaryFileDurableAtomic</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081963"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081963"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-38"></span><span id="writeBinaryFileDurableAtomic"><span class="annot"><span class="annottext">writeBinaryFileDurableAtomic :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.File.html#writeBinaryFileDurableAtomic"><span class="hs-identifier hs-var hs-var">writeBinaryFileDurableAtomic</span></a></span></span><span> </span><span id="local-6989586621679081966"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081966"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+forall (m :: Type -&gt; Type).
+MonadIO m =&gt;
+FilePath -&gt; ByteString -&gt; m ()
+</span><span class="hs-identifier hs-var">U.writeBinaryFileDurableAtomic</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081966"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.withBinaryFile'.</span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679081911"><span id="local-6989586621679081914"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFile"><span class="hs-identifier hs-type">withBinaryFile</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081911"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOMode</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081911"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081914"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081911"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081914"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-45"></span><span id="withBinaryFile"><span class="annot"><span class="annottext">withBinaryFile :: forall (es :: [Effect]) a.
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.FileSystem.IO.File.html#withBinaryFile"><span class="hs-identifier hs-var hs-var">withBinaryFile</span></a></span></span><span> </span><span id="local-6989586621679081973"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081973"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span id="local-6989586621679081974"><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081974"><span class="hs-identifier hs-var">mode</span></a></span></span><span> </span><span id="local-6989586621679081975"><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081975"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679081977"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081977"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IOMode -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall (m :: Type -&gt; Type) a.
+MonadUnliftIO m =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">U.withBinaryFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081973"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081974"><span class="hs-identifier hs-var">mode</span></a></span><span> </span><span class="annot"><span class="annottext">((Handle -&gt; IO a) -&gt; IO a) -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081977"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (Handle -&gt; Eff es a) -&gt; Handle -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081975"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.withBinaryFileAtomic'.</span></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679081979"><span id="local-6989586621679081980"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileAtomic"><span class="hs-identifier hs-type">withBinaryFileAtomic</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081979"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOMode</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081979"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081980"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081979"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081980"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-51"></span><span id="withBinaryFileAtomic"><span class="annot"><span class="annottext">withBinaryFileAtomic :: forall (es :: [Effect]) a.
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.FileSystem.IO.File.html#withBinaryFileAtomic"><span class="hs-identifier hs-var hs-var">withBinaryFileAtomic</span></a></span></span><span> </span><span id="local-6989586621679081985"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081985"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span id="local-6989586621679081986"><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081986"><span class="hs-identifier hs-var">mode</span></a></span></span><span> </span><span id="local-6989586621679081987"><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081987"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679081988"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081988"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IOMode -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall (m :: Type -&gt; Type) a.
+MonadUnliftIO m =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">U.withBinaryFileAtomic</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081985"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081986"><span class="hs-identifier hs-var">mode</span></a></span><span> </span><span class="annot"><span class="annottext">((Handle -&gt; IO a) -&gt; IO a) -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081988"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (Handle -&gt; Eff es a) -&gt; Handle -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081987"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.withBinaryFileDurable'.</span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679081990"><span id="local-6989586621679081991"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurable"><span class="hs-identifier hs-type">withBinaryFileDurable</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081990"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOMode</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081990"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081991"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081990"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679081991"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-57"></span><span id="withBinaryFileDurable"><span class="annot"><span class="annottext">withBinaryFileDurable :: forall (es :: [Effect]) a.
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurable"><span class="hs-identifier hs-var hs-var">withBinaryFileDurable</span></a></span></span><span> </span><span id="local-6989586621679081996"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081996"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span id="local-6989586621679081997"><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081997"><span class="hs-identifier hs-var">mode</span></a></span></span><span> </span><span id="local-6989586621679081998"><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081998"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679081999"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081999"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IOMode -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall (m :: Type -&gt; Type) a.
+MonadUnliftIO m =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">U.withBinaryFileDurable</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081996"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679081997"><span class="hs-identifier hs-var">mode</span></a></span><span> </span><span class="annot"><span class="annottext">((Handle -&gt; IO a) -&gt; IO a) -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679081999"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (Handle -&gt; Eff es a) -&gt; Handle -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679081998"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.withBinaryFileDurableAtomic'.</span></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679082001"><span id="local-6989586621679082002"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurableAtomic"><span class="hs-identifier hs-type">withBinaryFileDurableAtomic</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679082001"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IOMode</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679082001"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082002"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679082001"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082002"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-63"></span><span id="withBinaryFileDurableAtomic"><span class="annot"><span class="annottext">withBinaryFileDurableAtomic :: forall (es :: [Effect]) a.
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; Eff es a) -&gt; Eff es a
+</span><a href="Effectful.FileSystem.IO.File.html#withBinaryFileDurableAtomic"><span class="hs-identifier hs-var hs-var">withBinaryFileDurableAtomic</span></a></span></span><span> </span><span id="local-6989586621679082007"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679082007"><span class="hs-identifier hs-var">path</span></a></span></span><span> </span><span id="local-6989586621679082008"><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679082008"><span class="hs-identifier hs-var">mode</span></a></span></span><span> </span><span id="local-6989586621679082009"><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679082009"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeSeqUnliftIO</span></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679082010"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679082010"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IOMode -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall (m :: Type -&gt; Type) a.
+MonadUnliftIO m =&gt;
+FilePath -&gt; IOMode -&gt; (Handle -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">U.withBinaryFileDurableAtomic</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679082007"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679082008"><span class="hs-identifier hs-var">mode</span></a></span><span> </span><span class="annot"><span class="annottext">((Handle -&gt; IO a) -&gt; IO a) -&gt; (Handle -&gt; IO a) -&gt; IO a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679082010"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">(Eff es a -&gt; IO a) -&gt; (Handle -&gt; Eff es a) -&gt; Handle -&gt; IO a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Eff es a
+</span><a href="#local-6989586621679082009"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="annot"><span class="hs-comment">-- | Lifted 'U.ensureFileDurable'.</span></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679081933"><span class="annot"><a href="Effectful.FileSystem.IO.File.html#ensureFileDurable"><span class="hs-identifier hs-type">ensureFileDurable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081933"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081933"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-70"></span><span id="ensureFileDurable"><span class="annot"><span class="annottext">ensureFileDurable :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.File.html#ensureFileDurable"><span class="hs-identifier hs-var hs-var">ensureFileDurable</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (FilePath -&gt; IO ()) -&gt; FilePath -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+forall (m :: Type -&gt; Type). MonadIO m =&gt; FilePath -&gt; m ()
+</span><span class="hs-identifier hs-var">U.ensureFileDurable</span></span><span>
+</span><span id="line-71"></span></pre></body></html>

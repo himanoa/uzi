@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Lifted &quot;Data.ByteString.Lazy.Char8&quot;.</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- Like the original module, you probably want to import this module qualified</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- to avoid name clashes with the functions provided by &quot;Prelude&quot;, e.g.:</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- &gt; import Data.ByteString.Lazy (ByteString)</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- &gt; import qualified Data.ByteString.Lazy.Char8 as LBS8</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- &gt; import qualified Effectful.FileSystem.IO.ByteString.Lazy as ELBS</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.FileSystem.IO.ByteString.Lazy</span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Files</span></span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#readFile"><span class="hs-identifier">readFile</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#writeFile"><span class="hs-identifier">writeFile</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#appendFile"><span class="hs-identifier">appendFile</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><span class="hs-comment">-- * I/O with Handles</span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetContents"><span class="hs-identifier">hGetContents</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGet"><span class="hs-identifier">hGet</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetNonBlocking"><span class="hs-identifier">hGetNonBlocking</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPut"><span class="hs-identifier">hPut</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutNonBlocking"><span class="hs-identifier">hPutNonBlocking</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStr"><span class="hs-identifier">hPutStr</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStrLn"><span class="hs-identifier">hPutStrLn</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">appendFile</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">readFile</span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">writeFile</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LBS8</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Handle</span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Effectful.Dispatch.Static</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.FileSystem.html"><span class="hs-identifier">Effectful.FileSystem</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Files</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.readFile'.</span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679081820"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#readFile"><span class="hs-identifier hs-type">readFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081820"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081820"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-44"></span><span id="readFile"><span class="annot"><span class="annottext">readFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; Eff es ByteString
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#readFile"><span class="hs-identifier hs-var hs-var">readFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (FilePath -&gt; IO ByteString) -&gt; FilePath -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">LBS8.readFile</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.writeFile'.</span></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679081831"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#writeFile"><span class="hs-identifier hs-type">writeFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081831"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081831"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-48"></span><span id="writeFile"><span class="annot"><span class="annottext">writeFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#writeFile"><span class="hs-identifier hs-var hs-var">writeFile</span></a></span></span><span> </span><span id="local-6989586621679081865"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081865"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">LBS8.writeFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081865"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.appendFile'.</span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679081867"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#appendFile"><span class="hs-identifier hs-type">appendFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081867"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081867"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-52"></span><span id="appendFile"><span class="annot"><span class="annottext">appendFile :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+FilePath -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#appendFile"><span class="hs-identifier hs-var hs-var">appendFile</span></a></span></span><span> </span><span id="local-6989586621679081869"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081869"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">LBS8.appendFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081869"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- I/O with Handles</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hGetContents'.</span></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679081834"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetContents"><span class="hs-identifier hs-type">hGetContents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081834"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081834"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-59"></span><span id="hGetContents"><span class="annot"><span class="annottext">hGetContents :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; Eff es ByteString
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetContents"><span class="hs-identifier hs-var hs-var">hGetContents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (Handle -&gt; IO ByteString) -&gt; Handle -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">LBS8.hGetContents</span></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hGet'.</span></span><span>
+</span><span id="line-62"></span><span id="local-6989586621679081837"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGet"><span class="hs-identifier hs-type">hGet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081837"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081837"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-63"></span><span id="hGet"><span class="annot"><span class="annottext">hGet :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; Int -&gt; Eff es ByteString
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGet"><span class="hs-identifier hs-var hs-var">hGet</span></a></span></span><span> </span><span id="local-6989586621679081874"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081874"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (Int -&gt; IO ByteString) -&gt; Int -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Int -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">LBS8.hGet</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081874"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hGetNonBlocking'.</span></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679081876"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetNonBlocking"><span class="hs-identifier hs-type">hGetNonBlocking</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081876"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081876"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-67"></span><span id="hGetNonBlocking"><span class="annot"><span class="annottext">hGetNonBlocking :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; Int -&gt; Eff es ByteString
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hGetNonBlocking"><span class="hs-identifier hs-var hs-var">hGetNonBlocking</span></a></span></span><span> </span><span id="local-6989586621679081878"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081878"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (Int -&gt; IO ByteString) -&gt; Int -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; Int -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">LBS8.hGetNonBlocking</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081878"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hPut'.</span></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679081840"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPut"><span class="hs-identifier hs-type">hPut</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081840"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081840"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-71"></span><span id="hPut"><span class="annot"><span class="annottext">hPut :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPut"><span class="hs-identifier hs-var hs-var">hPut</span></a></span></span><span> </span><span id="local-6989586621679081881"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081881"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">LBS8.hPut</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081881"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hPutNonBlocking'.</span></span><span>
+</span><span id="line-74"></span><span id="local-6989586621679081842"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutNonBlocking"><span class="hs-identifier hs-type">hPutNonBlocking</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081842"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081842"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span></span><span>
+</span><span id="line-75"></span><span id="hPutNonBlocking"><span class="annot"><span class="annottext">hPutNonBlocking :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; ByteString -&gt; Eff es ByteString
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutNonBlocking"><span class="hs-identifier hs-var hs-var">hPutNonBlocking</span></a></span></span><span> </span><span id="local-6989586621679081884"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081884"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO ByteString -&gt; Eff es ByteString
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO ByteString -&gt; Eff es ByteString)
+-&gt; (ByteString -&gt; IO ByteString) -&gt; ByteString -&gt; Eff es ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">LBS8.hPutNonBlocking</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081884"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hPutStr'.</span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679081886"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStr"><span class="hs-identifier hs-type">hPutStr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081886"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081886"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-79"></span><span id="hPutStr"><span class="annot"><span class="annottext">hPutStr :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStr"><span class="hs-identifier hs-var hs-var">hPutStr</span></a></span></span><span> </span><span id="local-6989586621679081888"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081888"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">LBS8.hPutStr</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081888"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><span class="hs-comment">-- | Lifted 'LBS8.hPutStrLn'.</span></span><span>
+</span><span id="line-82"></span><span id="local-6989586621679081890"><span class="annot"><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStrLn"><span class="hs-identifier hs-type">hPutStrLn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Effectful.FileSystem.Effect.html#FileSystem"><span class="hs-identifier hs-type">FileSystem</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679081890"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eff</span></span><span> </span><span class="annot"><a href="#local-6989586621679081890"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-83"></span><span id="hPutStrLn"><span class="annot"><span class="annottext">hPutStrLn :: forall (es :: [Effect]).
+(FileSystem :&gt; es) =&gt;
+Handle -&gt; ByteString -&gt; Eff es ()
+</span><a href="Effectful.FileSystem.IO.ByteString.Lazy.html#hPutStrLn"><span class="hs-identifier hs-var hs-var">hPutStrLn</span></a></span></span><span> </span><span id="local-6989586621679081892"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081892"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; Eff es ()
+forall a (es :: [Effect]). IO a -&gt; Eff es a
+</span><span class="hs-identifier hs-var">unsafeEff_</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; Eff es ())
+-&gt; (ByteString -&gt; IO ()) -&gt; ByteString -&gt; Eff es ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">LBS8.hPutStrLn</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679081892"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-84"></span></pre></body></html>

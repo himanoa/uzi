@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Discord.Request.SlashCommand</span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier">Name</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier">Description</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#CommandOption"><span class="hs-identifier">CommandOption</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">newtype</span><span> </span><span id="Name"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier hs-var">Name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Name"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier hs-var">Name</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302704"><span id="local-6989586621679302709"><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+(Name -&gt; Name -&gt; Bool) -&gt; (Name -&gt; Name -&gt; Bool) -&gt; Eq Name
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Name -&gt; Name -&gt; Bool
+== :: Name -&gt; Name -&gt; Bool
+$c/= :: Name -&gt; Name -&gt; Bool
+/= :: Name -&gt; Name -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302715"><span id="local-6989586621679302720"><span id="local-6989586621679302724"><span id="local-6989586621679302728"><span class="annot"><span class="annottext">[Name] -&gt; Value
+[Name] -&gt; Encoding
+Name -&gt; Value
+Name -&gt; Encoding
+(Name -&gt; Value)
+-&gt; (Name -&gt; Encoding)
+-&gt; ([Name] -&gt; Value)
+-&gt; ([Name] -&gt; Encoding)
+-&gt; ToJSON Name
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: Name -&gt; Value
+toJSON :: Name -&gt; Value
+$ctoEncoding :: Name -&gt; Encoding
+toEncoding :: Name -&gt; Encoding
+$ctoJSONList :: [Name] -&gt; Value
+toJSONList :: [Name] -&gt; Value
+$ctoEncodingList :: [Name] -&gt; Encoding
+toEncodingList :: [Name] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302734"><span id="local-6989586621679302739"><span id="local-6989586621679302743"><span class="annot"><span class="annottext">Int -&gt; Name -&gt; ShowS
+[Name] -&gt; ShowS
+Name -&gt; String
+(Int -&gt; Name -&gt; ShowS)
+-&gt; (Name -&gt; String) -&gt; ([Name] -&gt; ShowS) -&gt; Show Name
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Name -&gt; ShowS
+showsPrec :: Int -&gt; Name -&gt; ShowS
+$cshow :: Name -&gt; String
+show :: Name -&gt; String
+$cshowList :: [Name] -&gt; ShowS
+showList :: [Name] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">newtype</span><span> </span><span id="Description"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier hs-var">Description</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Description"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier hs-var">Description</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302750"><span id="local-6989586621679302754"><span class="annot"><span class="annottext">Description -&gt; Description -&gt; Bool
+(Description -&gt; Description -&gt; Bool)
+-&gt; (Description -&gt; Description -&gt; Bool) -&gt; Eq Description
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Description -&gt; Description -&gt; Bool
+== :: Description -&gt; Description -&gt; Bool
+$c/= :: Description -&gt; Description -&gt; Bool
+/= :: Description -&gt; Description -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302759"><span id="local-6989586621679302763"><span id="local-6989586621679302767"><span id="local-6989586621679302771"><span class="annot"><span class="annottext">[Description] -&gt; Value
+[Description] -&gt; Encoding
+Description -&gt; Value
+Description -&gt; Encoding
+(Description -&gt; Value)
+-&gt; (Description -&gt; Encoding)
+-&gt; ([Description] -&gt; Value)
+-&gt; ([Description] -&gt; Encoding)
+-&gt; ToJSON Description
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+$ctoJSON :: Description -&gt; Value
+toJSON :: Description -&gt; Value
+$ctoEncoding :: Description -&gt; Encoding
+toEncoding :: Description -&gt; Encoding
+$ctoJSONList :: [Description] -&gt; Value
+toJSONList :: [Description] -&gt; Value
+$ctoEncodingList :: [Description] -&gt; Encoding
+toEncodingList :: [Description] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302776"><span id="local-6989586621679302780"><span id="local-6989586621679302784"><span class="annot"><span class="annottext">Int -&gt; Description -&gt; ShowS
+[Description] -&gt; ShowS
+Description -&gt; String
+(Int -&gt; Description -&gt; ShowS)
+-&gt; (Description -&gt; String)
+-&gt; ([Description] -&gt; ShowS)
+-&gt; Show Description
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Description -&gt; ShowS
+showsPrec :: Int -&gt; Description -&gt; ShowS
+$cshow :: Description -&gt; String
+show :: Description -&gt; String
+$cshowList :: [Description] -&gt; ShowS
+showList :: [Description] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">data</span><span> </span><span id="CommandOption"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#CommandOption"><span class="hs-identifier hs-var">CommandOption</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StringOption"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#StringOption"><span class="hs-identifier hs-var">StringOption</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier hs-type">Description</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="ChannelOption"><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#ChannelOption"><span class="hs-identifier hs-var">ChannelOption</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#Description"><span class="hs-identifier hs-type">Description</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302791"><span id="local-6989586621679302800"><span class="annot"><span class="annottext">CommandOption -&gt; CommandOption -&gt; Bool
+(CommandOption -&gt; CommandOption -&gt; Bool)
+-&gt; (CommandOption -&gt; CommandOption -&gt; Bool) -&gt; Eq CommandOption
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: CommandOption -&gt; CommandOption -&gt; Bool
+== :: CommandOption -&gt; CommandOption -&gt; Bool
+$c/= :: CommandOption -&gt; CommandOption -&gt; Bool
+/= :: CommandOption -&gt; CommandOption -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679302804"><span id="local-6989586621679302816"><span id="local-6989586621679302820"><span class="annot"><span class="annottext">Int -&gt; CommandOption -&gt; ShowS
+[CommandOption] -&gt; ShowS
+CommandOption -&gt; String
+(Int -&gt; CommandOption -&gt; ShowS)
+-&gt; (CommandOption -&gt; String)
+-&gt; ([CommandOption] -&gt; ShowS)
+-&gt; Show CommandOption
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; CommandOption -&gt; ShowS
+showsPrec :: Int -&gt; CommandOption -&gt; ShowS
+$cshow :: CommandOption -&gt; String
+show :: CommandOption -&gt; String
+$cshowList :: [CommandOption] -&gt; ShowS
+showList :: [CommandOption] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679302824"><span id="local-6989586621679302828"><span id="local-6989586621679302831"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#CommandOption"><span class="hs-identifier hs-type">CommandOption</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">toJSON</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#CommandOption"><span class="hs-identifier hs-type">CommandOption</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Value</span></span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679302864"><span class="annot"><span class="annottext">toJSON :: CommandOption -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#StringOption"><span class="hs-identifier hs-type">StringOption</span></a></span><span> </span><span id="local-6989586621679302865"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302865"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679302866"><span class="annot"><span class="annottext">Description
+</span><a href="#local-6989586621679302866"><span class="hs-identifier hs-var">description</span></a></span></span><span> </span><span id="local-6989586621679302867"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679302867"><span class="hs-identifier hs-var">required</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-34"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;name&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Name -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302865"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;description&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Description -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Description
+</span><a href="#local-6989586621679302866"><span class="hs-identifier hs-var">description</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;required&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Bool -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679302867"><span class="hs-identifier hs-var">required</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Integer -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Discord.Request.SlashCommand.html#ChannelOption"><span class="hs-identifier hs-type">ChannelOption</span></a></span><span> </span><span id="local-6989586621679302870"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302870"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679302871"><span class="annot"><span class="annottext">Description
+</span><a href="#local-6989586621679302871"><span class="hs-identifier hs-var">description</span></a></span></span><span> </span><span id="local-6989586621679302872"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679302872"><span class="hs-identifier hs-var">required</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-41"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;name&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Name -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302870"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;description&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Description -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Description
+</span><a href="#local-6989586621679302871"><span class="hs-identifier hs-var">description</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;required&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Bool -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679302872"><span class="hs-identifier hs-var">required</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>        </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Integer -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">7</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span></pre></body></html>

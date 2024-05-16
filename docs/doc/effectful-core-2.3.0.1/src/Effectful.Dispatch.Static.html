@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | Statically dispatched effects.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Effectful.Dispatch.Static</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Introduction</span></span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><span class="hs-comment">-- $intro</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** An example</span></span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><span class="hs-comment">-- $example</span></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Low level API</span></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Effectful.Internal.Monad.html#StaticRep"><span class="hs-identifier">StaticRep</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html#SideEffects"><span class="hs-identifier">SideEffects</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#MaybeIOE"><span class="hs-identifier">MaybeIOE</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Extending the environment</span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#runStaticRep"><span class="hs-identifier">runStaticRep</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#evalStaticRep"><span class="hs-identifier">evalStaticRep</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#execStaticRep"><span class="hs-identifier">execStaticRep</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Data retrieval and update</span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#getStaticRep"><span class="hs-identifier">getStaticRep</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#putStaticRep"><span class="hs-identifier">putStaticRep</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#stateStaticRep"><span class="hs-identifier">stateStaticRep</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#stateStaticRepM"><span class="hs-identifier">stateStaticRepM</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#localStaticRep"><span class="hs-identifier">localStaticRep</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Unlifts</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#seqUnliftIO"><span class="hs-identifier">seqUnliftIO</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#concUnliftIO"><span class="hs-identifier">concUnliftIO</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeSeqUnliftIO"><span class="hs-identifier">unsafeSeqUnliftIO</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeConcUnliftIO"><span class="hs-identifier">unsafeConcUnliftIO</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="hs-comment">-- ** Utils</span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#unEff"><span class="hs-identifier">unEff</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier">unsafeEff</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#unsafeEff_"><span class="hs-identifier">unsafeEff_</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeLiftMapIO"><span class="hs-identifier">unsafeLiftMapIO</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Re-exports</span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">HasCallStack</span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HasCallStack</span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Env.html"><span class="hs-identifier">Effectful.Internal.Env</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html"><span class="hs-identifier">Effectful.Internal.Monad</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- $intro</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- Unlike dynamically dispatched effects, statically dispatched effects have a</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- single, set interpretation that cannot be changed at runtime, which makes</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- them useful in specific scenarios. For example:</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- * If you'd like to ensure that a specific effect will behave in a certain way</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--   at all times, using a statically dispatched version is the only way to</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--   ensure that.</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- * If the effect you're about to define has only one reasonable</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--   implementation, it makes a lot of sense to make it statically dispatched.</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- Statically dispatched effects also perform slightly better than dynamically</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- dispatched ones, because their operations are implemented as standard top</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- level functions, so the compiler can apply more optimizations to them.</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- $example</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- Let's say that there exists a logging library whose functionality we'd like</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- to turn into an effect. Its @Logger@ data type (after simplification) is</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- represented in the following way:</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- &gt;&gt;&gt; data Logger = Logger { logMessage :: String -&gt; IO () }</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- Because the @Logger@ type itself allows customization of how messages are</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- logged, it is an excellent candidate to be turned into a statically</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- dispatched effect.</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- Such effect is represented by an empty data type of kind 'Effectful.Effect':</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- &gt;&gt;&gt; data Log :: Effect</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- When it comes to the dispatch, we also need to signify whether core</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- operations of the effect will perform side effects. Since GHC is not a</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- polygraph, you can lie, though being truthful is recommended &#128578;</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- &gt;&gt;&gt; type instance DispatchOf Log = Static WithSideEffects</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- The environment of 'Eff' will hold the data type that represents the</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- effect. It is defined by the appropriate instance of the 'StaticRep' data</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- family:</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;&gt;&gt; newtype instance StaticRep Log = Log Logger</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- /Note:/ all operations of a statically dispatched effect will have a</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- read/write access to this data type as long as they can see its constructors,</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- hence it's best not to export them from the module that defines the effect.</span><span>
+</span><span id="line-96"></span><span class="hs-comment">--</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- The logging operation can be defined as follows:</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-100"></span><span class="hs-comment">--  log :: (IOE :&gt; es, Log :&gt; es) =&gt; String -&gt; Eff es ()</span><span>
+</span><span id="line-101"></span><span class="hs-comment">--  log msg = do</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--    Log logger &lt;- getStaticRep</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--    liftIO $ logMessage logger msg</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- That works, but has an unfortunate consequence: in order to use the @log@</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- operation the 'IOE' effect needs to be in scope! This is bad, because we're</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- trying to limit (ideally, fully eliminate) the need to have the full power of</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- 'IO' available in the application code. The solution is to use one of the</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- escape hatches that allow unrestricted access to the internal representation</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- of 'Eff':</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-114"></span><span class="hs-comment">--  log :: Log :&gt; es =&gt; String -&gt; Eff es ()</span><span>
+</span><span id="line-115"></span><span class="hs-comment">--  log msg = do</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--    Log logger &lt;- getStaticRep</span><span>
+</span><span id="line-117"></span><span class="hs-comment">--    unsafeEff_ $ logMessage logger msg</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- However, since logging is most often an operation with side effects, in order</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- for this approach to be sound, the function that introduces the @Log@ effect</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- needs to require the 'IOE' effect.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- If you forget to do that, don't worry. As long as the 'DispatchOf' instance</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- was correctly defined to be @'Static' 'WithSideEffects'@, you will get a</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- reminder:</span><span>
+</span><span id="line-127"></span><span class="hs-comment">--</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-129"></span><span class="hs-comment">--  runLog :: Logger -&gt; Eff (Log : es) a -&gt; Eff es a</span><span>
+</span><span id="line-130"></span><span class="hs-comment">--  runLog logger = evalStaticRep (Log logger)</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- ...</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- ...No instance for ...IOE :&gt; es... arising from a use of &#8216;evalStaticRep&#8217;</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- ...</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- Including @'IOE' :&gt; es@ in the context fixes the problem:</span><span>
+</span><span id="line-137"></span><span class="hs-comment">--</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--  runLog :: IOE :&gt; es =&gt; Logger -&gt; Eff (Log : es) a -&gt; Eff es a</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--  runLog logger = evalStaticRep (Log logger)</span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--</span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- In general, whenever any operation of a statically dispatched effect performs</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- side effects using one of the unsafe functions, all functions that introduce</span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- this effect need to require the 'IOE' effect (otherwise it would be possible</span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- to run it via 'runPureEff').</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--</span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- Now we can use the newly defined effect to log messages:</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- &gt;&gt;&gt; dummyLogger = Logger { logMessage = \_ -&gt; pure () }</span><span>
+</span><span id="line-151"></span><span class="hs-comment">--</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- &gt;&gt;&gt; stdoutLogger = Logger { logMessage = putStrLn }</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--   action = do</span><span>
+</span><span id="line-156"></span><span class="hs-comment">--     log &quot;Computing things...&quot;</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--     log &quot;Sleeping...&quot;</span><span>
+</span><span id="line-158"></span><span class="hs-comment">--     log &quot;Computing more things...&quot;</span><span>
+</span><span id="line-159"></span><span class="hs-comment">--     pure True</span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-161"></span><span class="hs-comment">--</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- &gt;&gt;&gt; :t action</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- action :: (Log :&gt; es) =&gt; Eff es Bool</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- &gt;&gt;&gt; runEff . runLog stdoutLogger $ action</span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- Computing things...</span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- Sleeping...</span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- Computing more things...</span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-170"></span><span class="hs-comment">--</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- &gt;&gt;&gt; runEff . runLog dummyLogger $ action</span><span>
+</span><span id="line-172"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-173"></span><span class="hs-comment">--</span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- | Utility for lifting 'IO' computations of type</span><span>
+</span><span id="line-176"></span><span class="hs-comment">--</span><span>
+</span><span id="line-177"></span><span class="hs-comment">-- @'IO' a -&gt; 'IO' b@</span><span>
+</span><span id="line-178"></span><span class="hs-comment">--</span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- to</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- @'Eff' es a -&gt; 'Eff' es b@</span><span>
+</span><span id="line-182"></span><span class="hs-comment">--</span><span>
+</span><span id="line-183"></span><span class="hs-comment">-- /Note:/ the computation must not run its argument in a separate thread,</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- attempting to do so will result in a runtime error.</span><span>
+</span><span id="line-185"></span><span class="hs-comment">--</span><span>
+</span><span id="line-186"></span><span class="hs-comment">-- This function is __unsafe__ because it can be used to introduce arbitrary</span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- 'IO' actions into pure 'Eff' computations.</span><span>
+</span><span id="line-188"></span><span id="local-6989586621679076402"><span id="local-6989586621679076403"><span id="local-6989586621679076404"><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeLiftMapIO"><span class="hs-identifier hs-type">unsafeLiftMapIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076402"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076403"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076404"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076402"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076404"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076403"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-189"></span><span id="unsafeLiftMapIO"><span class="annot"><span class="annottext">unsafeLiftMapIO :: forall a b (es :: [Effect]).
+HasCallStack =&gt;
+(IO a -&gt; IO b) -&gt; Eff es a -&gt; Eff es b
+</span><a href="Effectful.Dispatch.Static.html#unsafeLiftMapIO"><span class="hs-identifier hs-var hs-var">unsafeLiftMapIO</span></a></span></span><span> </span><span id="local-6989586621679076460"><span class="annot"><span class="annottext">IO a -&gt; IO b
+</span><a href="#local-6989586621679076460"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679076461"><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679076461"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO b) -&gt; Eff es b
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO b) -&gt; Eff es b) -&gt; (Env es -&gt; IO b) -&gt; Eff es b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076462"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076462"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-190"></span><span>  </span><span class="annot"><span class="annottext">Env es -&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; IO b
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+Env es -&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#seqUnliftIO"><span class="hs-identifier hs-var">seqUnliftIO</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076462"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">(((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; IO b)
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076463"><span class="annot"><span class="annottext">forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679076463"><span class="hs-identifier hs-var">unlift</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; IO b
+</span><a href="#local-6989586621679076460"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Eff es a -&gt; IO a
+forall r. Eff es r -&gt; IO r
+</span><a href="#local-6989586621679076463"><span class="hs-identifier hs-var">unlift</span></a></span><span> </span><span class="annot"><span class="annottext">Eff es a
+</span><a href="#local-6989586621679076461"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- | Create an unlifting function with the 'SeqUnlift' strategy.</span><span>
+</span><span id="line-193"></span><span class="hs-comment">--</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- This function is __unsafe__ because it can be used to introduce arbitrary</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- 'IO' actions into pure 'Eff' computations.</span><span>
+</span><span id="line-196"></span><span id="local-6989586621679076418"><span id="local-6989586621679076420"><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeSeqUnliftIO"><span class="hs-identifier hs-type">unsafeSeqUnliftIO</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679076419"><span class="annot"><a href="#local-6989586621679076419"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076418"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076419"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076419"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076420"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-199"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Continuation with the unlifting function in scope.</span></span><span>
+</span><span id="line-200"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076418"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076420"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-201"></span><span id="unsafeSeqUnliftIO"><span class="annot"><span class="annottext">unsafeSeqUnliftIO :: forall (es :: [Effect]) a.
+HasCallStack =&gt;
+((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Static.html#unsafeSeqUnliftIO"><span class="hs-identifier hs-var hs-var">unsafeSeqUnliftIO</span></a></span></span><span> </span><span id="local-6989586621679076468"><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076468"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO a) -&gt; Eff es a) -&gt; (Env es -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076469"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076469"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-202"></span><span>  </span><span class="annot"><span class="annottext">Env es -&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; IO a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+Env es -&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#seqUnliftIO"><span class="hs-identifier hs-var">seqUnliftIO</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076469"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076468"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span class="hs-comment">-- | Create an unlifting function with the 'ConcUnlift' strategy.</span><span>
+</span><span id="line-205"></span><span class="hs-comment">--</span><span>
+</span><span id="line-206"></span><span class="hs-comment">-- This function is __unsafe__ because it can be used to introduce arbitrary</span><span>
+</span><span id="line-207"></span><span class="hs-comment">-- 'IO' actions into pure 'Eff' computations.</span><span>
+</span><span id="line-208"></span><span id="local-6989586621679076425"><span id="local-6989586621679076427"><span class="annot"><a href="Effectful.Dispatch.Static.html#unsafeConcUnliftIO"><span class="hs-identifier hs-type">unsafeConcUnliftIO</span></a></span><span>
+</span><span id="line-209"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span>
+</span><span id="line-210"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Unlift.html#Persistence"><span class="hs-identifier hs-type">Persistence</span></a></span><span>
+</span><span id="line-211"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Unlift.html#Limit"><span class="hs-identifier hs-type">Limit</span></a></span><span>
+</span><span id="line-212"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679076426"><span class="annot"><a href="#local-6989586621679076426"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076425"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076426"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076426"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679076427"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-213"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Continuation with the unlifting function in scope.</span></span><span>
+</span><span id="line-214"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Effectful.Internal.Monad.html#Eff"><span class="hs-identifier hs-type">Eff</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076425"><span class="hs-identifier hs-type">es</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679076427"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-215"></span><span id="unsafeConcUnliftIO"><span class="annot"><span class="annottext">unsafeConcUnliftIO :: forall (es :: [Effect]) a.
+HasCallStack =&gt;
+Persistence
+-&gt; Limit -&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Dispatch.Static.html#unsafeConcUnliftIO"><span class="hs-identifier hs-var hs-var">unsafeConcUnliftIO</span></a></span></span><span> </span><span id="local-6989586621679076474"><span class="annot"><span class="annottext">Persistence
+</span><a href="#local-6989586621679076474"><span class="hs-identifier hs-var">persistence</span></a></span></span><span> </span><span id="local-6989586621679076475"><span class="annot"><span class="annottext">Limit
+</span><a href="#local-6989586621679076475"><span class="hs-identifier hs-var">limit</span></a></span></span><span> </span><span id="local-6989586621679076476"><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076476"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Env es -&gt; IO a) -&gt; Eff es a
+forall (es :: [Effect]) a. (Env es -&gt; IO a) -&gt; Eff es a
+</span><a href="Effectful.Internal.Monad.html#unsafeEff"><span class="hs-identifier hs-var">unsafeEff</span></a></span><span> </span><span class="annot"><span class="annottext">((Env es -&gt; IO a) -&gt; Eff es a) -&gt; (Env es -&gt; IO a) -&gt; Eff es a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679076477"><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076477"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-216"></span><span>  </span><span class="annot"><span class="annottext">Env es
+-&gt; Persistence
+-&gt; Limit
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a)
+-&gt; IO a
+forall (es :: [Effect]) a.
+HasCallStack =&gt;
+Env es
+-&gt; Persistence
+-&gt; Limit
+-&gt; ((forall r. Eff es r -&gt; IO r) -&gt; IO a)
+-&gt; IO a
+</span><a href="Effectful.Internal.Monad.html#concUnliftIO"><span class="hs-identifier hs-var">concUnliftIO</span></a></span><span> </span><span class="annot"><span class="annottext">Env es
+</span><a href="#local-6989586621679076477"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">Persistence
+</span><a href="#local-6989586621679076474"><span class="hs-identifier hs-var">persistence</span></a></span><span> </span><span class="annot"><span class="annottext">Limit
+</span><a href="#local-6989586621679076475"><span class="hs-identifier hs-var">limit</span></a></span><span> </span><span class="annot"><span class="annottext">(forall r. Eff es r -&gt; IO r) -&gt; IO a
+</span><a href="#local-6989586621679076476"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-217"></span><span>
+</span><span id="line-218"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-219"></span><span class="hs-comment">-- &gt;&gt;&gt; import Effectful</span><span>
+</span><span id="line-220"></span></pre></body></html>

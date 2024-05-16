@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-missing-export-lists #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-matches #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Module: Data.Uzi.TimesChannelGroup</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Description: &#23431;&#27835;&#20849;&#21644;&#22269;&#12398;Discord&#12395;&#23384;&#22312;&#12377;&#12427;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12434;&#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12375;&#12383;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#23450;&#32681;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Maintainer: himanoa &lt;matsunoappy@gmail.com&gt;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- &#23431;&#27835;&#20849;&#21644;&#22269;&#12398;Discord&#12395;&#23384;&#22312;&#12377;&#12427;times&#12481;&#12515;&#12531;&#12493;&#12523;&#12434;&#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12375;&#12383;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#23450;&#32681;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- &#20855;&#20307;&#30340;&#12395;&#12399;&#21517;&#21069;&#12364; TIMES(A-M) TIMES(N-Z) &#12394;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#12371;&#12392;&#12434;&#25351;&#12375;&#12414;&#12377;</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Uzi.TimesChannelGroup</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier">TimesChannelGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#FindTimesChannelGroupsError"><span class="hs-identifier">FindTimesChannelGroupsError</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#findTimesCategories"><span class="hs-identifier">findTimesCategories</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#groupByFirstLetter"><span class="hs-identifier">groupByFirstLetter</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#sortTimesChannelGroupMap"><span class="hs-identifier">sortTimesChannelGroupMap</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#coerceChannelId"><span class="hs-identifier">coerceChannelId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html"><span class="hs-identifier">Data.Discord.Channel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html"><span class="hs-identifier">Data.Discord.ChannelId</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html"><span class="hs-identifier">Data.Discord.ChannelName</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">sort</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html"><span class="hs-identifier">Data.Uzi.TimesChannel</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TC</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Map</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Text</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RIO.Vector</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">RIOV</span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | &#23431;&#27835;&#20849;&#21644;&#22269;&#12395;&#23384;&#22312;&#12377;&#12427;TIMES(A-M) TIMES(N-Z) &#12394;&#21517;&#21069;&#12398;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#12487;&#12540;&#12479;&#23450;&#32681;</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- * 'Data.Uzi.TimesChannelGroup.AtoMGroup' &#12399;&#38957;&#25991;&#23383;&#12434;A-M&#12398;TimesChannel&#12434;&#12414;&#12392;&#12417;&#12383;&#12464;&#12523;&#12540;&#12503;</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- * 'Data.Uzi.TimesChannelGroup.NtoZGroup' &#12399;&#38957;&#25991;&#23383;&#12434;N-Z&#12398;TimesChannel&#12434;&#12414;&#12392;&#12417;&#12383;&#12464;&#12523;&#12540;&#12503;</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">data</span><span> </span><span id="TimesChannelGroup"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-var">TimesChannelGroup</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="AtoMGroup"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroup"><span class="hs-identifier hs-var">AtoMGroup</span></a></span></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">C.ChannelId</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="NtoZGroup"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroup"><span class="hs-identifier hs-var">NtoZGroup</span></a></span></span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">C.ChannelId</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305728"><span id="local-6989586621679305736"><span id="local-6989586621679305740"><span class="annot"><span class="annottext">Int -&gt; TimesChannelGroup -&gt; ShowS
+[TimesChannelGroup] -&gt; ShowS
+TimesChannelGroup -&gt; String
+(Int -&gt; TimesChannelGroup -&gt; ShowS)
+-&gt; (TimesChannelGroup -&gt; String)
+-&gt; ([TimesChannelGroup] -&gt; ShowS)
+-&gt; Show TimesChannelGroup
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; TimesChannelGroup -&gt; ShowS
+showsPrec :: Int -&gt; TimesChannelGroup -&gt; ShowS
+$cshow :: TimesChannelGroup -&gt; String
+show :: TimesChannelGroup -&gt; String
+$cshowList :: [TimesChannelGroup] -&gt; ShowS
+showList :: [TimesChannelGroup] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305744"><span id="local-6989586621679305749"><span class="annot"><span class="annottext">TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool
+(TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool)
+-&gt; (TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool)
+-&gt; Eq TimesChannelGroup
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool
+== :: TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool
+$c/= :: TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool
+/= :: TimesChannelGroup -&gt; TimesChannelGroup -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#coerceChannelId"><span class="hs-identifier hs-type">coerceChannelId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelId.html#ChannelId"><span class="hs-identifier hs-type">C.ChannelId</span></a></span><span>
+</span><span id="line-44"></span><span id="coerceChannelId"><span class="annot"><span class="annottext">coerceChannelId :: TimesChannelGroup -&gt; ChannelId
+</span><a href="Data.Uzi.TimesChannelGroup.html#coerceChannelId"><span class="hs-identifier hs-var hs-var">coerceChannelId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroup"><span class="hs-identifier hs-type">AtoMGroup</span></a></span><span> </span><span id="local-6989586621679305753"><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679305753"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679305753"><span class="hs-identifier hs-var">cid</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroup"><span class="hs-identifier hs-type">NtoZGroup</span></a></span><span> </span><span id="local-6989586621679305754"><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679305754"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><a href="#local-6989586621679305754"><span class="hs-identifier hs-var">cid</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | &#12477;&#12540;&#12488;&#12375;&#12383;&#22580;&#21512;&#12399; AtoM NtoZ&#12398;&#38918;&#30058;&#12395;&#12394;&#12426;&#12414;&#12377;</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679305759"><span id="local-6989586621679305762"><span id="local-6989586621679305765"><span id="local-6989586621679305768"><span id="local-6989586621679305771"><span id="local-6989586621679305774"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679305777"><span class="annot"><span class="annottext">compare :: TimesChannelGroup -&gt; TimesChannelGroup -&gt; Ordering
+</span><a href="#local-6989586621679305777"><span class="hs-identifier hs-var hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span id="local-6989586621679305779"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305779"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679305780"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305780"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305779"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305780"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroup"><span class="hs-identifier hs-type">AtoMGroup</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroup"><span class="hs-identifier hs-type">NtoZGroup</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroup"><span class="hs-identifier hs-type">NtoZGroup</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroup"><span class="hs-identifier hs-type">AtoMGroup</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelId
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">(TimesChannelGroup, TimesChannelGroup)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | 'Data.Uzi.TimesChannelGroup.findTimesCategories' &#12434;&#23455;&#34892;&#12375;&#12383;&#26178;&#12395;&#30330;&#29983;&#12375;&#12358;&#12427;&#12456;&#12521;&#12540;&#12434;&#12414;&#12392;&#12417;&#12383;&#12487;&#12540;&#12479;&#27083;&#36896;&#12391;&#12377;&#12290;</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- &#30330;&#29983;&#12375;&#12358;&#12427;&#12456;&#12521;&#12540;&#12392;&#12471;&#12481;&#12517;&#12456;&#12540;&#12471;&#12519;&#12531;&#12399;&#27425;&#12398;&#36890;&#12426;&#12391;&#12377;</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- * 'Data.Uzi.TimesChannelGroup.AtoMGroupMissing' &#24341;&#25968;&#12391;&#28193;&#12373;&#12428;&#12383;&#12481;&#12515;&#12531;&#12493;&#12523;&#19968;&#35239;&#12398;&#20013;&#12395; AtoM&#12395;&#12394;&#12426;&#12358;&#12427;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#23384;&#22312;&#12375;&#12394;&#12363;&#12387;&#12383;&#22580;&#21512;</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- * 'Data.Uzi.TimesChannelGroup.NtoZGroupMissing' &#24341;&#25968;&#12391;&#28193;&#12373;&#12428;&#12383;&#12481;&#12515;&#12531;&#12493;&#12523;&#19968;&#35239;&#12398;&#20013;&#12395; NtoZ&#12395;&#12394;&#12426;&#12358;&#12427;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12364;&#23384;&#22312;&#12375;&#12394;&#12363;&#12387;&#12383;&#22580;&#21512;</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- * 'Data.Uzi.TimesChannelGroup.AllMissing' &#24341;&#25968;&#12391;&#28193;&#12373;&#12428;&#12383;&#12481;&#12515;&#12531;&#12493;&#12523;&#19968;&#35239;&#12398;&#20013;&#12395;&#12289;AtoM,NtoZ&#12393;&#12385;&#12425;&#12418;&#23384;&#22312;&#12375;&#12394;&#12363;&#12387;&#12383;&#22580;&#21512;</span><span>
+</span><span id="line-62"></span><span class="hs-keyword">data</span><span> </span><span id="FindTimesChannelGroupsError"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#FindTimesChannelGroupsError"><span class="hs-identifier hs-var">FindTimesChannelGroupsError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="AtoMGroupMissing"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroupMissing"><span class="hs-identifier hs-var">AtoMGroupMissing</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="NtoZGroupMissing"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroupMissing"><span class="hs-identifier hs-var">NtoZGroupMissing</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="AllMissing"><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#AllMissing"><span class="hs-identifier hs-var">AllMissing</span></a></span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305785"><span id="local-6989586621679305787"><span id="local-6989586621679305791"><span class="annot"><span class="annottext">Int -&gt; FindTimesChannelGroupsError -&gt; ShowS
+[FindTimesChannelGroupsError] -&gt; ShowS
+FindTimesChannelGroupsError -&gt; String
+(Int -&gt; FindTimesChannelGroupsError -&gt; ShowS)
+-&gt; (FindTimesChannelGroupsError -&gt; String)
+-&gt; ([FindTimesChannelGroupsError] -&gt; ShowS)
+-&gt; Show FindTimesChannelGroupsError
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; FindTimesChannelGroupsError -&gt; ShowS
+showsPrec :: Int -&gt; FindTimesChannelGroupsError -&gt; ShowS
+$cshow :: FindTimesChannelGroupsError -&gt; String
+show :: FindTimesChannelGroupsError -&gt; String
+$cshowList :: [FindTimesChannelGroupsError] -&gt; ShowS
+showList :: [FindTimesChannelGroupsError] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305794"><span id="local-6989586621679305796"><span class="annot"><span class="annottext">FindTimesChannelGroupsError -&gt; FindTimesChannelGroupsError -&gt; Bool
+(FindTimesChannelGroupsError
+ -&gt; FindTimesChannelGroupsError -&gt; Bool)
+-&gt; (FindTimesChannelGroupsError
+    -&gt; FindTimesChannelGroupsError -&gt; Bool)
+-&gt; Eq FindTimesChannelGroupsError
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: FindTimesChannelGroupsError -&gt; FindTimesChannelGroupsError -&gt; Bool
+== :: FindTimesChannelGroupsError -&gt; FindTimesChannelGroupsError -&gt; Bool
+$c/= :: FindTimesChannelGroupsError -&gt; FindTimesChannelGroupsError -&gt; Bool
+/= :: FindTimesChannelGroupsError -&gt; FindTimesChannelGroupsError -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- | &#12481;&#12515;&#12531;&#12493;&#12523;&#19968;&#35239;&#12363;&#12425;TIMES(A-M)  TIMES(N-Z)&#12398;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12434;&#25506;&#12375;&#20986;&#12375;&#12390;&#36820;&#12377;&#38306;&#25968;</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- &#12371;&#12398;&#38306;&#25968;&#12399;&#22833;&#25943;&#12377;&#12427;&#21487;&#33021;&#24615;&#12364;&#12354;&#12426;&#12414;&#12377;&#12290;</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &#22833;&#25943;&#12375;&#12383;&#22580;&#21512;&#12395;&#30330;&#29983;&#12377;&#12427;&#12456;&#12521;&#12540;&#12395;&#12388;&#12356;&#12390;&#12399; 'Data.Uzi.TimesChannelGroup.FindTimesChannelGroupsError'&#12434;&#21442;&#29031;&#12375;&#12390;&#12367;&#12384;&#12373;&#12356;&#12290;</span><span>
+</span><span id="line-70"></span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#findTimesCategories"><span class="hs-identifier hs-type">findTimesCategories</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#19968;&#35239;</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">RIO.Vector</span></span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#22833;&#25943;&#12375;&#12383;&#22580;&#21512;&#12399;Left&#12290;&#25104;&#21151;&#12375;&#12383;&#22580;&#21512;&#12399;Right(AtoMGroup, NtoZGroup)</span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#FindTimesChannelGroupsError"><span class="hs-identifier hs-type">FindTimesChannelGroupsError</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-77"></span><span>      </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span id="findTimesCategories"><span class="annot"><span class="annottext">findTimesCategories :: Vector Channel
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+</span><a href="Data.Uzi.TimesChannelGroup.html#findTimesCategories"><span class="hs-identifier hs-var hs-var">findTimesCategories</span></a></span></span><span> </span><span id="local-6989586621679305799"><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679305799"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Channel
+ -&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+ -&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup))
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+-&gt; Vector Channel
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+forall (v :: * -&gt; *) a b.
+Vector v a =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; v a -&gt; b
+</span><span class="hs-identifier hs-var">RIOV.foldr'</span></span><span> </span><span class="annot"><span class="annottext">Channel
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+</span><a href="#local-6989586621679305801"><span class="hs-identifier hs-var">findTimesChannelGroups</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector Channel
+</span><a href="#local-6989586621679305799"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-81"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679305802"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305802"><span class="hs-identifier hs-var">aToM</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679305803"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305803"><span class="hs-identifier hs-var">nToZ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, TimesChannelGroup)
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305802"><span class="hs-identifier hs-var">aToM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305803"><span class="hs-identifier hs-var">nToZ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+</span><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroupMissing"><span class="hs-identifier hs-var">NtoZGroupMissing</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+</span><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroupMissing"><span class="hs-identifier hs-var">AtoMGroupMissing</span></a></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+-&gt; Either
+     FindTimesChannelGroupsError (TimesChannelGroup, TimesChannelGroup)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">FindTimesChannelGroupsError
+</span><a href="Data.Uzi.TimesChannelGroup.html#AllMissing"><span class="hs-identifier hs-var">AllMissing</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>    </span><span class="annot"><a href="#local-6989586621679305801"><span class="hs-identifier hs-type">findTimesChannelGroups</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679305801"><span class="annot"><span class="annottext">findTimesChannelGroups :: Channel
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+-&gt; (Maybe TimesChannelGroup, Maybe TimesChannelGroup)
+</span><a href="#local-6989586621679305801"><span class="hs-identifier hs-var hs-var">findTimesChannelGroups</span></a></span></span><span> </span><span id="local-6989586621679305804"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305804"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679305805"><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305805"><span class="hs-identifier hs-var">aToM</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679305806"><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305806"><span class="hs-identifier hs-var">nToZ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-88"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305804"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelType Channel ChannelType -&gt; ChannelType
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelType Channel ChannelType
+Lens' Channel ChannelType
+</span><a href="Data.Discord.Channel.html#_type"><span class="hs-identifier hs-var">C._type</span></a></span><span> </span><span class="annot"><span class="annottext">ChannelType -&gt; ChannelType -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">ChannelType
+</span><a href="Data.Discord.Channel.html#GuildCategory"><span class="hs-identifier hs-var">C.GuildCategory</span></a></span><span>
+</span><span id="line-89"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="hs-comment">-- Disocrd&#12399;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#12434;&#20837;&#21147;&#12375;&#12383;&#26178;times(a-z)&#12398;&#12424;&#12358;&#12394;&#23567;&#25991;&#23383;&#12391;&#27083;&#25104;&#12373;&#12428;&#12383;&#12364;&#12464;&#12523;&#12540;&#12503;&#12481;&#12515;&#12531;&#12493;&#12523;&#21517;&#12384;&#12387;&#12383;&#12392;&#12375;&#12390;&#12418;&#12289;&#34920;&#31034;&#19978;&#12399;TIMES(A-Z)&#12395;&#12375;&#12390;&#12367;&#12427;&#12290;</span><span>
+</span><span id="line-90"></span><span>        </span><span class="hs-comment">-- &#12375;&#12363;&#12375;&#12289;&#12487;&#12540;&#12479;&#19978;&#12399;times(a-z)&#12392;&#12375;&#12390;&#36820;&#12387;&#12390;&#12367;&#12427;</span><span>
+</span><span id="line-91"></span><span>        </span><span class="hs-comment">-- &#12371;&#12428;&#12384;&#12392;&#12497;&#12479;&#12540;&#12531;&#12510;&#12483;&#12481;&#26178;&#12395;&#20351;&#12387;&#12390;&#12356;&#12427;&#21517;&#21069;&#12434;&#19968;&#24847;&#12395;&#29305;&#23450;&#12375;&#12395;&#12367;&#12356;&#12383;&#12417;&#12289;&#12371;&#12398;&#23455;&#35013;&#12391;&#12399;&#12481;&#12515;&#12531;&#12493;&#12523;&#21517;&#12399;&#20840;&#12390;&#22823;&#25991;&#23383;&#12392;&#12375;&#12390;&#25201;&#12358;</span><span>
+</span><span id="line-92"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Channel -&gt; ChannelName
+</span><a href="#local-6989586621679305810"><span class="hs-identifier hs-var">upperedChannelName</span></a></span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305804"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-93"></span><span>          </span><span class="annot"><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-type">ChannelName</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;TIMES(A-M)&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup -&gt; Maybe TimesChannelGroup
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; TimesChannelGroup
+</span><a href="Data.Uzi.TimesChannelGroup.html#AtoMGroup"><span class="hs-identifier hs-var">AtoMGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305804"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelId Channel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId Channel ChannelId
+Lens' Channel ChannelId
+</span><a href="Data.Discord.Channel.html#_id"><span class="hs-identifier hs-var">C._id</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305806"><span class="hs-identifier hs-var">nToZ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>          </span><span class="annot"><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-type">ChannelName</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;TIMES(N-Z)&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305805"><span class="hs-identifier hs-var">aToM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup -&gt; Maybe TimesChannelGroup
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ChannelId -&gt; TimesChannelGroup
+</span><a href="Data.Uzi.TimesChannelGroup.html#NtoZGroup"><span class="hs-identifier hs-var">NtoZGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305804"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelId Channel ChannelId -&gt; ChannelId
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelId Channel ChannelId
+Lens' Channel ChannelId
+</span><a href="Data.Discord.Channel.html#_id"><span class="hs-identifier hs-var">C._id</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>          </span><span class="annot"><span class="annottext">ChannelName
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305805"><span class="hs-identifier hs-var">aToM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305806"><span class="hs-identifier hs-var">nToZ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305805"><span class="hs-identifier hs-var">aToM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TimesChannelGroup
+</span><a href="#local-6989586621679305806"><span class="hs-identifier hs-var">nToZ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>    </span><span class="annot"><a href="#local-6989586621679305810"><span class="hs-identifier hs-type">upperedChannelName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Discord.Channel.html#Channel"><span class="hs-identifier hs-type">C.Channel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-type">ChannelName</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679305810"><span class="annot"><span class="annottext">upperedChannelName :: Channel -&gt; ChannelName
+</span><a href="#local-6989586621679305810"><span class="hs-identifier hs-var hs-var">upperedChannelName</span></a></span></span><span> </span><span id="local-6989586621679305813"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305813"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; ChannelName
+</span><a href="Data.Discord.ChannelName.html#ChannelName"><span class="hs-identifier hs-var">ChannelName</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; ChannelName)
+-&gt; (ChannelName -&gt; Text) -&gt; ChannelName -&gt; ChannelName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text
+</span><span class="hs-identifier hs-var">T.toUpper</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (ChannelName -&gt; Text) -&gt; ChannelName -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ChannelName -&gt; Text
+</span><a href="Data.Discord.ChannelName.html#coerceChannelName"><span class="hs-identifier hs-var">coerceChannelName</span></a></span><span> </span><span class="annot"><span class="annottext">(ChannelName -&gt; ChannelName) -&gt; ChannelName -&gt; ChannelName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679305813"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Getting ChannelName Channel ChannelName -&gt; ChannelName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting ChannelName Channel ChannelName
+Lens' Channel ChannelName
+</span><a href="Data.Discord.Channel.html#_name"><span class="hs-identifier hs-var">C._name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">--</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- | times&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#21517;&#21069;&#12398;&#38957;&#25991;&#23383;&#12434;&#20351;&#12387;&#12390;AtoM,NtoZ&#12395;&#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12377;&#12427;&#38306;&#25968;</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- &#12464;&#12523;&#12540;&#12500;&#12531;&#12464;&#12373;&#12428;&#12383;TimesChannel&#12398;&#38918;&#30058;&#12364;&#12450;&#12523;&#12501;&#12449;&#12505;&#12483;&#12488;&#38918;&#12394;&#12371;&#12392;&#12399;&#20445;&#35388;&#12373;&#12428;&#12394;&#12356;</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- &#12477;&#12540;&#12488;&#12375;&#12383;&#12356;&#22580;&#21512;&#12399;&#25147;&#12426;&#20516;&#12395;&#23550;&#12375;&#12390; 'Data.Uzi.TimesChannelGroup.sortTimesChannelGroupMap' &#12434;&#21628;&#12403;&#20986;&#12375;&#12390;&#12367;&#12384;&#12373;&#12356;</span><span>
+</span><span id="line-107"></span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#groupByFirstLetter"><span class="hs-identifier hs-type">groupByFirstLetter</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-108"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#12469;&#12540;&#12496;&#12540;&#12395;&#23384;&#22312;&#12377;&#12427;&#20840;&#12390;&#12398;TimesChannel</span></span><span>
+</span><span id="line-109"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">RIO.Vector</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="hs-comment">-- | AtoMChannelGroup</span></span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><span class="hs-comment">-- | NtoZChannelGroup</span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-comment">-- | 'RIO.Map' &#12395;&#12424;&#12387;&#12390;&#34920;&#29694;&#12373;&#12428;&#12383;&#12464;&#12523;&#12540;&#12503;&#12392;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#38306;&#36899;</span></span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">RIO.Map</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-116"></span><span id="groupByFirstLetter"><span class="annot"><span class="annottext">groupByFirstLetter :: Vector TimesChannel
+-&gt; TimesChannelGroup
+-&gt; TimesChannelGroup
+-&gt; Map TimesChannelGroup [TimesChannel]
+</span><a href="Data.Uzi.TimesChannelGroup.html#groupByFirstLetter"><span class="hs-identifier hs-var hs-var">groupByFirstLetter</span></a></span></span><span> </span><span id="local-6989586621679305818"><span class="annot"><span class="annottext">Vector TimesChannel
+</span><a href="#local-6989586621679305818"><span class="hs-identifier hs-var">channels</span></a></span></span><span> </span><span id="local-6989586621679305819"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305819"><span class="hs-identifier hs-var">aToM</span></a></span></span><span> </span><span id="local-6989586621679305820"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305820"><span class="hs-identifier hs-var">nToZ</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><span class="annottext">([TimesChannel] -&gt; [TimesChannel] -&gt; [TimesChannel])
+-&gt; [(TimesChannelGroup, [TimesChannel])]
+-&gt; Map TimesChannelGroup [TimesChannel]
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.fromListWith</span></span><span> </span><span class="annot"><span class="annottext">[TimesChannel] -&gt; [TimesChannel] -&gt; [TimesChannel]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(++)</span></span><span> </span><span class="annot"><span class="annottext">([(TimesChannelGroup, [TimesChannel])]
+ -&gt; Map TimesChannelGroup [TimesChannel])
+-&gt; [(TimesChannelGroup, [TimesChannel])]
+-&gt; Map TimesChannelGroup [TimesChannel]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Maybe (TimesChannelGroup, [TimesChannel])]
+-&gt; [(TimesChannelGroup, [TimesChannel])]
+forall a. [Maybe a] -&gt; [a]
+</span><span class="hs-identifier hs-var">RIO.catMaybes</span></span><span> </span><span class="annot"><span class="annottext">([Maybe (TimesChannelGroup, [TimesChannel])]
+ -&gt; [(TimesChannelGroup, [TimesChannel])])
+-&gt; (Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+    -&gt; [Maybe (TimesChannelGroup, [TimesChannel])])
+-&gt; Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+-&gt; [(TimesChannelGroup, [TimesChannel])]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+-&gt; [Maybe (TimesChannelGroup, [TimesChannel])]
+forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; [a]
+</span><span class="hs-identifier hs-var">RIOV.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+ -&gt; [(TimesChannelGroup, [TimesChannel])])
+-&gt; Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+-&gt; [(TimesChannelGroup, [TimesChannel])]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(TimesChannel -&gt; Maybe (TimesChannelGroup, [TimesChannel]))
+-&gt; Vector TimesChannel
+-&gt; Vector (Maybe (TimesChannelGroup, [TimesChannel]))
+forall a b. (a -&gt; b) -&gt; Vector a -&gt; Vector b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+-&gt; TimesChannelGroup
+-&gt; TimesChannel
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+</span><a href="#local-6989586621679305824"><span class="hs-identifier hs-var">getGroupTuple</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305819"><span class="hs-identifier hs-var">aToM</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305820"><span class="hs-identifier hs-var">nToZ</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector TimesChannel
+</span><a href="#local-6989586621679305818"><span class="hs-identifier hs-var">channels</span></a></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>    </span><span class="annot"><a href="#local-6989586621679305824"><span class="hs-identifier hs-type">getGroupTuple</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679305824"><span class="annot"><span class="annottext">getGroupTuple :: TimesChannelGroup
+-&gt; TimesChannelGroup
+-&gt; TimesChannel
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+</span><a href="#local-6989586621679305824"><span class="hs-identifier hs-var hs-var">getGroupTuple</span></a></span></span><span> </span><span id="local-6989586621679305825"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span></span><span> </span><span id="local-6989586621679305826"><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span></span><span> </span><span id="local-6989586621679305827"><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679305828"><span class="annot"><span class="annottext">prefix :: Text
+</span><a href="#local-6989586621679305828"><span class="hs-identifier hs-var hs-var">prefix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text
+</span><span class="hs-identifier hs-var">T.toLower</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (TimesName -&gt; Text) -&gt; TimesName -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Text -&gt; Text
+</span><span class="hs-identifier hs-var">T.take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; (TimesName -&gt; Text) -&gt; TimesName -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">TimesName -&gt; Text
+</span><a href="Data.Uzi.TimesChannel.html#coerceTimesName"><span class="hs-identifier hs-var">TC.coerceTimesName</span></a></span><span> </span><span class="annot"><span class="annottext">(TimesName -&gt; Text) -&gt; TimesName -&gt; Text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">TimesChannel
+-&gt; Getting TimesName TimesChannel TimesName -&gt; TimesName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">Getting TimesName TimesChannel TimesName
+Lens' TimesChannel TimesName
+</span><a href="Data.Uzi.TimesChannel.html#name"><span class="hs-identifier hs-var">TC.name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679305828"><span class="hs-identifier hs-var">prefix</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-123"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;a&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;b&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;c&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;d&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;e&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;f&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;g&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;h&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;i&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;j&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;k&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;l&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;m&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305825"><span class="hs-identifier hs-var">aToMG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;n&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;o&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;p&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;q&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;r&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;s&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;t&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;u&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;v&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;w&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;y&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;z&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(TimesChannelGroup, [TimesChannel])
+-&gt; Maybe (TimesChannelGroup, [TimesChannel])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimesChannelGroup
+</span><a href="#local-6989586621679305826"><span class="hs-identifier hs-var">nToZG</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">TimesChannel
+</span><a href="#local-6989586621679305827"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>        </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (TimesChannelGroup, [TimesChannel])
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="annot"><span class="hs-comment">-- | 'Data.Uzi.TimesChannelGroup.groupByFirstLetter' &#12398;&#25147;&#12426;&#20516;&#12391;&#38306;&#36899;&#20184;&#12369;&#12425;&#12428;&#12383;TimesChannel&#12398;&#12522;&#12473;&#12488;&#12434;&#12477;&#12540;&#12488;&#12377;&#12427;</span></span><span>
+</span><span id="line-152"></span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#sortTimesChannelGroupMap"><span class="hs-identifier hs-type">sortTimesChannelGroupMap</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-153"></span><span>  </span><span class="annot"><span class="hs-comment">-- | 'RIO.Map' &#12395;&#12424;&#12387;&#12390;&#34920;&#29694;&#12373;&#12428;&#12383;&#12464;&#12523;&#12540;&#12503;&#12392;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#38306;&#36899;</span></span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">RIO.Map</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-155"></span><span>  </span><span class="annot"><span class="hs-comment">-- | &#12477;&#12540;&#12488;&#28168;&#12415;&#12398;&#12464;&#12523;&#12540;&#12503;&#12392;&#12481;&#12515;&#12531;&#12493;&#12523;&#12398;&#38306;&#36899;</span></span><span>
+</span><span id="line-156"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">RIO.Map</span></span><span> </span><span class="annot"><a href="Data.Uzi.TimesChannelGroup.html#TimesChannelGroup"><span class="hs-identifier hs-type">TimesChannelGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Uzi.TimesChannel.html#TimesChannel"><span class="hs-identifier hs-type">TC.TimesChannel</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-157"></span><span id="sortTimesChannelGroupMap"><span class="annot"><span class="annottext">sortTimesChannelGroupMap :: Map TimesChannelGroup [TimesChannel]
+-&gt; Map TimesChannelGroup [TimesChannel]
+</span><a href="Data.Uzi.TimesChannelGroup.html#sortTimesChannelGroupMap"><span class="hs-identifier hs-var hs-var">sortTimesChannelGroupMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([TimesChannel] -&gt; [TimesChannel])
+-&gt; Map TimesChannelGroup [TimesChannel]
+-&gt; Map TimesChannelGroup [TimesChannel]
+forall a b k. (a -&gt; b) -&gt; Map k a -&gt; Map k b
+</span><span class="hs-identifier hs-var">Map.map</span></span><span> </span><span class="annot"><span class="annottext">[TimesChannel] -&gt; [TimesChannel]
+forall a. Ord a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">sort</span></span><span>
+</span><span id="line-158"></span></pre></body></html>
