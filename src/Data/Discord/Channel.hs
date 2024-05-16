@@ -7,6 +7,7 @@ module Data.Discord.Channel where
 
 import Control.Lens (makeLenses)
 import Data.Aeson
+import Data.Aeson.Casing qualified as Casing
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Coerce
 import Data.Discord.ChannelId
@@ -46,14 +47,18 @@ data Channel = Channel
   { __id :: ChannelId,
     __type :: ChannelType,
     __position :: ChannelPosition,
-    __name :: ChannelName
+    __name :: ChannelName,
+    __parentId :: Maybe ChannelId
   }
   deriving (Show, Eq, Generic)
 
 instance FromJSON Channel where
-  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 2}
+  parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = drop 2 . Casing.snakeCase}
 
 instance ToJSON Channel where
-  toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 2}
+  toJSON = genericToJSON defaultOptions {fieldLabelModifier = drop 2 . Casing.snakeCase}
 
 makeLenses ''Channel
+
+makeChannel :: ChannelId -> ChannelType -> ChannelPosition -> ChannelName -> Maybe ChannelId -> Channel
+makeChannel = Channel

@@ -21,8 +21,7 @@ module Effectful.DiscordChannel.Effect where
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Discord hiding (channelId)
-import Data.Discord.Channel (Channel, ChannelPosition)
-import Data.Uzi.TimesChannel (TimesChannel)
+import Data.Discord.Channel (Channel)
 import Effectful
 import Effectful.Dispatch.Dynamic (HasCallStack, send)
 import RIO hiding (HasCallStack, (^.))
@@ -107,8 +106,7 @@ data DiscordChannel :: Effect where
   SendMessage :: SendMessageParams -> DiscordChannel m ()
   CreateChannel :: GuildId -> CreateChannelParams -> DiscordChannel m ()
   GetChannels :: GuildId -> DiscordChannel m [Channel]
-  -- FIXME: 手抜き実装でTimesに依存していて、他のChannelを変更する時に困るのでその時にリファクタリングする
-  ModifyChannel :: GuildId -> ChannelId -> TimesChannel -> ChannelPosition -> DiscordChannel m ()
+  ModifyChannel :: Channel -> DiscordChannel m ()
 
 type instance DispatchOf DiscordChannel = Dynamic
 
@@ -140,13 +138,7 @@ getChannels guildId = send (GetChannels guildId)
 -- | チャンネルの情報を更新します
 modifyChannel ::
   (HasCallStack, DiscordChannel :> es) =>
-  -- | 更新したいチャンネルが存在するDiscordサーバーのギルドId
-  GuildId ->
-  -- | チャンネル情報を更新したいチャンネルのID
-  ChannelId ->
   -- | 更新後のChannelの情報
-  TimesChannel ->
-  -- | 更新後のチャンネルの順番
-  ChannelPosition ->
+  Channel ->
   Eff es ()
-modifyChannel guildId cId channel position = send (ModifyChannel guildId cId channel position)
+modifyChannel = send . ModifyChannel

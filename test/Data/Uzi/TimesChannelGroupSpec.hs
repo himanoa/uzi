@@ -27,25 +27,14 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Left NtoZGroupMissing" $ do
         let cs =
               RIOV.fromList
-                [ C.Channel
-                    { C.__id = C.ChannelId "x",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "TIMES(A-M)"
-                    }
-                ]
+                [C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing]
         findTimesCategories cs `shouldBe` Left NtoZGroupMissing
 
     context "when vec include only nToZ group" $ do
       it "should be return to Left NtoZGroupMissing" $ do
         let cs =
               RIOV.fromList
-                [ C.Channel
-                    { C.__id = C.ChannelId "x",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "TIMES(N-Z)"
-                    }
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing
                 ]
         findTimesCategories cs `shouldBe` Left AtoMGroupMissing
 
@@ -53,18 +42,8 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Right" $ do
         let cs =
               RIOV.fromList
-                [ C.Channel
-                    { C.__id = C.ChannelId "x",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "TIMES(N-Z)"
-                    },
-                  C.Channel
-                    { C.__id = C.ChannelId "y",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "TIMES(A-M)"
-                    }
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(N-Z)") Nothing,
+                  C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "TIMES(A-M)") Nothing
                 ]
         RIO.isRight (findTimesCategories cs) `shouldBe` True
 
@@ -72,18 +51,8 @@ spec = describe "TimesChannelGroup" $ do
       it "should be return to Right" $ do
         let cs =
               RIOV.fromList
-                [ C.Channel
-                    { C.__id = C.ChannelId "x",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "times(n-z)"
-                    },
-                  C.Channel
-                    { C.__id = C.ChannelId "y",
-                      C.__type = C.GuildCategory,
-                      C.__position = C.ChannelPosition 0,
-                      C.__name = ChannelName "times(a-m)"
-                    }
+                [ C.makeChannel (C.ChannelId "x") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(n-z)") Nothing,
+                  C.makeChannel (C.ChannelId "y") C.GuildCategory (C.ChannelPosition 0) (ChannelName "times(a-m)") Nothing
                 ]
         RIO.isRight (findTimesCategories cs) `shouldBe` True
 

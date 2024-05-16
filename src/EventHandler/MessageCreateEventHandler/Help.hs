@@ -13,7 +13,6 @@ module EventHandler.MessageCreateEventHandler.Help where
 
 import Control.Lens
 import Data.Discord
-import Data.Discord.Content (body)
 import Data.Discord.Response.InteractionCreateEventResponse qualified as IC
 import Data.Either.Validation
 import Effectful
