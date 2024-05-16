@@ -28,6 +28,8 @@ import Effectful.DiscordSlash.Effect
 import Effectful.Dispatch.Dynamic
 import Effectful.DynamicLogger
 import Effectful.Environment (Environment, runEnvironment)
+import Effectful.InteractionCallback.Effect
+import Effectful.InteractionCallback.Interpreter (runInteractionCallback)
 import Effectful.Log.Static
 import Effectful.Req
 import Effectful.State.Static.Shared
@@ -58,6 +60,7 @@ runUzi = runEff $ do
     . runDiscordApplication
     . runDiscordChannel
     . runRegisterSlash
+    . runInteractionCallback
     . evalState @(Maybe User) Nothing
     . runBotUser
     . evalState @(Maybe HeartbeatInterval) Nothing
@@ -72,7 +75,8 @@ startUp ::
     DiscordChannel :> es,
     BotUser :> es,
     SlashCommand :> es,
-    State (Maybe HeartbeatInterval) :> es
+    State (Maybe HeartbeatInterval) :> es,
+    InteractionCallback :> es
   ) =>
   Eff es ()
 startUp = do
@@ -113,7 +117,8 @@ onConnect ::
     DiscordApiTokenReader :> es,
     DiscordChannel :> es,
     BotUser :> es,
-    State (Maybe HeartbeatInterval) :> es
+    State (Maybe HeartbeatInterval) :> es,
+    InteractionCallback :> es
   ) =>
   Connection ->
   Eff es ()
@@ -148,7 +153,8 @@ sender ::
     DiscordApiTokenReader :> es,
     DiscordChannel :> es,
     BotUser :> es,
-    State (Maybe HeartbeatInterval) :> es
+    State (Maybe HeartbeatInterval) :> es,
+    InteractionCallback :> es
   ) =>
   TQueue Response ->
   Eff es ()

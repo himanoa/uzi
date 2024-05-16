@@ -20,6 +20,7 @@ import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
+import Effectful.InteractionCallback.Effect
 import Effectful.NonDet
 import RIO hiding ((^.))
 import RIO.Text qualified as T
@@ -30,13 +31,13 @@ import RIO.Text qualified as T
 -- この関数は'MessageCreate'イベントを処理し、受け取ったメッセージが'organize-times'かどうかを確認します。
 -- 条件を満たす場合、整理プロセスを開始し、成功または失敗のログを記録し、対応するメッセージをチャンネルに送信します。
 -- 整理プロセス中に発生したエラーは適切にハンドリングされ、エラーメッセージが送信されます。
-organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
+organizeTimesHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es, InteractionCallback :> es) => Response -> Eff es ()
 organizeTimesHandler = \case
   InteractionCreate event -> do
     if (event ^. IC.slashCommandName) == "organize-times"
       then do
         info "organizeTimesHandler dispatched"
-        sendMessage (makeMessage (event ^. IC.channelId) (makeUnsafeContent "times channelの整理を開始したよ！"))
+        _ <- channelMessageCallback event (makeUnsafeContent "times channelの整理を開始したよ！")
         organizeTimesEither <- runError @OrganizeTimesError (organizeTimes (event ^. IC.guildId))
         case organizeTimesEither of
           Right _ -> do
