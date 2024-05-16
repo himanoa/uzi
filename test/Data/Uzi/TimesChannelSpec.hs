@@ -19,29 +19,29 @@ spec = describe "TimesChannel" $ do
   describe "TC.makeTimesChannel" $ do
     context "when channel type is voice" $ do
       it "should be return Nothing" $ do
-        TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildVoice, __position = ChannelPosition 10, __name = ChannelName "yyy"} `shouldBe` Nothing
+        TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildVoice (ChannelPosition 10) (ChannelName "yyy") Nothing) `shouldBe` Nothing
 
     context "when channel type is category" $ do
       it "should be return Nothing" $ do
-        TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildCategory, __position = ChannelPosition 10, __name = ChannelName "yyy"} `shouldBe` Nothing
+        TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildCategory (ChannelPosition 10) (ChannelName "yyy") Nothing) `shouldBe` Nothing
 
     context "when channel type is text" $ do
       context "when it is not times channel" $ do
         it "should be return Nothing " $ do
-          TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "yyy"} `shouldBe` Nothing
+          TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildText (ChannelPosition 10) (ChannelName "yyy") Nothing) `shouldBe` Nothing
 
       context "when channel name is start by times-" $ do
         it "should be return Justing TimesChannel object " $ do
-          TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "times-name"} `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "name"}
-          TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "times-name-foo"} `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "name-foo"}
+          TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildText (ChannelPosition 10) (ChannelName "times-name") Nothing) `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "name"}
+          TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildText (ChannelPosition 10) (ChannelName "times-name-foo") Nothing) `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "name-foo"}
 
       context "when channel name is timezunzun" $ do
         it "should be return Justing TimesChannel object " $ do
-          TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "timezunzun"} `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "zunzun"}
+          TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildText (ChannelPosition 10) (ChannelName "timezunzun") Nothing) `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "zunzun"}
 
       context "when channel name is the-ny-times" $ do
         it "should be return Justing TimesChannel object " $ do
-          TC.makeTimesChannel Channel {__id = ChannelId "xxx", __type = GuildText, __position = ChannelPosition 10, __name = ChannelName "the-ny-times"} `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "ny"}
+          TC.makeTimesChannel (makeChannel (ChannelId "xxx") GuildText (ChannelPosition 10) (ChannelName "the-ny-times") Nothing) `shouldBe` Just TC.TimesChannel {TC._id = ChannelId "xxx", TC._name = TC.TimesName "ny"}
 
   describe "fromChannels" $ do
     context "when input is empty vec" $ do
@@ -50,7 +50,7 @@ spec = describe "TimesChannel" $ do
 
     context "when the input is consists exclusively of voice channels" $ do
       it "should be return empty vec" $ do
-        let channel = Channel {__id = ChannelId "", __type = GuildVoice, __position = ChannelPosition 1, __name = ChannelName "xxxx"}
+        let channel = makeChannel (ChannelId "") GuildVoice (ChannelPosition 1) (ChannelName "xxxx") Nothing
         TC.fromChannels (RV.singleton channel) `shouldBe` (RIO.mempty @(RIO.Vector TC.TimesChannel))
 
   describe "Ord" $ do

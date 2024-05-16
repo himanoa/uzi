@@ -19,6 +19,7 @@ import Data.Discord.Channel
 import Data.Discord.Channel qualified as C
 import Data.Uzi.TimesChannel qualified as TC
 import Data.Uzi.TimesChannelGroup
+import Control.Lens
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DiscordChannel.Effect (getChannels)
@@ -26,7 +27,7 @@ import Effectful.DynamicLogger (DynamicLogger)
 import Effectful.DynamicLogger.Effect (info)
 import Effectful.Error.Dynamic
 import Effectful.State.Static.Local
-import RIO
+import RIO hiding ((^.))
 import RIO.Map qualified as M
 import RIO.Vector qualified as V
 import RIO.Vector.Boxed qualified as VU
@@ -80,5 +81,8 @@ organizeTimes guildId = do
     updateChannelPosition channels parentId tc = do
       count <- get
       channel <- maybe (throwError . FindChannelError $ tc ^. TC.id) pure (V.find (\c -> (c ^. C._id) == (tc ^. TC.id)) channels)
-      RIO.void $ modifyChannel guildId parentId channel (ChannelPosition count)
+      RIO.void $ modifyChannel channel
       RIO.void $ put (count + 1)
+    changePosition :: Channel ->  ChannelId ->  ChannelPosition -> Channel
+    changePosition channel channelId position = undefined
+      -- let updatedParentId = set' (channel ^. C._)

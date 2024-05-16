@@ -25,6 +25,7 @@ dependencies:
 - containers
 - network
 - aeson
+- aeson-casing
 - effectful
 - effectful-core
 - websockets

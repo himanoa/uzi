@@ -57,10 +57,9 @@ runDiscordChannel = interpret $ \_ -> \case
       request GET (https host /: "api" /: version /: "guilds" /: coerce guildId /: "channels") NoReqBody pr
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     unsafeEff_ . getResponseBodyAsJsonResponse $ response
-  ModifyChannel _ parentId channel pos -> do
+  ModifyChannel channel -> do
     token <- getToken
-    let payload = object ["type" .= (0 :: Integer), "position" .= C.coerceChannelPosition pos, "parent_id" .= coerceChannelId parentId]
     _ <-
-      request PATCH (https host /: "api" /: version /: "channels" /: coerceChannelId (channel ^. C._id)) (ReqBodyJson payload) ignoreResponse
+      request PATCH (https host /: "api" /: version /: "channels" /: coerceChannelId (channel ^. C._id)) (ReqBodyJson channel) ignoreResponse
         $ header "Authorization" ("Bot " <> encodeUtf8 token)
     pure ()
