@@ -5,12 +5,16 @@
 
 module Data.Discord.Response.InteractionCreateEventResponse
   ( InteractionCreateEventResponse (..),
+    InteractionId (..),
+    InteractionToken (..),
     channelId,
     member,
     guildId,
     slashCommandName,
     commandOptions,
     makeInteractionCreateEventResponse,
+    interactionId,
+    token,
   )
 where
 
@@ -26,6 +30,14 @@ import RIO
 data OptionPair = OptionPair !Text !Text
   deriving (Eq, Show)
 
+newtype InteractionId = InteractionId Text
+  deriving (Eq)
+  deriving (FromJSON, ToJSON, Show) via Text
+
+newtype InteractionToken = InteractionToken Text
+  deriving (Eq)
+  deriving (FromJSON, ToJSON, Show) via Text
+
 instance FromJSON OptionPair where
   parseJSON = withObject "OptionPair" $ \x -> do
     String key <- x .: "name"
@@ -37,13 +49,15 @@ data InteractionCreateEventResponse = InteractionCreateEventResponse
     _member :: Member,
     _slashCommandName :: Text,
     _commandOptions :: Map Text Text,
-    _guildId :: GuildId
+    _guildId :: GuildId,
+    _interactionId :: InteractionId,
+    _token :: InteractionToken
   }
   deriving (Show, Eq)
 
 makeLenses ''InteractionCreateEventResponse
 
-makeInteractionCreateEventResponse :: ChannelId -> Member -> Text -> Map Text Text -> GuildId -> InteractionCreateEventResponse
+makeInteractionCreateEventResponse :: ChannelId -> Member -> Text -> Map Text Text -> GuildId -> InteractionId -> InteractionToken -> InteractionCreateEventResponse
 makeInteractionCreateEventResponse = InteractionCreateEventResponse
 
 instance FromJSON InteractionCreateEventResponse where
@@ -53,6 +67,9 @@ instance FromJSON InteractionCreateEventResponse where
     _channelId <- parseJSON @ChannelId =<< dataSection .: "channel_id"
     _member <- parseJSON @Member =<< dataSection .: "member"
     _guildId <- parseJSON @GuildId =<< dataSection .: "guild_id"
+
+    _interactionId <- parseJSON @InteractionId =<< dataSection .: "id"
+    _token <- parseJSON @InteractionToken =<< dataSection .: "token"
 
     __data <- dataSection .: "data"
     _slashCommandName <- parseJSON @Text =<< __data .: "name"

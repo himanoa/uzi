@@ -9,16 +9,15 @@ module EventHandler.MessageCreateEventHandler.CreateChannelSpec
 where
 
 import Data.Discord
-import Data.Discord.Content
 import Data.Discord.Response.HelloEventResponse
-import Data.Discord.Response.InteractionCreateEventResponse (makeInteractionCreateEventResponse)
-import Data.Discord.Response.MessageCreateEventResponse
+import Data.Discord.Response.InteractionCreateEventResponse (InteractionId (InteractionId), InteractionToken (InteractionToken), makeInteractionCreateEventResponse)
 import Data.Either
 import Data.Map qualified as M
 import Effectful
 import Effectful.DiscordChannel.Effect hiding (roles)
 import Effectful.Dispatch.Dynamic
 import Effectful.DynamicLogger
+import Effectful.InteractionCallback.Effect
 import Effectful.NonDet
 import Effectful.State.Static.Local
 import EventHandler.MessageCreateEventHandler.CreateChannel
@@ -31,17 +30,26 @@ runDummyDiscordChannel = interpret $ \_ -> \case
   GetChannels _ -> pure []
   ModifyChannel {} -> pure ()
 
+runDummyInteractionCallback :: Eff (InteractionCallback : es) a -> Eff es a
+runDummyInteractionCallback = interpret $ \_ -> \case
+  ChannelMessage _ _ _ -> do
+    pure ()
+  Loading _ -> do
+    pure ()
+
 spec :: Spec
 spec = describe "CreateChannel" $ do
   describe "createChannelEventHandler" $ do
     context "when not MessageCreate event provided" $ do
       it "should be return to emptyEff" $ do
         let response = Hello HelloEventResponse {_interval = 10}
-        let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ createChannelEventHandler response
+        let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . runState @(Maybe CreateChannelParams) Nothing . runDummyInteractionCallback . runDummyDiscordChannel $ createChannelEventHandler response
         isLeft actual `shouldBe` True
     context "when MessageCreate event provided" $ do
       it "should be call create channel instruction" $ do
-        let msg = makeInteractionCreateEventResponse (ChannelId "xxx") Member {roles = [], nick = Just . Nickname $ "himanoa"} "create-times" (M.fromList [("name", "a")]) (GuildId "576648644942495744")
+        let interaction_id = "1237511116112924732"
+        let token = "aW50ZXJhY3Rpb246MTIzNzUxMTExNjExMjkyNDczMjptb01HV0JlU3U2Z29veFRuaWVDYkpSQWhuQkRkQlFsVXdqRXJpMjlaYWJ0WDFWdlBGekU2bVBMUkRvVlNjZEx5TEltNXhhNU1Id0ZBdFVxYnprWmFqNjhqSzdkZmVkOGw1bnhidlloVnJwblpIU3hWRmRvbDZXWHhYN2RPbGtrTg"
+        let msg = makeInteractionCreateEventResponse (ChannelId "xxx") Member {roles = [], nick = Just . Nickname $ "himanoa"} "create-times" (M.fromList [("name", "a")]) (GuildId "576648644942495744") (InteractionId interaction_id) (InteractionToken token)
         let response = InteractionCreate msg
-        let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . execState @(Maybe CreateChannelParams) Nothing . runDummyDiscordChannel $ createChannelEventHandler response
+        let actual = runPureEff . runSilentDynamicLogger . runNonDet OnEmptyKeep . execState @(Maybe CreateChannelParams) Nothing . execState @(Maybe CreateChannelParams) Nothing . runDummyInteractionCallback . runDummyDiscordChannel $ createChannelEventHandler response
         isRight actual `shouldBe` True

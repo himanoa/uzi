@@ -21,6 +21,7 @@ import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
 import Effectful.Error.Dynamic
+import Effectful.InteractionCallback
 import Effectful.NonDet
 import RIO hiding ((^.))
 
@@ -30,7 +31,7 @@ import RIO hiding ((^.))
 -- この関数は'MessageCreate'イベントを処理し、受け取ったメッセージが'create-times'コマンドであるかどうかを解析します。
 -- 条件を満たす場合、新しいtimes channelを作成し、成功または失敗のログを記録し、対応するメッセージをチャンネルに送信します。
 -- その後、チャンネルを整理する処理が行われ、その結果に基づいて追加のメッセージが送信されます。
-createChannelEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
+createChannelEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es, InteractionCallback :> es) => Response -> Eff es ()
 createChannelEventHandler = \case
   InteractionCreate res -> do
     case res ^. IC.slashCommandName of
@@ -43,7 +44,7 @@ createChannelEventHandler = \case
             let guildId = res ^. IC.guildId
             info "CreateChannelEventHandler dispatched"
             createChannel guildId (makeCreateChannelParams . ChannelName $ "times-" <> name)
-            sendMessage (makeMessage (res ^. IC.channelId) (makeUnsafeContent ("timesを作ったよ -> #times-" <> name)))
+            _ <- channelMessageCallback res (makeUnsafeContent ("timesを作ったよ -> #times-" <> name))
             _ <-
               (runError @OrganizeTimesError . organizeTimes $ guildId) >>= \case
                 Right _ -> sendMessage (makeMessage (res ^. IC.channelId) (makeUnsafeContent "times channelをソートしたよ"))

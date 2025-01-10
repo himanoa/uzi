@@ -18,6 +18,7 @@ import Data.Either.Validation
 import Effectful
 import Effectful.DiscordChannel
 import Effectful.DynamicLogger
+import Effectful.InteractionCallback
 import Effectful.NonDet
 import RIO hiding ((^.))
 
@@ -28,15 +29,14 @@ import RIO hiding ((^.))
 -- 特に'MessageCreate'に焦点を当てています。メッセージ本体が'help'を含んでいるかどうかを確認します。
 -- 成功した場合、ディスパッチをログに記録し、ヘルプURLを含むメッセージを構築し、送信します。
 -- URLをコンテンツオブジェクトに変換できない場合は何もしません。
-helpEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es) => Response -> Eff es ()
+helpEventHandler :: (DiscordChannel :> es, NonDet :> es, DynamicLogger :> es, InteractionCallback :> es) => Response -> Eff es ()
 helpEventHandler = \case
   InteractionCreate event -> do
     if (event ^. IC.slashCommandName) == "help"
       then case makeContent "https://github.com/himanoa/uzi/blob/master/docs/HELP.md" of
         Success c -> do
           info "Dispatched Help Handler"
-          let params = makeSendMessageParams (event ^. IC.channelId) c Nothing False Nothing Nothing Nothing
-          sendMessage params
+          channelMessageCallback event c
           pure ()
         Failure _ -> pure ()
       else emptyEff
